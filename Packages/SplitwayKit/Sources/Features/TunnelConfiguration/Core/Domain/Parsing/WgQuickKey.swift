@@ -14,7 +14,7 @@ public enum WgQuickKey: Sendable, Hashable, CaseIterable {
         uniqueKeysWithValues: allCases.map { key in (key.name.lowercased(), key) }
     )
 
-    init?(name: String) {
+    public init?(name: String) {
         guard let key = Self.keysByLowercasedName[name.lowercased()] else { return nil }
         self = key
     }
