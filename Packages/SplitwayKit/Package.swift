@@ -139,7 +139,8 @@ let features: [FeatureModule] = [
     FeatureModule(
         "TunnelLibrary",
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        providesTestSupport: true
     ),
 ]
 
