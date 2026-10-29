@@ -1,4 +1,5 @@
 module TunnelCoreFramework {
+    header "TunnelCoreTypes.h"
     header "TunnelCore.h"
     export *
 }
