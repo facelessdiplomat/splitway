@@ -14,6 +14,18 @@ public struct TunnelLibraryAssembly: Sendable {
         LoadTunnelsUseCase(records: records, secrets: secrets)
     }
 
+    public var createTunnel: CreateTunnelUseCase {
+        CreateTunnelUseCase(records: records, secrets: secrets)
+    }
+
+    public var updateTunnel: UpdateTunnelUseCase {
+        UpdateTunnelUseCase(records: records, secrets: secrets)
+    }
+
+    public var renameTunnel: RenameTunnelUseCase {
+        RenameTunnelUseCase(records: records)
+    }
+
     public var duplicateTunnel: DuplicateTunnelUseCase {
         DuplicateTunnelUseCase(records: records, secrets: secrets)
     }

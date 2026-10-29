@@ -1,4 +1,5 @@
 import SwiftUI
+import TunnelEditorPresentation
 import TunnelImportInfrastructure
 import TunnelImportPresentation
 import TunnelLibraryPresentation
@@ -14,8 +15,11 @@ struct SplitwayRootScene: Scene {
                 addition: TunnelAdditionOptions(methods: AppComposition.additionMethods) { method in
                     composition.add(method)
                 }
-            )
+            ) { tunnel in
+                composition.tunnelEditor.edit(tunnel)
+            }
             .tunnelImport(composition.tunnelImport)
+            .tunnelEditor(composition.tunnelEditor)
             .dropDestination(for: DroppedImportFile.self) { files, _ in
                 Task.immediate { await composition.tunnelImport.importDropped(files.map(\.payload)) }
                 return !files.isEmpty

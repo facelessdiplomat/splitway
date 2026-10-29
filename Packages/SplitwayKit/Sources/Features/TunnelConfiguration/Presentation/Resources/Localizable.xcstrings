@@ -81,6 +81,76 @@
         }
       }
     },
+    "Enter DNS servers or search domains, separated by commas." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите DNS-серверы или домены поиска через запятую."
+          }
+        }
+      }
+    },
+    "Enter a 44-character base64 key." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите ключ base64 из 44 символов."
+          }
+        }
+      }
+    },
+    "Enter a host and port, like vpn.example.com:51820." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите хост и порт, например vpn.example.com:51820."
+          }
+        }
+      }
+    },
+    "Enter a port from %@ to %@." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите порт от %@ до %@."
+          }
+        }
+      }
+    },
+    "Enter addresses like 10.0.0.2/32, separated by commas." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите адреса вида 10.0.0.2/32 через запятую."
+          }
+        }
+      }
+    },
+    "Enter an MTU from %@ to %@." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите MTU от %@ до %@."
+          }
+        }
+      }
+    },
+    "Enter seconds from %@ to %@, or 0 to turn it off." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите число секунд от %@ до %@ или 0, чтобы выключить."
+          }
+        }
+      }
+    },
     "Line %lld" : {
       "localizations" : {
         "ru" : {

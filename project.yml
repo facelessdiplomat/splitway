@@ -56,6 +56,8 @@ targets:
         product: TunnelImportPresentation
       - package: SplitwayKit
         product: TunnelImportInfrastructure
+      - package: SplitwayKit
+        product: TunnelEditorPresentation
     scheme:
       testTargets:
         - iOSIntegrationTests
@@ -126,6 +128,8 @@ targets:
         product: TunnelImportPresentation
       - package: SplitwayKit
         product: TunnelImportInfrastructure
+      - package: SplitwayKit
+        product: TunnelEditorPresentation
     scheme: {}
   NetworkSystemExtension:
     type: system-extension
