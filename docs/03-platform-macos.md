@@ -1,0 +1,204 @@
+# 03. План реализации: macOS
+
+## 1. Итог
+
+| Параметр | Значение |
+|---|---|
+| Минимальная ОС | macOS 26 (решение D-04) |
+| Дистрибуция | Developer ID + нотаризация, DMG, обновления через Sparkle (ADR-09) |
+| Приложение | `macOSApp`: окно + `MenuBarExtra` + `Settings` (решение D-12). Без App Sandbox: нужно читать подписи чужих приложений. Hardened Runtime включён |
+| Расширение | `NetworkSystemExtension` — одно системное расширение с тремя провайдерами: `PacketTunnelProvider`, `TransparentProxyProvider`, `DNSProxyProvider` |
+| Режим «Весь трафик» | `NETunnelProviderManager` → `PacketTunnelProvider` → `fdtunnel` (wireguard-go поверх `utun`) |
+| Режим «Только выбранные приложения» | `NETransparentProxyManager` → `TransparentProxyProvider` → `usernet` (wireguard-go поверх gVisor netstack) |
+| DNS выбранных приложений | `NEDNSProxyManager` → `DNSProxyProvider` → DNS через тот же `usernet` (решение D-09) |
+
+Почему системное расширение, а не app extension: по [TN3134](https://developer.apple.com/documentation/technotes/tn3134-network-extension-provider-deployment) app extension для packet tunnel и transparent proxy на macOS — «App Store only». Для Developer ID остаётся только system extension. Ещё плюс: системное расширение работает в глобальном контексте и не завершается, когда пользователь выходит из системы.
+
+## 2. Состав бандла и entitlements
+
+```
+Splitway.app/
+└── Contents/
+    ├── MacOS/Splitway
+    ├── Frameworks/Sparkle.framework
+    └── Library/SystemExtensions/
+        └── com.company.splitway.network-extension.systemextension
+```
+
+`Info.plist` системного расширения:
+
+```
+NetworkExtension
+├── NEProviderClasses
+│   ├── com.apple.networkextension.packet-tunnel → $(PRODUCT_MODULE_NAME).PacketTunnelProvider
+│   ├── com.apple.networkextension.app-proxy     → $(PRODUCT_MODULE_NAME).TransparentProxyProvider
+│   └── com.apple.networkextension.dns-proxy     → $(PRODUCT_MODULE_NAME).DNSProxyProvider
+└── NEMachServiceName → <App Group ID>.network-extension.xpc
+```
+
+| Entitlement | Приложение | Расширение |
+|---|---|---|
+| `com.apple.developer.system-extension.install` | да | — |
+| `com.apple.developer.networking.networkextension` | `packet-tunnel-provider-systemextension`, `app-proxy-provider-systemextension`, `dns-proxy-systemextension` | то же |
+| `com.apple.security.application-groups` | `<TeamID>.com.company.splitway` | то же |
+| `keychain-access-groups` | `<TeamID>.com.company.splitway.shared` | то же |
+| `com.apple.security.app-sandbox` | нет (Developer ID) | да, сетевые расширения обязаны быть в песочнице |
+
+Provisioning-профили — Developer ID с возможностями Network Extensions и System Extension. Для отладки нужны Development-профили и одноразовая команда `systemextensionsctl developer on` (по необходимости).
+
+## 3. Установка и обновление системного расширения (фича `SystemExtension`)
+
+Состояния (доменная модель `SystemExtensionState`):
+
+```
+notInstalled → activationRequested → awaitingUserApproval → activated
+                                     ↘ failed(reason)        ↘ requiresReboot
+```
+
+1. При первом включении туннеля приложение отправляет `OSSystemExtensionRequest.activationRequest`.
+2. `requestNeedsUserApproval` → мастер показывает пошаговую инструкцию: «Системные настройки → Основные → Объекты входа и расширения → Сетевые расширения» и кнопку открытия нужного раздела.
+3. `didFinishWithResult` (`.completed`) → сохраняется системная VPN-конфигурация, и система показывает запросы на добавление конфигураций VPN, прокси и DNS-прокси.
+4. Обновление приложения: `actionForReplacingExtension` сравнивает `CFBundleVersion` и возвращает `.replace`. Активный туннель перезапускается автоматически после замены.
+5. Удаление: пункт «Удалить Splitway» в настройках выполняет `deactivationRequest`, удаляет системные конфигурации и данные из Keychain. Затем приложение предлагает переместить себя в корзину.
+
+## 4. Режим «Весь трафик»
+
+- `PacketTunnelProvider.startTunnel`: читает id активного туннеля из `providerConfiguration`, загружает конфиг (раздел 5), строит `TunnelNetworkPlan` (домен фичи `PacketTunnel`: адреса, маршруты из `AllowedIPs`, DNS, MTU) и применяет `NEPacketTunnelNetworkSettings`.
+- Дескриптор `utun` находится перебором открытых дескрипторов с проверкой `UTUN_OPT_IFNAME` — тот же подход, что в WireGuardKit. Затем `tc_fd_tunnel_start`.
+- Endpoint резолвится в Swift через `getaddrinfo` (с поддержкой NAT64/DNS64) до передачи в Go. При смене сети (`NWPathMonitor`) — повторный резолвинг и `tc_tunnel_bump_sockets`.
+- Сон и пробуждение (`sleep`/`wake` у `NEProvider`) — пересоздание сокетов после пробуждения.
+- «Исключить локальные сети» — пересчёт `AllowedIPs` в домене (`AllowedIPsCalculator`).
+- Kill switch (`includeAllNetworks`) — в бэклоге: у этой опции много системных побочных эффектов.
+
+## 5. Секреты в системном расширении
+
+Системное расширение работает от root в глобальном контексте и **не видит** пользовательский Keychain приложения. Варианты:
+
+| Вариант | Как | Плюсы | Минусы |
+|---|---|---|---|
+| A. `passwordReference` | Приложение кладёт конфиг в свой Keychain и передаёт persistent reference в протокол | Как в официальном клиенте | Не подтверждено, что ссылка доступна root-процессу системного расширения |
+| **B. XPC + System Keychain (рекомендуется)** | Приложение по XPC (`NEMachServiceName`) передаёт конфиг расширению, расширение хранит его в System Keychain под своим ACL | Секреты никогда не лежат в открытом plist; работает без запущенного туннеля | Нужен XPC-протокол и проверка подписи клиента XPC (только наш Team ID) |
+| C. `providerConfiguration` | Конфиг целиком в словаре протокола | Проще всего | Приватный ключ хранится в системных настройках NE в открытом виде |
+
+Решение принимается по итогам спайка **SP-5**. Порт `TunnelSecretStore` в `TunnelLibrary` скрывает выбор: в macOS-сборке приложения его реализует `SystemExtensionSecretStore` (XPC-клиент), в расширении — `SystemKeychainSecretStore`.
+
+## 6. Режим «Только выбранные приложения»
+
+### 6.1. Поток обработки
+
+```mermaid
+sequenceDiagram
+  participant App as Приложение пользователя
+  participant OS as macOS (NE)
+  participant TP as TransparentProxyProvider
+  participant D as FlowRoutingDecider
+  participant G as usernet (Go)
+  App->>OS: TCP/UDP-поток
+  OS->>TP: handleNewFlow / handleNewUDPFlow
+  TP->>D: источник + назначение + политика
+  alt направление: напрямую
+    TP-->>OS: false — система ведёт поток сама
+  else направление: туннель
+    TP->>G: DialTCP / UDP (host из remoteHostname или IP)
+    TP-->>OS: true + open(), далее двусторонняя ретрансляция
+  else направление: блокировать
+    TP-->>OS: true + закрытие потока с ошибкой
+  end
+```
+
+Возврат `false` из `handleNewFlow` и `handleNewUDPFlow(_:initialRemoteEndpoint:)` у transparent proxy отпускает поток напрямую к адресату ([документация](https://developer.apple.com/documentation/networkextension/netransparentproxyprovider)). Это основа режима: невыбранные приложения не платят ничем, кроме принятия решения.
+
+### 6.2. Сетевые настройки провайдера
+
+- `NETransparentProxyNetworkSettings.includedNetworkRules` — исходящие TCP и UDP к сетям из `AllowedIPs` (после «исключить локальные сети»). Потоки к другим адресам система вообще не отдаёт провайдеру.
+- `excludedNetworkRules` (у них приоритет) — loopback, link-local, multicast и адреса endpoint-ов WireGuard. Без последних собственный UDP-трафик движка мог бы снова попасть в перехват.
+- DNS-настройки у transparent proxy игнорируются системой (раздел 6.5).
+
+### 6.3. Определение приложения-источника (`SourceApplicationResolver`)
+
+1. Быстрый путь — `flow.metaData.sourceAppSigningIdentifier`, поиск в хэш-таблице `ApplicationMatcher`.
+2. Проверка и запасной путь — `sourceAppAuditToken` → `SecCodeCopyGuestWithAttributes` → Team ID и путь исполняемого файла. Результат кэшируется по `(pid, pidversion)` из audit token.
+3. `ApplicationIdentity` выбранного приложения содержит: signing identifier главного бандла, Team ID, путь бандла и **signing identifiers всех вложенных бандлов** (`Contents/Frameworks/*.app`, `Contents/XPCServices/*.xpc`, `Contents/Helpers`, `Contents/Library/LoginItems`). Их собирает `ApplicationCatalog` при выборе приложения и пересобирает, если поменялась версия бандла. Так автоматически покрываются Chrome Helper и хелперы Electron-приложений.
+4. CLI-утилиты сопоставляются по пути исполняемого файла и (если есть) по signing identifier, например `com.apple.curl`.
+5. Защита от подмены: если у выбранного приложения есть Team ID, совпадения одного signing identifier недостаточно, Team ID процесса тоже должен совпасть.
+
+Документация Apple пишет, что метаданные потока есть только у per-app VPN-провайдеров, но на форумах их успешно используют и в transparent proxy ([тред](https://developer.apple.com/forums/thread/763912)). Это главный риск, его проверяет спайк **SP-2**, причём на конкретных приложениях: Safari, WebKit-приложения, Chrome, Firefox, Electron, `curl`, `nsurlsessiond`.
+
+**Safari и WebKit.** Сеть WebKit работает в отдельном процессе `com.apple.WebKit.Networking`. Если система не атрибутирует такие потоки приложению-владельцу, Safari и приложения с `WKWebView` выбрать не получится. Тогда в каталоге они помечаются как «не поддерживается» с объяснением. Mullvad и vpnonly прямо называют это ограничением своих решений. Приватные API для обхода не используются (решение D-10).
+
+### 6.4. Ретрансляция (`TCPFlowRelay`, `UDPFlowRelay`) — горячий путь
+
+- **TCP**: `flow.open` → `tc_usernet_dial_tcp` → два насоса: `flow.readData` → `tc_connection_write`, а callback из Go → `flow.write`. Поддерживаются полузакрытие (half-close), ошибки и таймауты.
+- **UDP**: для каждого потока — сокет в netstack. `readDatagrams` → отправка, входящие датаграммы → `writeDatagrams`. Закрытие по таймауту простоя. QUIC и HTTP/3 работают как обычный UDP.
+- **Буферы**: пул буферов фиксированного размера, ограниченная очередь на поток, backpressure (не читать из flow, пока Go не принял предыдущий блок).
+- **Потоки выполнения**: выделенная `DispatchQueue` на группу потоков, без блокировок на кооперативном пуле Swift Concurrency.
+- Цель по скорости фиксируется по итогам спайка **SP-3** и проверяется бенчмарком перед каждым релизом (`Scripts/check.sh --bench`).
+
+### 6.5. DNS (решение D-09)
+
+- Если приложение подключается по имени (`URLSession`, Network.framework), у потока заполнен `remoteHostname`. Transparent proxy резолвит имя **через туннель** (`usernet`, DNS из конфига) и подключается к полученному адресу.
+- Если приложение резолвит имя само (BSD sockets + `getaddrinfo`), запрос идёт через системный резолвер. Его перехватывает `DNSProxyProvider` (фича `DNSProxy`) в том же системном расширении:
+  - запрос выбранного приложения пересылается через `usernet` на DNS-сервер из конфига туннеля;
+  - запрос любого другого приложения без изменений уходит к исходному резолверу — туда, куда его отправила система;
+  - при `whenTunnelUnavailable = .block` выбранное приложение получает ответ `REFUSED`, при `.bypass` его запрос уходит к исходному резолверу.
+- DNS-прокси включается только на время работы туннеля в режиме выбора приложений.
+- При любой внутренней ошибке DNS-прокси запрос пересылается исходному резолверу: сбой прокси не должен оставить без DNS всю систему.
+- Риск: запросы фактически отправляет `mDNSResponder`, поэтому атрибуцию запроса к приложению и работу всех провайдеров в одном процессе проверяет спайк **SP-9**. Если атрибуции нет, в M0-11 выбирается одно из двух: все DNS-запросы через туннель на время его работы или возврат к ограничению «DNS-запрос мимо туннеля».
+
+### 6.6. Поведение при недоступном туннеле и IPv6
+
+- `whenTunnelUnavailable = .block`: пока движок не готов или рукопожатие не проходит, потоки выбранных приложений закрываются с ошибкой. При `.bypass` они отпускаются напрямую.
+- У туннеля нет IPv6-адреса, а адресат — IPv6 внутри `AllowedIPs` → `.block`. Приложение уйдёт на IPv4 (Happy Eyeballs), и утечки по IPv6 не будет.
+
+### 6.7. Изменение выбора на лету
+
+Новая `RoutingPolicySnapshot` приходит сообщением провайдеру и атомарно подменяет `ApplicationMatcher`. Существующие потоки продолжают работать, новые решаются по новой политике. Перезапуск не нужен.
+
+### 6.8. Совместимость с другими прокси и VPN
+
+Если в системе есть другой transparent proxy (корпоративный агент, другой VPN), порядок их работы не управляется ([тред](https://developer.apple.com/forums/thread/763912)), и атрибуция может ломаться. При старте приложение показывает предупреждение, если находит чужие активные VPN/прокси-конфигурации.
+
+## 7. Каталог приложений (фича `ApplicationCatalog`)
+
+- Источники: `/Applications`, `/Applications/Utilities`, `/System/Applications`, `~/Applications`, `/Applications/Setapp`, запущенные приложения (`NSWorkspace.runningApplications`), Spotlight (`NSMetadataQuery` по `com.apple.application-bundle`).
+- Для каждого: отображаемое имя, иконка (`NSWorkspace.icon(forFile:)`), bundle ID, signing identifier и Team ID (`SecStaticCodeCreateWithPath` + `SecCodeCopySigningInformation`), вложенный код.
+- Ручное добавление: drag & drop `.app` и выбор любого исполняемого файла через `NSOpenPanel` (CLI).
+- Сканирование асинхронное, с кэшем по `(путь, дата изменения, версия)`; иконки грузятся лениво.
+- Приложения с пометками: «Apple-приложение — ограниченная поддержка», «Не подписано — сопоставление по пути».
+
+## 8. Интерфейс
+
+- **Окно**: `NavigationSplitView` — слева список туннелей со статусом, справа детали: статус, статистика, режим маршрутизации, выбранные приложения, кнопки.
+- **Редактор**: форма полей с валидацией на лету и режим «сырого» текста wg-quick с подсветкой ошибок по строкам.
+- **Выбор приложений**: лист со списком, поиском, фильтрами («Выбранные», «Все», «CLI») и drag & drop.
+- **Строка меню**: иконка отражает состояние; список туннелей с переключателем; «Открыть Splitway»; «Выйти».
+- **Настройки**: запуск при входе (`SMAppService.mainApp`), удаление расширения, журнал.
+- **Dock**: иконка видна, пока открыто окно, и скрывается после его закрытия (`NSApp.setActivationPolicy`, решение D-12).
+- **Мастер первого запуска**: объяснение двух системных запросов (расширение и VPN/прокси-конфигурация) до того, как система их покажет.
+- Горячие клавиши: ⌘N (новый туннель), ⌘O (импорт), ⌘⏎ (подключить/отключить), ⌘⌫ (удалить), ⌘, (настройки).
+
+## 9. Сборка, подпись, выпуск
+
+1. `Scripts/build-xcframework.sh` собирает `TunnelCore` для `macos-arm64` и `macos-x86_64` (+ iOS, см. документ iOS).
+2. Archive с Developer ID-профилями, Hardened Runtime, без get-task-allow.
+3. `xcrun notarytool submit --wait` → `xcrun stapler staple` для `.app` и DMG.
+4. Sparkle 2 (решение D-21): appcast с EdDSA-подписью на публичном HTTPS-хостинге, который выбирается до задачи M7-08 (решение D-28). Ключ подписи хранится вне репозитория.
+5. Проверка установки на чистой системе (VM): первый запуск, одобрение расширения, обновление со старой версии, удаление.
+
+## 10. Спайки и риски macOS
+
+| ID | Что проверить | Критерий готовности | Что делаем при провале |
+|---|---|---|---|
+| SP-9 | `NEDNSProxyProvider`: видно ли в метаданных DNS-потока приложение-источник; работают ли все провайдеры в одном процессе (общий `usernet`); что происходит с DNS системы при сбое прокси | Таблица атрибуции для приложений из SP-2, подтверждён общий процесс | Решение в M0-11: все DNS-запросы через туннель на время его работы или возврат к ограничению v1 |
+| SP-2 | Атрибуция потоков в transparent proxy: Safari, WKWebView, Chrome, Firefox, Electron, `curl`, `nsurlsessiond`; заполнение `remoteHostname`; поведение возврата `false` | Таблица «приложение → что видим в метаданных» в документе фичи | Неподдерживаемые приложения помечаются в каталоге |
+| SP-3 | Скорость ретрансляции TCP через netstack | Замер скорости и задержки против режима «Весь трафик»; профиль CPU | Оптимизация буферов, перенос насосов в Go |
+| SP-5 | Доставка секретов в системное расширение (варианты A/B/C) | Работающий вариант, ADR в документе фичи | Вариант C как временный, с предупреждением о рисках |
+| SP-6 | UDP/QUIC через `handleNewUDPFlow` | HTTP/3 в Chrome и голосовой звонок в Discord через туннель | Для UDP — `.bypass` или `.block` по политике, с пометкой в интерфейсе |
+
+Прочие риски: изменения поведения Network Extension в новых macOS (регресс-прогон на бета-версиях каждое лето); пользователь не одобрил расширение (мастер и понятный статус); конфликт с другими VPN (раздел 6.8).
+
+## 11. Тестирование на macOS
+
+- Локальный WireGuard-сервер: контейнер или VM на машине разработчика, конфиги для тестов в `Scripts/test-server/`.
+- `RoutingProbe` — маленькая подписанная CLI-утилита: печатает свой внешний IP, результат резолвинга и то, какой резолвер ответил на DNS-запрос. Её выбирают в туннеле и сравнивают с невыбранным `curl`. Основа автоматических тестов утечек.
+- Ручная матрица: Safari, Chrome, Firefox, Telegram, Slack, Discord, `curl`, `ssh`, `git`; смена Wi-Fi ↔ Ethernet; сон и пробуждение; обновление приложения при активном туннеле.
