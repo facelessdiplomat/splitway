@@ -2,7 +2,17 @@
 
 > Рабочее название. Нативный клиент для протокола WireGuard® на macOS, iOS и iPadOS: пользователь добавляет свой конфиг и выбирает, чей трафик идёт через VPN. На macOS выбираются приложения, на iOS/iPadOS — сервисы.
 
-Сейчас проект на этапе планирования: кода ещё нет, есть только документация.
+Сейчас идёт веха M0: каркас проекта, линтеры, сборка Go-ядра и локальные проверки.
+
+## Быстрый старт
+
+Нужны Xcode 27, Go 1.27, SwiftLint и XcodeGen (`brew install swiftlint xcodegen go`).
+
+1. `Scripts/bootstrap.sh` — устанавливает git-хуки, собирает `TunnelCore.xcframework` и генерирует `Splitway.xcodeproj`.
+2. `Scripts/check.sh` — все проверки: линтеры, тесты Go и Swift, сборка iOS и macOS. Хук `pre-merge-commit` запускает его при каждом слиянии в `main`.
+3. Открыть `Splitway.xcodeproj` в Xcode.
+
+Если `xcode-select -p` указывает на Command Line Tools, скрипты сами используют `/Applications/Xcode.app`. Постоянное исправление: `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
 
 ## Документация
 

@@ -12,6 +12,9 @@ for tool in "${required_tools[@]}"; do
     fi
 done
 
-chmod +x Scripts/*.sh Scripts/git-hooks/* Scripts/tests/*.sh
+chmod +x Scripts/*.sh Scripts/git-hooks/* Scripts/tests/*.sh Packages/TunnelCore/Scripts/*.sh
 git config core.hooksPath Scripts/git-hooks
 printf 'Git hooks installed from Scripts/git-hooks\n'
+
+Packages/TunnelCore/Scripts/build-xcframework.sh
+Scripts/generate-project.sh
