@@ -1,8 +1,6 @@
 import SharedKernel
 
 public enum PrivateNetworkExclusion {
-    private static let ipv4HostPrefixLength = 32
-
     public static let excludedNetworks = IPNetworkSet(
         (IPNetwork.privateNetworks + IPNetwork.multicastNetworks + IPNetwork.reservedNetworks)
             .filter { network in network.family == .ipv4 }
@@ -47,6 +45,6 @@ public enum PrivateNetworkExclusion {
     private static func hostRoutes(forExcluded servers: [IPAddress]) -> [IPNetwork] {
         servers
             .filter { server in server.family == .ipv4 && excludedNetworks.contains(server) }
-            .compactMap { server in try? IPNetwork(address: server, prefixLength: ipv4HostPrefixLength) }
+            .map(IPNetwork.init(host:))
     }
 }
