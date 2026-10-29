@@ -177,6 +177,11 @@ let features: [FeatureModule] = [
         testDependencies: ["TunnelConfigurationTestSupport"],
         layersWithoutTests: [.infrastructure]
     ),
+    FeatureModule(
+        "TunnelConnection",
+        coreDependencies: ["TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
+        testDependencies: ["TunnelConfigurationTestSupport"]
+    ),
 ]
 
 let package = Package(
