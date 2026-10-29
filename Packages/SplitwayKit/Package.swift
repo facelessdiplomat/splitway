@@ -130,7 +130,7 @@ let sharedKernelTargets: [Target] = [
 ]
 
 let features: [FeatureModule] = [
-    FeatureModule("TunnelConfiguration")
+    FeatureModule("TunnelConfiguration", providesTestSupport: true)
 ]
 
 let package = Package(
