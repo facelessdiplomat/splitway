@@ -12,7 +12,7 @@
 - [x] M0-06 Проект XcodeGen и оболочки таргетов
 - [x] M0-07 Линтеры и форматирование
 - [x] M0-08 Go-модуль TunnelCore и сборка xcframework
-- [ ] M0-09 Локальная проверка `Scripts/check.sh`
+- [x] M0-09 Локальная проверка `Scripts/check.sh`
 - [ ] M0-10 Тестовый WireGuard-сервер
 - [ ] SP-7 Hello tunnel: wireguard-go в пакетном туннеле
 - [ ] SP-2 Атрибуция потоков в transparent proxy
@@ -93,7 +93,7 @@
 ### M0-09. Локальная проверка `Scripts/check.sh`
 `shared` · M · зависит от: M0-06, M0-07, M0-08
 
-**Сделать:** CI нет (решение D-23), его заменяет один скрипт: сборка xcframework (с кэшем), `Scripts/lint.sh`, `go test ./...`, `swift test` для SplitwayKit, `xcodebuild build test` для iOS-симулятора и macOS без подписи. Флаги: `--ui` (UI-тесты), `--bench` (бенчмарки). Хук `pre-merge-commit` запускает скрипт при слиянии ветки в `main` через `git merge --no-ff` (решение D-26).
+**Сделать:** CI нет (решение D-23), его заменяет один скрипт: сборка xcframework (с кэшем), `Scripts/lint.sh`, `go vet` и `go test`, `swift test` для SplitwayKit и TunnelCore, генерация проекта и `xcodebuild build` для iOS-симулятора и macOS без подписи. Флаги `--ui` (UI-тесты) и `--bench` (бенчмарки) добавляются вместе с этими тестами в M3-15 и M4-16. Хук `pre-merge-commit` запускает скрипт при слиянии ветки в `main` через `git merge --no-ff` (решение D-26).
 **Тесты сначала:** не требуются (скрипт сам запускает тесты).
 **Готово, когда:** слияние ветки с намеренно добавленным комментарием в коде отклоняется хуком, а чистой ветки — проходит.
 
