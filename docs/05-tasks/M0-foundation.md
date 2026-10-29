@@ -11,7 +11,7 @@
 - [x] M0-05 SPM-пакет SplitwayKit
 - [ ] M0-06 Проект XcodeGen и оболочки таргетов
 - [x] M0-07 Линтеры и форматирование
-- [ ] M0-08 Go-модуль TunnelCore и сборка xcframework
+- [x] M0-08 Go-модуль TunnelCore и сборка xcframework
 - [ ] M0-09 Локальная проверка `Scripts/check.sh`
 - [ ] M0-10 Тестовый WireGuard-сервер
 - [ ] SP-7 Hello tunnel: wireguard-go в пакетном туннеле
@@ -86,7 +86,7 @@
 ### M0-08. Go-модуль TunnelCore и сборка xcframework
 `shared` · L · зависит от: M0-05
 
-**Сделать:** `Packages/TunnelCore/go/go.mod` с закреплённой версией `golang.zx2c4.com/wireguard`; пакет `bridge` с `tc_version` и `tc_free`. `Scripts/build-xcframework.sh`: `-buildmode=c-archive` для `ios-arm64`, `ios-arm64-simulator`, `macos-arm64`, `macos-x86_64`, `lipo`, заголовок и `module.modulemap`, `xcodebuild -create-xcframework`; кэш по хэшу Go-исходников. `Packages/TunnelCore/Package.swift`: `binaryTarget` `TunnelCoreFramework` и таргет `TunnelCoreAdapter`, вызывающий `tc_version`.
+**Сделать:** `Packages/TunnelCore/go/go.mod` (зависимость `golang.zx2c4.com/wireguard` с закреплённой версией появляется вместе с первым импортом в M2-03: неиспользуемую зависимость удалил бы `go mod tidy`); пакет `bridge` с `tc_version` и `tc_free`. `Scripts/build-xcframework.sh`: `-buildmode=c-archive` для `ios-arm64`, `ios-arm64-simulator`, `macos-arm64`, `macos-x86_64`, `lipo`, заголовок и `module.modulemap`, `xcodebuild -create-xcframework`; кэш по хэшу Go-исходников. `Packages/TunnelCore/Package.swift`: `binaryTarget` `TunnelCoreFramework` и таргет `TunnelCoreAdapter`, вызывающий `tc_version`.
 **Тесты сначала:** Go-тест на `tc_version`; Swift-тест в `TunnelCoreAdapterTests`, что версия читается и память освобождается.
 **Готово, когда:** скрипт собирает xcframework с нуля и при повторном запуске пропускает сборку; оба теста зелёные.
 
