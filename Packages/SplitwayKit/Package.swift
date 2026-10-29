@@ -247,8 +247,10 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         "TransparentProxy",
-        coreDependencies: ["TunnelConfiguration", "PacketTunnel"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        layers: [.core, .infrastructure],
+        coreDependencies: ["TunnelConfiguration", "AppRouting", "PacketTunnel"],
+        testDependencies: ["TunnelConfigurationTestSupport", "AppRoutingTestSupport"],
+        providesTestSupport: true
     ),
     FeatureModule(
         "DNSProxy",
