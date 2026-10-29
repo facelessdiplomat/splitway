@@ -34,6 +34,7 @@ let package = Package(
                 "TunnelCoreAdapter",
                 .product(name: "TunnelEngine", package: "SplitwayKit"),
                 .product(name: "TunnelConfiguration", package: "SplitwayKit"),
+                .product(name: "Diagnostics", package: "SplitwayKit"),
             ],
             path: "Tests/TunnelCoreAdapterTests",
             swiftSettings: strictSwiftSettings
