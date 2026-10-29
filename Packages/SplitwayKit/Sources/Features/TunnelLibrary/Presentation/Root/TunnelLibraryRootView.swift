@@ -5,12 +5,19 @@ public struct TunnelLibraryRootView: View {
     private let model: TunnelListModel
     private let statistics: TunnelStatisticsPolling
     private let addition: TunnelAdditionOptions
+    private let editTunnel: @MainActor (Tunnel) -> Void
     @State private var selection: TunnelIdentifier?
 
-    public init(model: TunnelListModel, statistics: TunnelStatisticsPolling, addition: TunnelAdditionOptions) {
+    public init(
+        model: TunnelListModel,
+        statistics: TunnelStatisticsPolling,
+        addition: TunnelAdditionOptions,
+        editTunnel: @escaping @MainActor (Tunnel) -> Void
+    ) {
         self.model = model
         self.statistics = statistics
         self.addition = addition
+        self.editTunnel = editTunnel
     }
 
     public var body: some View {
@@ -31,6 +38,15 @@ public struct TunnelLibraryRootView: View {
                     toggleConnection(of: row)
                 }
                 .id(tunnel)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            editTunnel(tunnel)
+                        } label: {
+                            Text("Edit", bundle: .module)
+                        }
+                    }
+                }
             } else {
                 TunnelDetailView(row: row, peers: [], statisticsProblem: nil) {
                     toggleConnection(of: row)

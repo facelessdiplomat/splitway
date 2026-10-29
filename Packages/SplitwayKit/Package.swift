@@ -182,8 +182,11 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         "TunnelEditor",
+        layers: [.core, .presentation],
         coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        presentationDependencies: ["TunnelConnection", "TunnelConfigurationPresentation", "DesignSystemPresentation"],
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        presentationTestDependencies: ["TunnelLibraryTestSupport", "TunnelConnectionTestSupport"]
     ),
     FeatureModule("Diagnostics", layers: [.core, .infrastructure]),
     FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),

@@ -181,6 +181,16 @@
         }
       }
     },
+    "Edit" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить"
+          }
+        }
+      }
+    },
     "Endpoint" : {
       "localizations" : {
         "ru" : {

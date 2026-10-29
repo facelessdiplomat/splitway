@@ -17,4 +17,14 @@ public struct SystemClipboard: ClipboardTextSource {
             return NSPasteboard.general.string(forType: .string)
         #endif
     }
+
+    @MainActor
+    public func copy(_ text: String) {
+        #if canImport(UIKit)
+            UIPasteboard.general.string = text
+        #else
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(text, forType: .string)
+        #endif
+    }
 }

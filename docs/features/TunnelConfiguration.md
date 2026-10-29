@@ -4,7 +4,7 @@
 |---|---|
 | Статус | завершена (M1); тексты проблем — M3-04 |
 | Платформы | shared |
-| Задачи | M1-04, M1-05, M1-06, M1-07, M1-08, M1-09, M3-04, M3-06 (API для редактора) |
+| Задачи | M1-04, M1-05, M1-06, M1-07, M1-08, M1-09, M3-04, M3-06 (API для редактора), M3-07 (тексты неверных значений) |
 | Таргеты | `TunnelConfiguration`, `TunnelConfigurationPresentation`, `TunnelConfigurationTestSupport` |
 
 ## Назначение
@@ -47,7 +47,7 @@ flowchart LR
 
 ## Публичный API
 
-`TunnelConfiguration`, `InterfaceConfiguration`, `PeerConfiguration`, `TunnelConfigurationError`, `TunnelConfigurationWarning`; `PrivateKey`, `PublicKey`, `PresharedKey`, `WireGuardKeyParsingError`; `MTU`, `PersistentKeepalive`, `Endpoint`, `EndpointHost`, `DNSConfiguration`, `AllowedIPs` и их ошибки; `WgQuickConfigurationParser`, `WgQuickParsingResult`, `ConfigurationIssue`, `ConfigurationIssueKind`, `ConfigurationIssueSeverity`, `ConfigurationValueError`, `WgQuickKey` (с поиском `init?(name:)` без учёта регистра), `WgQuickSection`, `WgQuickValueConversions` (правила значений парсера), `WgQuickConfigurationParser.rawSections(of:)` с `WgQuickRawSection` и `WgQuickRawEntry` (пары «ключ = значение» без проверки значений); `WgQuickConfigurationSerializer`; `PrivateNetworkExclusion`. Слой `Presentation`: `ConfigurationIssueKind.message`, `TunnelConfigurationWarning.message` (`LocalizedStringResource`) и `ConfigurationIssueLabel` — проблема с номером строки для предпросмотра импорта и редактора.
+`TunnelConfiguration`, `InterfaceConfiguration`, `PeerConfiguration`, `TunnelConfigurationError`, `TunnelConfigurationWarning`; `PrivateKey`, `PublicKey`, `PresharedKey`, `WireGuardKeyParsingError`; `MTU`, `PersistentKeepalive`, `Endpoint`, `EndpointHost`, `DNSConfiguration`, `AllowedIPs` и их ошибки; `WgQuickConfigurationParser`, `WgQuickParsingResult`, `ConfigurationIssue`, `ConfigurationIssueKind`, `ConfigurationIssueSeverity`, `ConfigurationValueError`, `WgQuickKey` (с поиском `init?(name:)` без учёта регистра), `WgQuickSection`, `WgQuickValueConversions` (правила значений парсера), `WgQuickConfigurationParser.rawSections(of:)` с `WgQuickRawSection` и `WgQuickRawEntry` (пары «ключ = значение» без проверки значений); `WgQuickConfigurationSerializer`; `PrivateNetworkExclusion`. Слой `Presentation`: `ConfigurationIssueKind.message`, `TunnelConfigurationWarning.message`, `ConfigurationValueError.message` (`LocalizedStringResource`) и `ConfigurationIssueLabel` — проблема с номером строки для предпросмотра импорта и редактора.
 
 ## Решения
 
@@ -90,7 +90,7 @@ flowchart LR
 - эталонный набор 30 сетей для исключения локальных сетей;
 - сырое чтение секций, поиск ключа без учёта регистра, правила значений.
 
-2 теста в `TunnelConfigurationPresentationTests`: текст каждой проблемы и предупреждения.
+3 теста в `TunnelConfigurationPresentationTests`: текст каждой проблемы, предупреждения и неверного значения. Границы диапазонов в текстах — без разделителей разрядов (`9000`, а не `9,000`).
 
 Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelConfiguration`.
 
@@ -106,3 +106,4 @@ flowchart LR
 | 2026-10-29 | «Исключить локальные сети» | M1-09 |
 | 2026-10-29 | Тексты проблем конфигурации | M3-04 |
 | 2026-10-29 | Публичные правила значений и сырое чтение секций для редактора | M3-06 |
+| 2026-10-29 | Тексты неверных значений для полей редактора | M3-07 |
