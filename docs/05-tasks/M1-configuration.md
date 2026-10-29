@@ -11,7 +11,7 @@
 - [x] M1-05 Value objects интерфейса и пира
 - [x] M1-06 Агрегат `TunnelConfiguration`
 - [x] M1-07 Парсер wg-quick
-- [ ] M1-08 Сериализатор wg-quick
+- [x] M1-08 Сериализатор wg-quick
 - [ ] M1-09 «Исключить локальные сети»
 - [ ] M1-10 `RoutingPolicy`
 - [ ] M1-11 `Tunnel`, `TunnelName`, уникальность имён
