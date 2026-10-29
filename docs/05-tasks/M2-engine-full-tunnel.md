@@ -6,7 +6,7 @@
 
 - [x] M2-01 Кодирование UAPI и разбор статистики
 - [ ] M2-02 Мост Go: API режима fd
-- [ ] M2-03 `fdtunnel`: wireguard-go поверх utun
+- [x] M2-03 `fdtunnel`: wireguard-go поверх utun
 - [ ] M2-04 Swift-адаптер `TunnelCoreAdapter` (режим fd)
 - [ ] M2-05 План сетевых настроек
 - [ ] M2-06 Инфраструктура пакетного туннеля
@@ -39,9 +39,9 @@
 ### M2-03. `fdtunnel`: wireguard-go поверх utun
 `shared` · M · зависит от: M2-02
 
-**Сделать:** создание устройства из дескриптора (`tun.CreateTUNFromFile`), стандартный bind, применение UAPI. Для iOS: `debug.SetMemoryLimit`, уменьшенные очереди. Передача логов wireguard-go в `logbridge`.
-**Тесты сначала:** два устройства wireguard-go в одном процессе на `tuntest`, соединённые через loopback: рукопожатие и передача пакета; применение UAPI из фикстуры M2-01.
-**Готово, когда:** Go-тесты проходят, утечек горутин нет (`goleak` или ручная проверка числа горутин).
+**Сделать:** пакет `fdtunnel`. `StartOnFileDescriptor` дублирует дескриптор utun (`unix.Dup`, неблокирующий режим) и создаёт устройство через `tun.CreateTUNFromFile`; `Start` работает поверх любого `tun.Device` (`conn.NewDefaultBind`, `IpcSet`, `Up`). Методы `Apply`, `Configuration`, `BumpSockets`, `Stop`; ошибки `ErrTunnelInterfaceUnavailable`, `ErrConfigurationRejected`, `ErrDeviceUnavailable`. Для iOS — `debug.SetMemoryLimit` (30 МБ, файл с тегом `ios`); уменьшенные очереди дают константы wireguard-go для `GOOS=ios`. Пакет `logbridge`: `DeviceLogger` передаёт `Verbosef` и `Errorf` wireguard-go в приёмник вместе с уровнем. wireguard-go закреплён на коммите `b3bc704` (2026-10-25): в нём и предыдущем коммите исправления рукопожатия и разбора пакетов.
+**Тесты сначала:** два устройства на `tuntest`, соединённые через loopback: рукопожатие и доставка ping; wireguard-go принимает `testdata/full.uapi` — с этим же файлом Swift-тест M2-01 сверяет вывод кодировщика; неверная конфигурация, дескриптор не utun, закрытый дескриптор; перепривязка сокетов; уровни логов; `goleak.VerifyTestMain`.
+**Готово, когда:** Go-тесты проходят, утечек горутин нет (`goleak`).
 
 ### M2-04. Swift-адаптер `TunnelCoreAdapter` (режим fd)
 `shared` · M · зависит от: M2-01, M2-03
