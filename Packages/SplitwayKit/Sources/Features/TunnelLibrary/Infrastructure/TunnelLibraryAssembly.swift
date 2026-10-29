@@ -26,6 +26,10 @@ public struct TunnelLibraryAssembly: Sendable {
         RenameTunnelUseCase(records: records)
     }
 
+    public var exportTunnels: ExportTunnelsUseCase {
+        ExportTunnelsUseCase(records: records, secrets: secrets, archiveWriter: ZIPArchiveWriter())
+    }
+
     public var duplicateTunnel: DuplicateTunnelUseCase {
         DuplicateTunnelUseCase(records: records, secrets: secrets)
     }

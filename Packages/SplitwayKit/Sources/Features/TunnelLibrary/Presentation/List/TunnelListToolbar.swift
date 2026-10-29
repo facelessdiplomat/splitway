@@ -2,11 +2,12 @@ import SwiftUI
 
 struct TunnelListToolbar: ToolbarContent {
     let addition: TunnelAdditionOptions
-    let isReorderable: Bool
+    let export: TunnelExportModel
+    let hasTunnels: Bool
 
     var body: some ToolbarContent {
         #if os(iOS)
-            if isReorderable {
+            if hasTunnels {
                 ToolbarItem(placement: .topBarLeading) {
                     EditButton()
                 }
@@ -21,6 +22,19 @@ struct TunnelListToolbar: ToolbarContent {
                         Text("Add tunnel", bundle: .module)
                     } icon: {
                         Image(systemName: "plus")
+                    }
+                }
+            }
+        }
+        if hasTunnels {
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    export.requestExportOfAllTunnels()
+                } label: {
+                    Label {
+                        Text("Export All Tunnels", bundle: .module)
+                    } icon: {
+                        Image(systemName: "square.and.arrow.up.on.square")
                     }
                 }
             }

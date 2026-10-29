@@ -63,7 +63,21 @@ struct TunnelRemovalAndExportUseCaseTests {
 
         let archive = try await environment.exportTunnels().exportAll()
 
-        #expect(String(bytes: archive, encoding: .utf8) == "a-b.conf\na-b 2.conf")
+        #expect(String(bytes: archive.contents, encoding: .utf8) == "a-b.conf\na-b 2.conf")
+        #expect(archive.skippedTunnels.isEmpty)
+    }
+
+    @Test
+    func leavesOutTunnelsWhoseConfigurationIsUnreadable() async throws {
+        let environment = LibraryTestEnvironment()
+        try await environment.storedTunnel(named: "Office")
+        let broken = try await environment.storedTunnel(named: "Broken")
+        try await environment.secrets.deleteConfigurationText(for: broken.id)
+
+        let archive = try await environment.exportTunnels().exportAll()
+
+        #expect(String(bytes: archive.contents, encoding: .utf8) == "Office.conf")
+        #expect(archive.skippedTunnels.map(\.description) == ["Broken"])
     }
 
     @Test

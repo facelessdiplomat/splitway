@@ -14,7 +14,8 @@ struct SplitwayRootScene: Scene {
                 statistics: composition.statistics,
                 addition: TunnelAdditionOptions(methods: AppComposition.additionMethods) { method in
                     composition.add(method)
-                }
+                },
+                export: composition.tunnelExport
             ) { tunnel in
                 composition.tunnelEditor.edit(tunnel)
             }

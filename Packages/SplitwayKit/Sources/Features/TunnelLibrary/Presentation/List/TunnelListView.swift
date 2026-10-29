@@ -5,6 +5,7 @@ struct TunnelListView: View {
     let model: TunnelListModel
     @Binding var selection: TunnelIdentifier?
     let addition: TunnelAdditionOptions
+    let export: TunnelExportModel
 
     var body: some View {
         List(selection: $selection) {
@@ -14,6 +15,7 @@ struct TunnelListView: View {
                 }
                 .contextMenu {
                     duplicateButton(for: row)
+                    exportButton(for: row)
                     deleteButton(for: row, role: .destructive)
                 }
                 .swipeActions {
@@ -34,7 +36,7 @@ struct TunnelListView: View {
         }
         .navigationTitle(Text("Tunnels", bundle: .module))
         .toolbar {
-            TunnelListToolbar(addition: addition, isReorderable: !model.rows.isEmpty)
+            TunnelListToolbar(addition: addition, export: export, hasTunnels: !model.rows.isEmpty)
         }
         #if os(macOS)
             .onDeleteCommand {
@@ -56,6 +58,19 @@ struct TunnelListView: View {
             }
         }
         .disabled(!row.canDuplicate)
+    }
+
+    private func exportButton(for row: TunnelRow) -> some View {
+        Button {
+            export.requestExport(of: row.id, named: row.name)
+        } label: {
+            Label {
+                Text("Export…", bundle: .module)
+            } icon: {
+                Image(systemName: "square.and.arrow.up")
+            }
+        }
+        .disabled(!row.canExport)
     }
 
     private func deleteButton(for row: TunnelRow, role: ButtonRole?) -> some View {

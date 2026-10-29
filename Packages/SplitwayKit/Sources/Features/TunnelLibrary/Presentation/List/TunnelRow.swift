@@ -18,4 +18,8 @@ public struct TunnelRow: Identifiable, Sendable, Hashable {
     public var canDuplicate: Bool {
         status != .unavailable
     }
+
+    public var canExport: Bool {
+        status != .unavailable
+    }
 }
