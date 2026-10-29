@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 import TunnelConfigurationPresentation
 
@@ -20,6 +21,7 @@ struct TunnelTextSection: View {
                 }
             } header: {
                 Text("Problems", bundle: .module)
+                    .foregroundStyle(.supportingText)
             }
         }
     }

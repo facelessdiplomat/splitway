@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import Diagnostics
 import SwiftUI
 
@@ -14,10 +15,10 @@ struct LogEntryRow: View {
                         .foregroundStyle(entry.level.color)
                 }
                 entry.source.title
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.supportingText)
                 Spacer()
                 Text(entry.date, format: .dateTime.hour().minute().second())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.supportingText)
                     .monospacedDigit()
             }
             .font(.caption)

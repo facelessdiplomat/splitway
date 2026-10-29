@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct EmptyStateView<Actions: View>: View {
+    private static var spacing: CGFloat { 12 }
+
     private let title: Text
     private let systemImage: String
     private let message: Text
@@ -14,16 +16,22 @@ public struct EmptyStateView<Actions: View>: View {
     }
 
     public var body: some View {
-        ContentUnavailableView {
-            Label {
-                title
-            } icon: {
+        OverflowScrollView {
+            VStack(spacing: Self.spacing) {
                 Image(systemName: systemImage)
+                    .font(.largeTitle)
+                    .foregroundStyle(.supportingText)
+                    .accessibilityHidden(true)
+                title
+                    .font(.title2.bold())
+                    .accessibilityAddTraits(.isHeader)
+                message
+                    .foregroundStyle(.supportingText)
+                actions
             }
-        } description: {
-            message
-        } actions: {
-            actions
+            .multilineTextAlignment(.center)
+            .padding()
+            .frame(maxWidth: .infinity)
         }
     }
 }

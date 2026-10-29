@@ -1,4 +1,5 @@
 import AppRouting
+import DesignSystemPresentation
 import SwiftUI
 
 public struct RoutingSection: View {
@@ -32,6 +33,7 @@ public struct RoutingSection: View {
             }
         } header: {
             Text("Routing", bundle: .module)
+                .foregroundStyle(.supportingText)
         }
     }
 

@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 
 struct OnboardingView: View {
@@ -7,9 +8,11 @@ struct OnboardingView: View {
 
     var body: some View {
         VStack {
-            Spacer(minLength: 0)
-            OnboardingPageView(model: model)
-            Spacer(minLength: 0)
+            OverflowScrollView {
+                OnboardingPageView(model: model)
+                    .frame(maxWidth: .infinity)
+            }
+            .frame(maxHeight: .infinity)
             OnboardingButtons(model: model)
         }
         .padding()

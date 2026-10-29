@@ -9,6 +9,7 @@ struct AppConfiguration {
     private static let groupStoragePath = "Library/Application Support"
     private static let logsPath = "Library/Logs/Splitway"
     private static let fallbackSubsystem = "Splitway"
+    private static let temporaryStorageArgument = "SplitwayUsesTemporaryStorage"
 
     let storageDirectory: URL
     let logDirectory: URL
@@ -18,18 +19,28 @@ struct AppConfiguration {
     let build: String
 
     init(bundle: Bundle) {
-        let groupIdentifier = bundle.object(forInfoDictionaryKey: Self.appGroupInfoKey) as? String
-        let groupContainer = groupIdentifier.flatMap { identifier in
-            FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
+        if UserDefaults.standard.bool(forKey: Self.temporaryStorageArgument) {
+            let temporaryRoot = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+            storageDirectory = temporaryRoot.appending(path: Self.storageDirectoryName)
+            logDirectory = temporaryRoot.appending(path: Self.logsPath)
+        } else {
+            let groupContainer = Self.groupContainer(of: bundle)
+            let storageParent =
+                groupContainer?.appending(path: Self.groupStoragePath) ?? URL.applicationSupportDirectory
+            storageDirectory = storageParent.appending(path: Self.storageDirectoryName)
+            logDirectory = (groupContainer ?? FileManager.default.temporaryDirectory).appending(path: Self.logsPath)
         }
-        let storageParent =
-            groupContainer?.appending(path: Self.groupStoragePath) ?? URL.applicationSupportDirectory
-        storageDirectory = storageParent.appending(path: Self.storageDirectoryName)
-        logDirectory = (groupContainer ?? FileManager.default.temporaryDirectory).appending(path: Self.logsPath)
         let tunnelProvider = bundle.object(forInfoDictionaryKey: Self.tunnelProviderInfoKey) as? String
         tunnelProviderBundleIdentifier = tunnelProvider ?? ""
         logSubsystem = bundle.bundleIdentifier ?? Self.fallbackSubsystem
         version = bundle.object(forInfoDictionaryKey: Self.versionInfoKey) as? String ?? ""
         build = bundle.object(forInfoDictionaryKey: Self.buildInfoKey) as? String ?? ""
+    }
+
+    private static func groupContainer(of bundle: Bundle) -> URL? {
+        let groupIdentifier = bundle.object(forInfoDictionaryKey: appGroupInfoKey) as? String
+        return groupIdentifier.flatMap { identifier in
+            FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
+        }
     }
 }

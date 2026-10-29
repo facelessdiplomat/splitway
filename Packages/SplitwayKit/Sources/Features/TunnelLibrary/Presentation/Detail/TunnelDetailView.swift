@@ -39,7 +39,7 @@ struct TunnelDetailView: View {
                         Text(failure.explanation.title)
                             .font(.headline)
                         Text(failure.explanation.message)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.supportingText)
                     }
                 }
             }

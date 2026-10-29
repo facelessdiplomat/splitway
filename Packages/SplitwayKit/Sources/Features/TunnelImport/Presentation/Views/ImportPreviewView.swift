@@ -24,6 +24,7 @@ struct ImportPreviewView: View {
                     }
                 } header: {
                     Text("Configurations", bundle: .module)
+                        .foregroundStyle(.supportingText)
                 }
             }
             if !model.failures.isEmpty {
@@ -33,11 +34,12 @@ struct ImportPreviewView: View {
                             failure.source.title
                             failure.reason.message
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.supportingText)
                         }
                     }
                 } header: {
                     Text("Not imported", bundle: .module)
+                        .foregroundStyle(.supportingText)
                 }
             }
         }

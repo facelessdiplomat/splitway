@@ -48,6 +48,7 @@ struct InterfaceSection: View {
             row(.dns, Text("DNS servers", bundle: .module), example: "1.1.1.1")
         } header: {
             Text("Interface", bundle: .module)
+                .foregroundStyle(.supportingText)
         }
     }
 

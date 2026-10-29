@@ -5,10 +5,15 @@ repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$repository_root/Scripts/lib/xcode-environment.sh"
 cd "$repository_root"
 
-if (($# > 0)); then
-    printf 'usage: Scripts/check.sh\n' >&2
-    exit 2
-fi
+runs_ui_tests=false
+case "${1-}" in
+    "") ;;
+    --ui) runs_ui_tests=true ;;
+    *)
+        printf 'usage: Scripts/check.sh [--ui]\n' >&2
+        exit 2
+        ;;
+esac
 
 derived_data="$repository_root/build/DerivedData"
 go_modules=(Packages/TunnelCore/go Scripts/go-comment-check)
@@ -18,10 +23,26 @@ step() {
     printf '\n==> %s\n' "$1"
 }
 
-iphone_simulator_identifier() {
+simulator_identifier() {
     xcrun simctl list devices available \
-        | grep -m 1 -E '^[[:space:]]+iPhone' \
+        | grep -m 1 -E "^[[:space:]]+$1" \
         | grep -oE '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' || true
+}
+
+iphone_simulator_identifier() {
+    simulator_identifier iPhone
+}
+
+run_ui_tests() {
+    local device="$1"
+    local simulator
+    simulator="$(simulator_identifier "$device")"
+    if [[ -z "$simulator" ]]; then
+        printf 'No available %s simulator, install one in Xcode\n' "$device" >&2
+        exit 1
+    fi
+    xcodebuild -project Splitway.xcodeproj -scheme iOSUITests -destination "id=$simulator" \
+        -derivedDataPath "$derived_data" test -quiet
 }
 
 build_scheme() {
@@ -68,5 +89,12 @@ xcodebuild -project Splitway.xcodeproj -scheme iOSApp -destination "id=$iphone_s
 
 step "macOS build"
 build_scheme macOSApp 'generic/platform=macOS'
+
+if [[ "$runs_ui_tests" == true ]]; then
+    step "UI tests on iPhone"
+    run_ui_tests iPhone
+    step "UI tests on iPad"
+    run_ui_tests iPad
+fi
 
 printf '\nAll checks passed in %ds\n' "$((SECONDS - started_at))"

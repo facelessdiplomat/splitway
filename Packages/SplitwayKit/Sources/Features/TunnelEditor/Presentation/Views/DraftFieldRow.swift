@@ -6,17 +6,21 @@ struct DraftFieldRow: View {
     let field: TunnelDraftField
     let title: Text
     let example: String
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading) {
-            LabeledContent {
-                TextField(text: text, prompt: Text(verbatim: example)) {
+            if dynamicTypeSize.isAccessibilitySize {
+                title
+                textField
+                    .multilineTextAlignment(.leading)
+            } else {
+                LabeledContent {
+                    textField
+                        .multilineTextAlignment(.trailing)
+                } label: {
                     title
                 }
-                .multilineTextAlignment(.trailing)
-                .plainTextInput()
-            } label: {
-                title
             }
             ForEach(Array(model.problems(for: field).enumerated()), id: \.offset) { _, reason in
                 reason.message
@@ -24,6 +28,14 @@ struct DraftFieldRow: View {
                     .foregroundStyle(.red)
             }
         }
+    }
+
+    private var textField: some View {
+        TextField(text: text, prompt: Text(verbatim: example)) {
+            title
+        }
+        .accessibilityLabel(title)
+        .plainTextInput()
     }
 
     private var text: Binding<String> {

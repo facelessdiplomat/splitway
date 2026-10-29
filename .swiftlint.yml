@@ -2,6 +2,7 @@ included:
   - Packages
   - Apps
   - IntegrationTests
+  - UITests
 excluded:
   - Packages/SplitwayKit/.build
   - Packages/TunnelCore/.build

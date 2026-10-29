@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 
 public struct SystemExtensionWizardView: View {
@@ -21,7 +22,7 @@ public struct SystemExtensionWizardView: View {
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
             model.step.message
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.supportingText)
                 .multilineTextAlignment(.center)
             SystemExtensionWizardActions(step: model.step, install: install)
         }

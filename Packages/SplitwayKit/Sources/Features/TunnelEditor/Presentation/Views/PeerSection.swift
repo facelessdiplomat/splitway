@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 import TunnelEditor
 
@@ -19,6 +20,7 @@ struct PeerSection: View {
             }
         } header: {
             Text("Peer", bundle: .module)
+                .foregroundStyle(.supportingText)
         }
     }
 
