@@ -13,7 +13,7 @@
 - [x] M0-07 Линтеры и форматирование
 - [x] M0-08 Go-модуль TunnelCore и сборка xcframework
 - [x] M0-09 Локальная проверка `Scripts/check.sh`
-- [ ] M0-10 Тестовый туннель
+- [x] M0-10 Тестовый туннель
 - [ ] SP-7 Hello tunnel: wireguard-go в пакетном туннеле
 - [ ] SP-2 Атрибуция потоков в transparent proxy
 - [ ] SP-6 UDP и QUIC в transparent proxy
