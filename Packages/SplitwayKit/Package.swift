@@ -159,6 +159,7 @@ let features: [FeatureModule] = [
         testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"],
         infrastructureTestDependencies: [zipFoundation]
     ),
+    FeatureModule("Diagnostics", layers: [.core, .infrastructure]),
 ]
 
 let package = Package(
