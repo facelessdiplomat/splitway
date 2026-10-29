@@ -1,3 +1,4 @@
+import AppRoutingPresentation
 import SwiftUI
 
 struct TunnelEditorView: View {
@@ -13,6 +14,7 @@ struct TunnelEditorView: View {
             switch model.mode {
             case .form:
                 InterfaceSection(model: model, copyToClipboard: copyToClipboard)
+                RoutingSection(model: model.routing, excludesPrivateNetworks: excludesPrivateNetworks)
                 ForEach(model.draft.peers) { peer in
                     PeerSection(model: model, peer: peer)
                 }
@@ -29,6 +31,7 @@ struct TunnelEditorView: View {
                 }
             case .text:
                 TunnelTextSection(model: model)
+                RoutingSection(model: model.routing, excludesPrivateNetworks: nil)
             }
         }
         .formStyle(.grouped)
@@ -38,5 +41,14 @@ struct TunnelEditorView: View {
         }
         .modifier(TunnelRestartConfirmation(model: model))
         .modifier(TunnelEditorFailureAlert(model: model))
+    }
+
+    private var excludesPrivateNetworks: Binding<Bool>? {
+        guard model.privateNetworkChoice() != .notApplicable else { return nil }
+        return Binding {
+            model.privateNetworkChoice() == .excluded
+        } set: { excludes in
+            model.setExcludesPrivateNetworks(excludes)
+        }
     }
 }

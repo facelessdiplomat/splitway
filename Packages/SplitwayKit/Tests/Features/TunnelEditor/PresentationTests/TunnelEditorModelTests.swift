@@ -132,4 +132,15 @@ struct TunnelEditorModelTests {
 
         #expect(editor.isPrivateKeyRevealed)
     }
+
+    @Test
+    func savesTheRoutingPolicyChosenInTheEditor() async throws {
+        let environment = TunnelEditorTestEnvironment()
+        let editor = environment.editor(for: try await environment.storeTunnel(named: "Office"))
+
+        editor.routing.selectMode(.selectedServices)
+        await editor.save()
+
+        #expect(environment.savedTunnels.map(\.routingPolicy.mode.kind) == [.selectedServices])
+    }
 }

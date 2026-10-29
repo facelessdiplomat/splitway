@@ -1,3 +1,5 @@
+import AppRouting
+import AppRoutingPresentation
 import Observation
 import TunnelConfiguration
 import TunnelEditor
@@ -13,6 +15,7 @@ public final class TunnelEditorModel: Identifiable {
     public private(set) var isSaving = false
     public private(set) var isConfirmingRestart = false
     public private(set) var failure: TunnelEditorFailure?
+    public let routing: RoutingSectionModel
 
     private let editedTunnel: Tunnel?
     private let actions: TunnelEditorActions
@@ -20,6 +23,7 @@ public final class TunnelEditorModel: Identifiable {
 
     public init(
         newTunnelNamed name: String,
+        routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
@@ -27,6 +31,7 @@ public final class TunnelEditorModel: Identifiable {
         draft.generatePrivateKey()
         self.draft = draft
         editedTunnel = nil
+        routing = RoutingSectionModel(policy: .default, platform: routingPlatform)
         self.actions = actions
         self.didSave = didSave
         isPrivateKeyRevealed = true
@@ -34,11 +39,13 @@ public final class TunnelEditorModel: Identifiable {
 
     public init(
         editing tunnel: Tunnel,
+        routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         draft = TunnelDraft(name: tunnel.name, configuration: tunnel.configuration)
         editedTunnel = tunnel
+        routing = RoutingSectionModel(policy: tunnel.routingPolicy, platform: routingPlatform)
         self.actions = actions
         self.didSave = didSave
     }
@@ -90,12 +97,12 @@ public final class TunnelEditorModel: Identifiable {
         isPrivateKeyRevealed = true
     }
 
-    public func privateNetworkChoice(forPeer id: PeerDraftID) -> PrivateNetworkChoice {
-        draft.privateNetworkChoice(forPeer: id)
+    public func privateNetworkChoice() -> PrivateNetworkChoice {
+        draft.privateNetworkChoice()
     }
 
-    public func setExcludesPrivateNetworks(_ excludesPrivateNetworks: Bool, forPeer id: PeerDraftID) {
-        draft.setExcludesPrivateNetworks(excludesPrivateNetworks, forPeer: id)
+    public func setExcludesPrivateNetworks(_ excludesPrivateNetworks: Bool) {
+        draft.setExcludesPrivateNetworks(excludesPrivateNetworks)
     }
 
     public func showText() {
@@ -164,12 +171,16 @@ public final class TunnelEditorModel: Identifiable {
     ) async throws(TunnelEditorFailure) -> Tunnel {
         do {
             guard let editedTunnel else {
-                return try await actions.createTunnel.execute(name: name, configuration: configuration)
+                return try await actions.createTunnel.execute(
+                    name: name,
+                    configuration: configuration,
+                    routingPolicy: routing.policy
+                )
             }
             let updated = try await actions.updateTunnel.execute(
                 id: editedTunnel.id,
                 configuration: configuration,
-                routingPolicy: editedTunnel.routingPolicy
+                routingPolicy: routing.policy
             )
             guard name != editedTunnel.name else { return updated }
             return updated.renamed(to: try await actions.renameTunnel.execute(id: editedTunnel.id, to: name))

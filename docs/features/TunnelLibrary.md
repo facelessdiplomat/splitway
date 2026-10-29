@@ -15,7 +15,7 @@
 
 | Тип | Что | Зачем |
 |---|---|---|
-| Фичи проекта | `SharedKernel`, `TunnelConfiguration`, `AppRouting`; в `Presentation` — `TunnelConnection`, `DesignSystemPresentation` | часы, конфигурация туннеля, политика маршрутизации; состояние слота и подключение; общие компоненты |
+| Фичи проекта | `SharedKernel`, `TunnelConfiguration`, `AppRouting`; в `Presentation` — `TunnelConnection`, `AppRoutingPresentation`, `DesignSystemPresentation` | часы, конфигурация туннеля, политика маршрутизации; состояние слота и подключение; общие компоненты |
 | Системные фреймворки | Foundation, Security, SwiftUI, Observation | файлы и JSON; Keychain; экран списка |
 | Сторонние библиотеки | ZIPFoundation 0.9.20, MIT | архив при экспорте (решение D-21) |
 

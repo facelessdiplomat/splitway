@@ -105,4 +105,24 @@ struct TunnelDraftTests {
                 .notApplicable, .notApplicable,
             ])
     }
+
+    @Test
+    func excludesPrivateNetworksForEveryPeerThatRoutesAllTraffic() throws {
+        var draft = TunnelDraft(name: "Office", text: WgQuickFixtures.minimal)
+        let second = draft.addPeer()
+        draft.setText("0.0.0.0/0", for: .peer(second, .allowedIPs))
+        #expect(draft.privateNetworkChoice() == .included)
+
+        draft.setExcludesPrivateNetworks(true)
+
+        #expect(draft.privateNetworkChoice() == .excluded)
+        #expect(draft.peers.map { peer in draft.privateNetworkChoice(forPeer: peer.id) } == [.excluded, .excluded])
+    }
+
+    @Test
+    func offersNoTunnelWidePrivateNetworkExclusionForASplitTunnel() {
+        let draft = TunnelDraft(name: "Office", text: WgQuickFixtures.multiplePeers)
+
+        #expect(draft.privateNetworkChoice() == .notApplicable)
+    }
 }

@@ -159,13 +159,17 @@ let zipFoundation: Target.Dependency = .product(name: "ZIPFoundation", package: 
 
 let features: [FeatureModule] = [
     FeatureModule("TunnelConfiguration", layers: [.core, .presentation], providesTestSupport: true),
-    FeatureModule("AppRouting"),
+    FeatureModule(
+        "AppRouting",
+        layers: [.core, .presentation],
+        presentationDependencies: ["DesignSystemPresentation"]
+    ),
     FeatureModule(
         "TunnelLibrary",
         layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
         infrastructureDependencies: [zipFoundation],
-        presentationDependencies: ["TunnelConnection", "DesignSystemPresentation"],
+        presentationDependencies: ["TunnelConnection", "AppRoutingPresentation", "DesignSystemPresentation"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         infrastructureTestDependencies: [zipFoundation],
         presentationTestDependencies: ["TunnelConnectionTestSupport"],
@@ -184,7 +188,9 @@ let features: [FeatureModule] = [
         "TunnelEditor",
         layers: [.core, .presentation],
         coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
-        presentationDependencies: ["TunnelConnection", "TunnelConfigurationPresentation", "DesignSystemPresentation"],
+        presentationDependencies: [
+            "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation", "DesignSystemPresentation",
+        ],
         testDependencies: ["TunnelConfigurationTestSupport"],
         presentationTestDependencies: ["TunnelLibraryTestSupport", "TunnelConnectionTestSupport"]
     ),

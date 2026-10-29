@@ -131,16 +131,6 @@
         }
       }
     },
-    "Exclude private networks" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Исключить локальные сети"
-          }
-        }
-      }
-    },
     "Form" : {
       "localizations" : {
         "ru" : {

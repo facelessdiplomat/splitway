@@ -33,13 +33,13 @@ final class TunnelEditorTestEnvironment {
     }
 
     func newTunnelEditor() -> TunnelEditorModel {
-        TunnelEditorModel(newTunnelNamed: "New tunnel", actions: actions) { [weak self] tunnel in
+        TunnelEditorModel(newTunnelNamed: "New tunnel", routingPlatform: .iOS, actions: actions) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
     }
 
     func editor(for tunnel: Tunnel) -> TunnelEditorModel {
-        TunnelEditorModel(editing: tunnel, actions: actions) { [weak self] tunnel in
+        TunnelEditorModel(editing: tunnel, routingPlatform: .iOS, actions: actions) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
     }
@@ -57,7 +57,7 @@ final class TunnelEditorTestEnvironment {
 
 extension TunnelEditorTestEnvironment {
     func flow() -> TunnelEditorFlow {
-        TunnelEditorFlow(actions: actions) { _ in
+        TunnelEditorFlow(routingPlatform: .iOS, actions: actions) { _ in
         } didSave: { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }

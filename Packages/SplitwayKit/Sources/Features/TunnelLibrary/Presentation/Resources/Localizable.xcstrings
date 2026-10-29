@@ -21,16 +21,6 @@
         }
       }
     },
-    "All traffic" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Весь трафик"
-          }
-        }
-      }
-    },
     "Configuration unavailable" : {
       "localizations" : {
         "ru" : {
@@ -337,26 +327,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выберите туннель"
-          }
-        }
-      }
-    },
-    "Selected apps" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбранные приложения"
-          }
-        }
-      }
-    },
-    "Selected services" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбранные сервисы"
           }
         }
       }
