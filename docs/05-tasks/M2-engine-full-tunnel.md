@@ -10,7 +10,7 @@
 - [x] M2-04 Swift-адаптер `TunnelCoreAdapter` (режим fd)
 - [ ] M2-05 План сетевых настроек
 - [ ] M2-06 Инфраструктура пакетного туннеля
-- [ ] M2-07 Протокол сообщений «приложение ↔ расширение»
+- [x] M2-07 Протокол сообщений «приложение ↔ расширение»
 - [ ] M2-08 Сборка расширений
 - [ ] M2-09 Домен и сценарии подключения
 - [ ] M2-10 Системный слот пакетного туннеля
@@ -71,9 +71,9 @@
 ### M2-07. Протокол сообщений «приложение ↔ расширение»
 `shared` · M · зависит от: M2-01
 
-**Сделать:** `ProviderMessageEnvelope { protocolVersion, request }`; `ProviderRequest` (`runtimeStatistics`, `applyRoutingPolicy`, `healthCheck`), `ProviderResponse`, `ProviderMessageCodec` (JSON). Порт `ProviderMessenger` в приложении (адаптер над `NETunnelProviderSession.sendProviderMessage`) и `ProviderMessageHandler` в расширении.
-**Тесты сначала:** round-trip всех сообщений; неизвестная версия → явная ошибка; повреждённые данные → ошибка без падения.
-**Готово, когда:** кодек покрыт тестами, адаптеры тонкие.
+**Сделать:** фича `ProviderMessaging`. Конверт `{ protocolVersion, payload }` для запросов и ответов: после обновления приложения может работать старое расширение, поэтому версия есть в обоих направлениях. `ProviderRequest` (`runtimeStatistics`, `applyRoutingPolicy(policy:)`, `healthCheck`), `ProviderResponse` (`runtimeStatistics(statistics:)`, `routingPolicyApplied`, `health(isTunnelRunning:)`, `failure(reason:)`), `ProviderFailure`. `ProviderMessageCodec` (JSON) сначала читает версию, чужая версия → `unsupportedProtocolVersion(found:)`, любые повреждения → `malformedMessage`. `ProviderMessageDispatcher` в расширении превращает любые байты в ответ: чужую версию и мусор — в явный `failure`. Порты `ProviderMessenger` (приложение) и `ProviderMessageHandler` (расширение); адаптер `TunnelProviderSessionMessenger` — actor над `NETunnelProviderSession.sendProviderMessage`, отвечает `incompatibleExtension(protocolVersion:)` при чужой версии. `RuntimeStatistics` стал `Codable` (ключи пиров — base64).
+**Тесты сначала:** round-trip всех запросов и ответов; чужая версия → явная ошибка в запросе и ответе; шесть видов повреждённых данных и неверный ключ пира → ошибка без падения; диспетчер передаёт запрос обработчику, а на чужую версию и мусор отвечает явным `failure`, не вызывая обработчик.
+**Готово, когда:** кодек покрыт тестами, адаптеры тонкие. У слоя Infrastructure тестов нет по построению (`layersWithoutTests` в `Package.swift`): адаптер только вызывает NetworkExtension.
 
 ### M2-08. Сборка расширений
 `iOS+iPadOS`, `macOS` · M · зависит от: M1-13, M1-14, M2-06, M2-07
