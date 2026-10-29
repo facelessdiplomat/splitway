@@ -36,6 +36,7 @@ struct FeatureModule {
     let presentationDependencies: [Target.Dependency]
     let testDependencies: [Target.Dependency]
     let infrastructureTestDependencies: [Target.Dependency]
+    let layersWithoutTests: [FeatureLayer]
     let providesTestSupport: Bool
 
     init(
@@ -46,6 +47,7 @@ struct FeatureModule {
         presentationDependencies: [Target.Dependency] = [],
         testDependencies: [Target.Dependency] = [],
         infrastructureTestDependencies: [Target.Dependency] = [],
+        layersWithoutTests: [FeatureLayer] = [],
         providesTestSupport: Bool = false
     ) {
         self.name = name
@@ -55,6 +57,7 @@ struct FeatureModule {
         self.presentationDependencies = presentationDependencies
         self.testDependencies = testDependencies
         self.infrastructureTestDependencies = infrastructureTestDependencies
+        self.layersWithoutTests = layersWithoutTests
         self.providesTestSupport = providesTestSupport
     }
 
@@ -92,13 +95,15 @@ struct FeatureModule {
             + (providesTestSupport ? [.target(name: testSupportName)] : [])
             + testDependencies
             + (layer == .infrastructure ? infrastructureTestDependencies : [])
+        let target: Target = .target(
+            name: targetName,
+            dependencies: dependencies(for: layer),
+            path: "Sources/Features/\(name)/\(layer.directoryName)",
+            swiftSettings: strictSwiftSettings
+        )
+        guard !layersWithoutTests.contains(layer) else { return [target] }
         return [
-            .target(
-                name: targetName,
-                dependencies: dependencies(for: layer),
-                path: "Sources/Features/\(name)/\(layer.directoryName)",
-                swiftSettings: strictSwiftSettings
-            ),
+            target,
             .testTarget(
                 name: "\(targetName)Tests",
                 dependencies: layerTestDependencies,
@@ -164,6 +169,13 @@ let features: [FeatureModule] = [
         "TunnelEngine",
         coreDependencies: ["TunnelConfiguration"],
         testDependencies: ["TunnelConfigurationTestSupport"]
+    ),
+    FeatureModule(
+        "ProviderMessaging",
+        layers: [.core, .infrastructure],
+        coreDependencies: ["TunnelEngine", "AppRouting"],
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        layersWithoutTests: [.infrastructure]
     ),
 ]
 

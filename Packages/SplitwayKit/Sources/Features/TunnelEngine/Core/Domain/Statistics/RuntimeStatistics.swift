@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RuntimeStatistics: Sendable, Hashable {
+public struct RuntimeStatistics: Sendable, Hashable, Codable {
     public let peers: [PeerRuntimeStatistics]
 
     public init(peers: [PeerRuntimeStatistics]) {
