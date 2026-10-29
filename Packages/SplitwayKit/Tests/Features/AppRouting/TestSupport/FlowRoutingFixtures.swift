@@ -1,51 +1,53 @@
 import AppRouting
 import SharedKernel
 
-enum FlowRoutingFixtures {
-    static let browserTeam = "BROWSER123"
-    static let tunnelAddress = IPAddress.ipv4(0x0A01_0203)
-    static let tunnelIPv6Address = IPAddress.ipv6(0x2001_0DB8 << 96 | 1)
-    static let outsideAddress = IPAddress.ipv4(0xC000_020A)
+public enum FlowRoutingFixtures {
+    public static let browserTeam = "BROWSER123"
+    public static let tunnelAddress = IPAddress.ipv4(0x0A01_0203)
+    public static let tunnelIPv6Address = IPAddress.ipv6(0x2001_0DB8 << 96 | 1)
+    public static let outsideAddress = IPAddress.ipv4(0xC000_020A)
 
-    static let browser = SourceApplication(
+    public static let browser = SourceApplication(
         signingIdentifier: "com.example.browser",
         teamIdentifier: browserTeam,
         executablePath: "/Applications/Browser.app/Contents/MacOS/Browser"
     )
-    static let browserHelper = SourceApplication(
+    public static let browserHelper = SourceApplication(
         signingIdentifier: "com.example.browser.helper",
         teamIdentifier: browserTeam,
         executablePath: "/Applications/Browser.app/Contents/Frameworks/Helper.app/Contents/MacOS/Helper"
     )
-    static let spoofedBrowser = SourceApplication(
+    public static let spoofedBrowser = SourceApplication(
         signingIdentifier: "com.example.browser",
         teamIdentifier: "INTRUDER99",
         executablePath: "/Users/someone/Downloads/Browser"
     )
-    static let spoofedCurl = SourceApplication(
+    public static let spoofedCurl = SourceApplication(
         signingIdentifier: "com.apple.curl",
         teamIdentifier: "INTRUDER99",
         executablePath: "/Users/someone/curl"
     )
-    static let unsignedCurl = SourceApplication(
+    public static let unsignedCurl = SourceApplication(
         signingIdentifier: nil, teamIdentifier: nil, executablePath: "/usr/bin/curl")
-    static let bundledExecutable = SourceApplication(
+    public static let bundledExecutable = SourceApplication(
         signingIdentifier: nil,
         teamIdentifier: browserTeam,
         executablePath: "/Applications/Browser.app/Contents/Helpers/updater"
     )
-    static let neighbourExecutable = SourceApplication(
+    public static let neighbourExecutable = SourceApplication(
         signingIdentifier: nil,
         teamIdentifier: browserTeam,
         executablePath: "/Applications/Browser.app Tools/updater"
     )
-    static let otherApplication = SourceApplication(
+    public static let otherApplication = SourceApplication(
         signingIdentifier: "com.example.mail",
         teamIdentifier: "MAIL123456",
         executablePath: "/Applications/Mail Client.app/Contents/MacOS/Mail Client"
     )
 
-    static func snapshot(whenTunnelUnavailable: TunnelUnavailableBehavior = .block) throws -> RoutingPolicySnapshot {
+    public static func snapshot(whenTunnelUnavailable: TunnelUnavailableBehavior = .block) throws
+        -> RoutingPolicySnapshot
+    {
         RoutingPolicySnapshot(
             applications: [
                 try ApplicationIdentity(

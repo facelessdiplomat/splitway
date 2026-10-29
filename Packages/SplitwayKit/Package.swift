@@ -170,7 +170,8 @@ let features: [FeatureModule] = [
     FeatureModule(
         "AppRouting",
         layers: [.core, .presentation],
-        presentationDependencies: ["DesignSystemPresentation"]
+        presentationDependencies: ["DesignSystemPresentation"],
+        providesTestSupport: true
     ),
     FeatureModule(
         "TunnelLibrary",
@@ -248,6 +249,11 @@ let features: [FeatureModule] = [
         "TransparentProxy",
         coreDependencies: ["TunnelConfiguration", "PacketTunnel"],
         testDependencies: ["TunnelConfigurationTestSupport"]
+    ),
+    FeatureModule(
+        "DNSProxy",
+        coreDependencies: ["AppRouting", "TunnelConfiguration"],
+        testDependencies: ["AppRoutingTestSupport", "TunnelConfigurationTestSupport"]
     ),
     FeatureModule(
         "SystemExtension",

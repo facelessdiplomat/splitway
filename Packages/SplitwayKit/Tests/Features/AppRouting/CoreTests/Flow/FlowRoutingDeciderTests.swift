@@ -1,4 +1,5 @@
 import AppRouting
+import AppRoutingTestSupport
 import SharedKernel
 import Testing
 
