@@ -173,7 +173,7 @@ let features: [FeatureModule] = [
     FeatureModule(
         "ProviderMessaging",
         layers: [.core, .infrastructure],
-        coreDependencies: ["TunnelEngine", "AppRouting"],
+        coreDependencies: ["TunnelEngine", "AppRouting", "TunnelLibrary"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         layersWithoutTests: [.infrastructure]
     ),
@@ -185,6 +185,7 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         "TunnelConnection",
+        layers: [.core, .infrastructure],
         coreDependencies: ["TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
         testDependencies: ["TunnelConfigurationTestSupport"]
     ),

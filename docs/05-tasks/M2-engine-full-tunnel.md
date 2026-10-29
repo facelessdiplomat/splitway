@@ -13,7 +13,7 @@
 - [x] M2-07 Протокол сообщений «приложение ↔ расширение»
 - [ ] M2-08 Сборка расширений
 - [x] M2-09 Домен и сценарии подключения
-- [ ] M2-10 Системный слот пакетного туннеля
+- [ ] M2-10 Системный слот пакетного туннеля — код и тесты готовы, проверка на устройстве ждёт M0-04
 - [ ] M2-11 Установка системного расширения
 - [ ] M2-12 Передача секретов в системное расширение
 - [ ] M2-13 Журнал в расширении и движке
@@ -94,9 +94,9 @@
 ### M2-10. Системный слот пакетного туннеля
 `shared` · M · зависит от: M2-09
 
-**Сделать:** `PacketTunnelSlotController` (реализует `SystemTunnelController`): найти или создать `NETunnelProviderManager`, задать `NETunnelProviderProtocol` (`providerBundleIdentifier`, `serverAddress` — endpoint для отображения, `providerConfiguration` с id туннеля и снимком политики), включить, сохранить, `startVPNTunnel` / `stopVPNTunnel`, поток статусов из `NEVPNStatusDidChange`, `fetchLastDisconnectError`.
-**Тесты сначала:** маппинг `NEVPNStatus` → `ConnectionState` и построение `providerConfiguration` выносятся в чистые функции и тестируются.
-**Готово, когда:** подключение и отключение работают из кода, статус приходит в приложение.
+**Сделать:** `PacketTunnelSlotController` в `TunnelConnectionInfrastructure` (actor, реализует `SystemTunnelController`). Находит сохранённый `NETunnelProviderManager` по `providerBundleIdentifier` или создаёт новый; задаёт `NETunnelProviderProtocol` с `serverAddress` — endpoint первого пира или имя туннеля (`TunnelSlotDescription`) — и `providerConfiguration` = `TunnelProviderConfiguration` (id туннеля и снимок политики, без секретов, с версией в общем конверте); имя слота «Splitway» (D-17); включает, сохраняет и перечитывает настройки. `startVPNTunnel` / `stopVPNTunnel`: остановка ждёт отключения (событие или 10 с). Поток статусов из `NEVPNStatusDidChange` — только для своего соединения; `fetchLastDisconnectError`. Контракт приложения и расширения лежит в `ProviderMessaging`: `TunnelProviderConfigurationCodec` и `TunnelStopReason` (код `NSError` в домене `Splitway.TunnelStop`, который расширение передаёт в `cancelTunnelWithError`). `ConnectionFailure(stopReason:)` объясняет причину отключения; `VPNErrorMapping`: `configurationReadWriteFailed` при сохранении → `permissionDenied` (пользователь не разрешил VPN), остальные ошибки → `systemConfigurationUnavailable`.
+**Тесты сначала:** `VPNStatusMapping` (все `NEVPNStatus`, дата подключения по умолчанию), `VPNErrorMapping`, кодек `providerConfiguration` (round-trip, нет данных, чужая версия, мусор), `TunnelStopReason` через `NSError`, `ConnectionFailure(stopReason:)`, адрес сервера в системных настройках. Сам контроллер — тонкая обёртка над NetworkExtension.
+**Готово, когда:** подключение и отключение работают из кода, статус приходит в приложение. Проверка на устройстве ждёт подписи (M0-04) и проходит вместе с M2-14.
 
 ## macOS: SystemExtension и секреты
 
