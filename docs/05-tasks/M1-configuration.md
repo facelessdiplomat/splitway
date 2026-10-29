@@ -15,7 +15,7 @@
 - [x] M1-09 «Исключить локальные сети»
 - [x] M1-10 `RoutingPolicy`
 - [x] M1-11 `Tunnel`, `TunnelName`, уникальность имён
-- [ ] M1-12 Порты и сценарии библиотеки
+- [x] M1-12 Порты и сценарии библиотеки
 - [ ] M1-13 Репозиторий метаданных в App Group
 - [ ] M1-14 Хранилище секретов в Keychain
 - [ ] M1-15 Архивы `.zip`
@@ -112,7 +112,7 @@
 ### M1-12. Порты и сценарии библиотеки
 `shared` · L · зависит от: M1-11
 
-**Сделать:** порты `TunnelRepository`, `TunnelSecretStore`, `ArchiveWriter`, `TunnelActivityProbe` (активен ли туннель и как его остановить; реализует `TunnelConnection` в M2). Сценарии: `CreateTunnelUseCase`, `ImportTunnelsUseCase` (пакетный импорт: частичные неудачи, конфликты имён), `UpdateTunnelUseCase`, `RenameTunnelUseCase`, `DeleteTunnelUseCase` (сначала останавливает активный туннель), `DuplicateTunnelUseCase`, `ReorderTunnelsUseCase`, `ExportTunnelsUseCase` (один или все, имена файлов в архиве уникальны). Секрет и метаданные сохраняются согласованно: при ошибке записи одного второе откатывается.
+**Сделать:** порты `TunnelRepository`, `TunnelSecretStore`, `ArchiveWriter`, `TunnelActivityProbe` (активен ли туннель и как его остановить; реализует `TunnelConnection` в M2). Сценарии: `CreateTunnelUseCase`, `ImportTunnelsUseCase` (пакетный импорт: частичные неудачи, конфликты имён), `UpdateTunnelUseCase`, `RenameTunnelUseCase`, `DeleteTunnelUseCase` (сначала останавливает активный туннель), `DuplicateTunnelUseCase`, `ReorderTunnelsUseCase`, `ExportTunnelsUseCase` (один или все, имена файлов в архиве уникальны), `LoadTunnelsUseCase` (список в сохранённом порядке, нечитаемые записи отдельно). Метаданные (`TunnelRecord`) и текст конфига с ключами хранятся раздельно. Секрет и метаданные сохраняются согласованно: при ошибке записи одного второе откатывается.
 **Тесты сначала:** каждый сценарий с фейковыми портами; откат при сбое `TunnelSecretStore`; удаление активного туннеля; импорт 3 файлов, где 1 невалиден.
 **Готово, когда:** все сценарии покрыты, у фейков нет логики сверх хранения в памяти.
 
