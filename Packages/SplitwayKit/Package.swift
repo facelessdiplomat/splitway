@@ -183,6 +183,7 @@ let features: [FeatureModule] = [
         coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine"],
         testDependencies: ["TunnelConfigurationTestSupport"]
     ),
+    FeatureModule("SystemExtension", layers: [.core, .infrastructure]),
     FeatureModule(
         "TunnelConnection",
         layers: [.core, .infrastructure],
