@@ -162,9 +162,10 @@ RoutingPolicy
 ├── mode: .allTraffic
 │       | .selectedApplications(ApplicationSelection)   macOS
 │       | .selectedServices(ServiceSelection)           iOS/iPadOS
-├── excludesPrivateNetworks: Bool
 └── whenTunnelUnavailable: .bypass | .block
 ```
+
+«Исключить локальные сети» хранится не в политике, а в самих `AllowedIPs` (`PrivateNetworkExclusion`), как в официальном клиенте: так у состояния один источник истины.
 
 Все value objects валидируются при создании (`init` бросает доменную ошибку) и дальше считаются корректными. Невалидное состояние в домене непредставимо.
 
