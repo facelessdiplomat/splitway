@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Статус | завершена (M1) |
+| Статус | изменена: сеть одного адреса и диапазон `2000::/3` (M2-05), `Ticker` (M3-12) |
 | Платформы | shared |
-| Задачи | M0-05, M1-01, M1-02, M1-03, M1-05, M3-12 (`Ticker`) |
+| Задачи | M0-05, M1-01, M1-02, M1-03, M1-05, M2-05 (сети для полного туннеля), M3-12 (`Ticker`) |
 | Таргеты | `SharedKernel`, `SharedKernelTestSupport` |
 
 ## Назначение
@@ -22,7 +22,7 @@
 ## Принцип работы
 
 - `IPAddress` хранит семейство и значение `UInt128`; адрес IPv4 лежит в младших 32 битах. Разбор выполняют собственные `IPv4AddressParser` и `IPv6AddressParser`: октеты IPv4 строго десятичные и без ведущих нулей, IPv6 поддерживает `::` и встроенный IPv4, зоны `%en0` отклоняются. IPv6 форматируется по RFC 5952. Адреса сравниваются сначала по семейству, затем по значению; `Codable` — строкой.
-- `IPNetwork` — адрес и длина префикса с проверкой диапазона. `normalized` обнуляет биты хоста, `hasHostBits` сообщает об их наличии; есть `contains`, `overlaps`, `firstAddress` и `lastAddress`. Известные диапазоны (`loopbackNetworks`, `linkLocalNetworks`, `privateNetworks`, `multicastNetworks`, `reservedNetworks`, маршруты по умолчанию) объявлены как сети. Классификация адресов (`isLoopback`, `isLinkLocal`, `isPrivate`, `isMulticast`) выражена через эти сети.
+- `IPNetwork` — адрес и длина префикса с проверкой диапазона. `normalized` обнуляет биты хоста, `hasHostBits` сообщает об их наличии; есть `contains`, `overlaps`, `firstAddress` и `lastAddress`. Известные диапазоны (`loopbackNetworks`, `linkLocalNetworks`, `privateNetworks`, `multicastNetworks`, `reservedNetworks`, маршруты по умолчанию, глобальный IPv6 `ipv6GlobalUnicast` = `2000::/3` для решения D-30) объявлены как сети. `IPNetwork(host:)` — сеть ровно из одного адреса. Классификация адресов (`isLoopback`, `isLinkLocal`, `isPrivate`, `isMulticast`) выражена через эти сети.
 - `IPNetworkSet` держит по одному `AddressRanges` на семейство: отсортированные непересекающиеся `ClosedRange<UInt128>`, соседние диапазоны сливаются при создании. Объединение, пересечение и вычитание — линейные проходы по двум отсортированным спискам. `networks` раскладывает диапазоны в минимальный список CIDR (`CIDRDecomposition`).
 - `NetworkPort` — 1…65535, `Codable` числом. `DomainName` — ASCII и punycode, метка до 63 символов, имя до 253, нижний регистр, завершающая точка отбрасывается; `isSameOrSubdomain(of:)` сравнивает по суффиксу меток.
 - `CanonicalDecimalText` — единое строгое правило для чисел из конфигураций: только цифры, без знака, пробелов и ведущих нулей; `integerValue` принимает до 9 цифр.
@@ -31,7 +31,7 @@
 
 ## Публичный API
 
-`IPAddress`, `IPAddressFamily`, `IPAddressParsingError`, `IPNetwork`, `IPNetworkParsingError`, `IPNetworkSet`, `NetworkPort`, `NetworkPortValidationError`, `DomainName`, `DomainNameValidationError`, `CanonicalDecimalText`, `WallClock`, `SystemWallClock`, `Ticker`, `RepeatingTicker`.
+`IPAddress`, `IPAddressFamily`, `IPAddressParsingError`, `IPNetwork` (с `init(host:)` и `ipv6GlobalUnicast`), `IPNetworkParsingError`, `IPNetworkSet`, `NetworkPort`, `NetworkPortValidationError`, `DomainName`, `DomainNameValidationError`, `CanonicalDecimalText`, `WallClock`, `SystemWallClock`, `Ticker`, `RepeatingTicker`.
 
 ## Решения
 
@@ -62,10 +62,10 @@
 
 ## Тесты
 
-73 теста в `SharedKernelTests`:
+75 тестов в `SharedKernelTests`:
 
 - табличные тесты разбора и форматирования адресов, включая IPv4-mapped IPv6 и отклонение зон;
-- такие же тесты для сетей, портов и доменов;
+- такие же тесты для сетей, портов и доменов, сеть одного адреса, маршруты по умолчанию и глобальный диапазон IPv6;
 - алгебра `IPNetworkSet` с эталоном «`0.0.0.0/0` минус частные сети»;
 - property-тест «объединение разности и вычитаемого равно исходному множеству» на случайных сетях с фиксированным seed;
 - часы.
@@ -81,4 +81,5 @@
 | 2026-10-29 | `IPNetwork`, `IPNetworkSet`, классификация адресов | M1-02 |
 | 2026-10-29 | `NetworkPort`, `DomainName` | M1-03 |
 | 2026-10-29 | `CanonicalDecimalText` стал публичным | M1-05 |
+| 2026-10-29 | `IPNetwork(host:)`, `ipv6GlobalUnicast` | M2-05 |
 | 2026-10-29 | `Ticker`, `RepeatingTicker`, `ManualTicker` из `TunnelLibraryPresentation` | M3-12 |
