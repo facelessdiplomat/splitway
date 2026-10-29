@@ -19,6 +19,10 @@ enum FeatureLayer {
         }
     }
 
+    var resources: [Resource]? {
+        self == .presentation ? [.process("Resources")] : nil
+    }
+
     var directoryName: String {
         switch self {
         case .core: "Core"
@@ -99,6 +103,7 @@ struct FeatureModule {
             name: targetName,
             dependencies: dependencies(for: layer),
             path: "Sources/Features/\(name)/\(layer.directoryName)",
+            resources: layer.resources,
             swiftSettings: strictSwiftSettings
         )
         guard !layersWithoutTests.contains(layer) else { return [target] }
@@ -113,11 +118,15 @@ struct FeatureModule {
         ]
     }
 
+    private var coreTargetDependency: [Target.Dependency] {
+        layers.contains(.core) ? [.target(name: name)] : []
+    }
+
     private func dependencies(for layer: FeatureLayer) -> [Target.Dependency] {
         switch layer {
         case .core: ["SharedKernel"] + coreDependencies
-        case .infrastructure: [.target(name: name), "SharedKernel"] + infrastructureDependencies
-        case .presentation: [.target(name: name), "SharedKernel"] + presentationDependencies
+        case .infrastructure: coreTargetDependency + ["SharedKernel"] + infrastructureDependencies
+        case .presentation: coreTargetDependency + ["SharedKernel"] + presentationDependencies
         }
     }
 }
@@ -165,6 +174,7 @@ let features: [FeatureModule] = [
         infrastructureTestDependencies: [zipFoundation]
     ),
     FeatureModule("Diagnostics", layers: [.core, .infrastructure]),
+    FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
     FeatureModule(
         "TunnelEngine",
         coreDependencies: ["TunnelConfiguration"],
@@ -194,6 +204,7 @@ let features: [FeatureModule] = [
 
 let package = Package(
     name: "SplitwayKit",
+    defaultLocalization: "en",
     platforms: [.iOS(.v26), .macOS(.v26)],
     products: [.library(name: "SharedKernel", targets: ["SharedKernel"])] + features.flatMap(\.products),
     dependencies: [.package(url: "https://github.com/weichsel/ZIPFoundation.git", exact: "0.9.20")],
