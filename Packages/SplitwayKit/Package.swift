@@ -34,6 +34,7 @@ struct FeatureModule {
     let coreDependencies: [Target.Dependency]
     let infrastructureDependencies: [Target.Dependency]
     let presentationDependencies: [Target.Dependency]
+    let testDependencies: [Target.Dependency]
     let providesTestSupport: Bool
 
     init(
@@ -42,6 +43,7 @@ struct FeatureModule {
         coreDependencies: [Target.Dependency] = [],
         infrastructureDependencies: [Target.Dependency] = [],
         presentationDependencies: [Target.Dependency] = [],
+        testDependencies: [Target.Dependency] = [],
         providesTestSupport: Bool = false
     ) {
         self.name = name
@@ -49,6 +51,7 @@ struct FeatureModule {
         self.coreDependencies = coreDependencies
         self.infrastructureDependencies = infrastructureDependencies
         self.presentationDependencies = presentationDependencies
+        self.testDependencies = testDependencies
         self.providesTestSupport = providesTestSupport
     }
 
@@ -81,9 +84,10 @@ struct FeatureModule {
 
     private func targets(for layer: FeatureLayer) -> [Target] {
         let targetName = layer.targetName(for: name)
-        let testDependencies: [Target.Dependency] =
+        let layerTestDependencies: [Target.Dependency] =
             [.target(name: targetName), "SharedKernelTestSupport"]
             + (providesTestSupport ? [.target(name: testSupportName)] : [])
+            + testDependencies
         return [
             .target(
                 name: targetName,
@@ -93,7 +97,7 @@ struct FeatureModule {
             ),
             .testTarget(
                 name: "\(targetName)Tests",
-                dependencies: testDependencies,
+                dependencies: layerTestDependencies,
                 path: "Tests/Features/\(name)/\(layer.directoryName)Tests",
                 swiftSettings: strictSwiftSettings
             ),
@@ -132,6 +136,11 @@ let sharedKernelTargets: [Target] = [
 let features: [FeatureModule] = [
     FeatureModule("TunnelConfiguration", providesTestSupport: true),
     FeatureModule("AppRouting"),
+    FeatureModule(
+        "TunnelLibrary",
+        coreDependencies: ["TunnelConfiguration", "AppRouting"],
+        testDependencies: ["TunnelConfigurationTestSupport"]
+    ),
 ]
 
 let package = Package(
