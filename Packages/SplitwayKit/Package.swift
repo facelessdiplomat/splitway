@@ -40,6 +40,7 @@ struct FeatureModule {
     let presentationDependencies: [Target.Dependency]
     let testDependencies: [Target.Dependency]
     let infrastructureTestDependencies: [Target.Dependency]
+    let presentationTestDependencies: [Target.Dependency]
     let layersWithoutTests: [FeatureLayer]
     let providesTestSupport: Bool
 
@@ -51,6 +52,7 @@ struct FeatureModule {
         presentationDependencies: [Target.Dependency] = [],
         testDependencies: [Target.Dependency] = [],
         infrastructureTestDependencies: [Target.Dependency] = [],
+        presentationTestDependencies: [Target.Dependency] = [],
         layersWithoutTests: [FeatureLayer] = [],
         providesTestSupport: Bool = false
     ) {
@@ -61,6 +63,7 @@ struct FeatureModule {
         self.presentationDependencies = presentationDependencies
         self.testDependencies = testDependencies
         self.infrastructureTestDependencies = infrastructureTestDependencies
+        self.presentationTestDependencies = presentationTestDependencies
         self.layersWithoutTests = layersWithoutTests
         self.providesTestSupport = providesTestSupport
     }
@@ -99,6 +102,7 @@ struct FeatureModule {
             + (providesTestSupport ? [.target(name: testSupportName)] : [])
             + testDependencies
             + (layer == .infrastructure ? infrastructureTestDependencies : [])
+            + (layer == .presentation ? presentationTestDependencies : [])
         let target: Target = .target(
             name: targetName,
             dependencies: dependencies(for: layer),
@@ -158,11 +162,13 @@ let features: [FeatureModule] = [
     FeatureModule("AppRouting"),
     FeatureModule(
         "TunnelLibrary",
-        layers: [.core, .infrastructure],
+        layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
         infrastructureDependencies: [zipFoundation],
+        presentationDependencies: ["TunnelConnection", "DesignSystemPresentation"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         infrastructureTestDependencies: [zipFoundation],
+        presentationTestDependencies: ["TunnelConnectionTestSupport"],
         providesTestSupport: true
     ),
     FeatureModule(
@@ -198,7 +204,8 @@ let features: [FeatureModule] = [
         "TunnelConnection",
         layers: [.core, .infrastructure],
         coreDependencies: ["TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        providesTestSupport: true
     ),
 ]
 

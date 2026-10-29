@@ -1,7 +1,9 @@
 import Foundation
 import Testing
 import TunnelConnection
+import TunnelConnectionTestSupport
 import TunnelEngine
+import TunnelLibrary
 
 @Suite
 struct ObserveConnectionStateUseCaseTests {
@@ -59,10 +61,31 @@ struct ObserveConnectionStateUseCaseTests {
         #expect(await Self.collect(1, from: states) == [.disconnected])
     }
 
-    private static func collect(_ count: Int, from states: AsyncStream<ConnectionState>) async -> [ConnectionState] {
+    @Test
+    func reportsWhichTunnelTheStateBelongsTo() async {
+        let tunnel = TunnelIdentifier()
+        let controller = FakeSystemTunnelController(installed: tunnel)
+        let states = ObserveConnectionStateUseCase(controller: controller).execute()
+
+        controller.emit(.connecting)
+
+        var iterator = states.makeAsyncIterator()
+        #expect(await iterator.next() == SlotState(tunnelID: tunnel, connection: .connecting))
+    }
+
+    @Test
+    func showsEveryOtherTunnelAsDisconnected() {
+        let tunnel = TunnelIdentifier()
+        let state = SlotState(tunnelID: tunnel, connection: .connecting)
+
+        #expect(state.connectionState(of: tunnel) == .connecting)
+        #expect(state.connectionState(of: TunnelIdentifier()) == .disconnected)
+    }
+
+    private static func collect(_ count: Int, from states: AsyncStream<SlotState>) async -> [ConnectionState] {
         var collected: [ConnectionState] = []
         for await state in states.prefix(count) {
-            collected.append(state)
+            collected.append(state.connection)
         }
         return collected
     }

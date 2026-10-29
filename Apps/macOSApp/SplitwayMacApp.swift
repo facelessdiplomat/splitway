@@ -2,9 +2,9 @@ import SwiftUI
 
 @main
 struct SplitwayMacApp: App {
+    private let composition = AppComposition(configuration: AppConfiguration(bundle: .main))
+
     var body: some Scene {
-        WindowGroup {
-            Text(verbatim: "Splitway")
-        }
+        SplitwayRootScene(composition: composition)
     }
 }

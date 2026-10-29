@@ -32,7 +32,7 @@ struct ImportTestEnvironment {
 
     func storeTunnel(named name: String, fixture: String) async throws {
         let configuration = try #require(WgQuickConfigurationParser.parse(fixture).configuration)
-        try await CreateTunnelUseCase(records: records, secrets: secrets)
+        _ = try await CreateTunnelUseCase(records: records, secrets: secrets)
             .execute(name: TunnelName(name), configuration: configuration)
     }
 }

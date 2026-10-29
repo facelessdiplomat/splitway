@@ -5,7 +5,7 @@ public struct ObserveConnectionStateUseCase: Sendable {
         self.controller = controller
     }
 
-    public func execute() -> AsyncStream<ConnectionState> {
+    public func execute() -> AsyncStream<SlotState> {
         let controller = controller
         return AsyncStream { continuation in
             let observation = Task {
@@ -15,7 +15,8 @@ public struct ObserveConnectionStateUseCase: Sendable {
                         stateMachine.needsDisconnectReason(for: status)
                         ? await controller.lastDisconnectFailure()
                         : nil
-                    continuation.yield(stateMachine.apply(status, disconnectReason: reason))
+                    let connection = stateMachine.apply(status, disconnectReason: reason)
+                    continuation.yield(SlotState(tunnelID: await controller.installedTunnel(), connection: connection))
                 }
                 continuation.finish()
             }

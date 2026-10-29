@@ -1,0 +1,73 @@
+import SwiftUI
+import TunnelLibrary
+
+struct TunnelListView: View {
+    let model: TunnelListModel
+    @Binding var selection: TunnelIdentifier?
+    let addition: TunnelAdditionOptions
+
+    var body: some View {
+        List(selection: $selection) {
+            ForEach(model.rows) { row in
+                TunnelRowView(row: row) {
+                    Task.immediate { await model.toggleConnection(of: row) }
+                }
+                .contextMenu {
+                    duplicateButton(for: row)
+                    deleteButton(for: row, role: .destructive)
+                }
+                .swipeActions {
+                    deleteButton(for: row, role: nil)
+                        .tint(.red)
+                    duplicateButton(for: row)
+                }
+                .modifier(TunnelDeletionConfirmation(model: model, row: row))
+            }
+            .onMove { source, destination in
+                Task.immediate { await model.move(fromOffsets: source, toOffset: destination) }
+            }
+        }
+        .overlay {
+            if model.isEmpty {
+                TunnelListEmptyStateView(addition: addition)
+            }
+        }
+        .navigationTitle(Text("Tunnels", bundle: .module))
+        .toolbar {
+            TunnelListToolbar(addition: addition, isReorderable: !model.rows.isEmpty)
+        }
+        #if os(macOS)
+            .onDeleteCommand {
+                if let row = selection.flatMap({ id in model.row(withID: id) }) {
+                    model.requestDeletion(of: row)
+                }
+            }
+        #endif
+        .modifier(TunnelListAlertPresentation(model: model))
+    }
+
+    private func duplicateButton(for row: TunnelRow) -> some View {
+        Button {
+            Task.immediate { await model.duplicate(row) }
+        } label: {
+            Label {
+                Text("Duplicate", bundle: .module)
+            } icon: {
+                Image(systemName: "plus.square.on.square")
+            }
+        }
+        .disabled(!row.canDuplicate)
+    }
+
+    private func deleteButton(for row: TunnelRow, role: ButtonRole?) -> some View {
+        Button(role: role) {
+            model.requestDeletion(of: row)
+        } label: {
+            Label {
+                Text("Delete", bundle: .module)
+            } icon: {
+                Image(systemName: "trash")
+            }
+        }
+    }
+}

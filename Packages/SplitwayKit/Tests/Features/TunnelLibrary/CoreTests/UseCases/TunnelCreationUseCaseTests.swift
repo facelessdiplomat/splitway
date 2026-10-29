@@ -84,4 +84,18 @@ struct TunnelCreationUseCaseTests {
         #expect(snapshot.tunnels == [office, home])
         #expect(snapshot.unreadableRecords.map(\.id) == [broken.id])
     }
+
+    @Test
+    func keepsAnUnreadableRecordInItsStoredPlace() async throws {
+        let environment = LibraryTestEnvironment()
+        let office = try await environment.storedTunnel(named: "Office")
+        let broken = try await environment.storedTunnel(named: "Broken")
+        let home = try await environment.storedTunnel(named: "Home")
+        try await environment.secrets.deleteConfigurationText(for: broken.id)
+
+        let snapshot = try await environment.loadTunnels.execute()
+
+        #expect(snapshot.entries.map(\.id) == [office.id, broken.id, home.id])
+        #expect(snapshot.entries.map(\.name) == [office.name, broken.name, home.name])
+    }
 }
