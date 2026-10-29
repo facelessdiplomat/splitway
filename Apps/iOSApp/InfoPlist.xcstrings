@@ -1,0 +1,23 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Splitway uses the camera to scan QR codes with WireGuard configurations."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway использует камеру, чтобы сканировать QR-коды с конфигурациями WireGuard."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -3,18 +3,19 @@ import TunnelLibrary
 
 struct ImportCandidateEvaluator {
     private let existingTunnels: [Tunnel]
-    private let fallbackName: TunnelName
+    private let fallbackNames: ImportFallbackNames
     private var takenNames: [TunnelName]
 
-    init(library: TunnelLibrarySnapshot, fallbackName: TunnelName) {
+    init(library: TunnelLibrarySnapshot, fallbackNames: ImportFallbackNames) {
         existingTunnels = library.tunnels
         takenNames = library.tunnels.map(\.name) + library.unreadableRecords.map(\.name)
-        self.fallbackName = fallbackName
+        self.fallbackNames = fallbackNames
     }
 
     mutating func evaluate(_ extracted: ExtractedConfiguration) -> ImportPreviewCandidate {
         let parsingResult = WgQuickConfigurationParser.parse(extracted.text)
-        let proposedName = extracted.fileName.flatMap(TunnelName.derived(fromFileName:)) ?? fallbackName
+        let proposedName =
+            extracted.fileName.flatMap(TunnelName.derived(fromFileName:)) ?? fallbackNames.name(for: extracted.source)
         let uniqueName = UniqueTunnelNameResolver.uniqueName(for: proposedName, takenNames: takenNames)
         if parsingResult.configuration != nil {
             takenNames.append(uniqueName)

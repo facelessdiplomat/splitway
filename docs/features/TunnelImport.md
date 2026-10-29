@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Статус | в работе: импорт из файлов, архивов, буфера, перетаскиванием и через «Открыть в…» готов; сканер QR — M3-05 |
+| Статус | в работе: импорт из файлов, архивов, буфера, перетаскиванием, через «Открыть в…» и сканер QR готовы; сканирование камерой и распознавание фото проверяются на устройстве (M0-04) |
 | Платформы | shared; распознавание QR — iOS и iPadOS |
-| Задачи | M1-15, M1-16, M1-17, M3-04, M3-11 (проверка обратного импорта) |
+| Задачи | M1-15, M1-16, M1-17, M3-04, M3-05, M3-11 (проверка обратного импорта) |
 | Таргеты | `TunnelImport`, `TunnelImportInfrastructure`, `TunnelImportPresentation` |
 
 ## Назначение
@@ -16,7 +16,7 @@
 | Тип | Что | Зачем |
 |---|---|---|
 | Фичи проекта | `SharedKernel`, `TunnelConfiguration`, `TunnelLibrary`; в `Presentation` — `TunnelConfigurationPresentation`, `DesignSystemPresentation` | разбор конфигов, имена туннелей, сохранение; тексты проблем конфигурации; общие компоненты |
-| Системные фреймворки | Foundation, Vision, UIKit / AppKit, CoreTransferable, UniformTypeIdentifiers, SwiftUI | данные файлов; распознавание QR; буфер обмена; перетаскивание; типы файлов; экраны |
+| Системные фреймворки | Foundation, Vision, AVFoundation, UIKit / AppKit, CoreTransferable, UniformTypeIdentifiers, SwiftUI; на iOS — VisionKit, PhotosUI | данные файлов; распознавание QR; доступ к камере; буфер обмена; перетаскивание; типы файлов; экраны; сканер камерой; выбор фото |
 | Сторонние библиотеки | ZIPFoundation 0.9.20, MIT | чтение `.zip` (решение D-21) |
 
 ## Принцип работы
@@ -32,10 +32,10 @@ flowchart LR
   Confirm --> Library[ImportTunnelsUseCase]
 ```
 
-1. `ImportPayload` — `.text` или `.file(name:contents:)`. Файл считается архивом, если начинается с сигнатуры ZIP (`PK\3\4`, `PK\5\6`) или называется `*.zip`; иначе он декодируется как UTF-8.
+1. `ImportPayload` — `.text`, `.qrCode` или `.file(name:contents:)`. Файл считается архивом, если начинается с сигнатуры ZIP (`PK\3\4`, `PK\5\6`) или называется `*.zip`; иначе он декодируется как UTF-8.
 2. Из архива `ArchiveReader` достаёт только файлы конфигураций по правилам `ArchiveEntryPath`: расширение `.conf`; пропускаются `__MACOSX`, скрытые файлы и папки; разделители `/` и `\`. Действуют лимиты `ArchiveImportLimits.standard`: 100 конфигов и 10 МБ распакованных данных.
 3. Каждый текст разбирает `WgQuickConfigurationParser`.
-   - Имя берётся из имени файла через `TunnelName.derived(fromFileName:)`; для текста и QR — `fallbackName`, который передаёт composition root.
+   - Имя берётся из имени файла через `TunnelName.derived(fromFileName:)`. Для текста и QR имена по умолчанию передаёт composition root в `ImportFallbackNames`: «Вставленный туннель» и «Отсканированный туннель».
    - Имя делается уникальным среди туннелей библиотеки и уже принятых кандидатов того же импорта.
    - `alreadyImportedAs` называет туннель библиотеки с точно такой же конфигурацией.
 4. Источники, из которых ничего не прочитано, попадают в `ImportSourceFailure`: не текст, архив отклонён (повреждён или вне лимитов), в архиве нет конфигов.
@@ -48,6 +48,17 @@ flowchart LR
 - `TunnelImportModel` — единая точка входа: файлы из `fileImporter` и «Открыть в…», буфер обмена, перетаскивание. Каждый путь ведёт к одному `ImportPreviewModel`, который показывается листом. Пустой буфер даёт сообщение, а не пустой предпросмотр.
 - `ImportPreviewModel` строит строки `ImportPreviewRow`: имя (то, что набрал пользователь, с пробелами), итоговое имя, выбор, ошибки и предупреждения разбора, дубликат. Кнопка «Импортировать» недоступна, если ничего не выбрано или у выбранного неверное имя. После импорта модель показывает «Импортировано N из M» (M — все найденные конфигурации и нечитаемые источники) и перечитывает список.
 - Тексты проблем разбора берутся из `TunnelConfigurationPresentation` (`ConfigurationIssueLabel`).
+- **Сканер QR** (iOS и iPadOS) открывается листом из пункта «Сканировать QR-код» меню «+».
+  - `QRScannerModel` проверяет, умеет ли устройство сканировать камерой, и доступ к камере через `CameraAccess`:
+    - доступ есть — сканирует;
+    - доступ ещё не запрашивали — спрашивает;
+    - отказ — «Нет доступа к камере» с кнопкой «Открыть Настройки»;
+    - ограничение на устройстве — объяснение;
+    - сканера нет (симулятор) или камера не запустилась — «Сканирование камерой недоступно».
+  - Камера — `DataScannerViewController` из VisionKit с символикой QR. Подсказки, подсветку кода, масштаб жестом и поворот устройства ведёт сам контроллер.
+  - Первый распознанный код закрывает лист, следующие распознавания игнорируются. Предпросмотр открывается после того, как лист закрылся (`onDismiss`), поэтому два листа не мешают друг другу. Код приходит как `ImportPayload.qrCode`, источник в предпросмотре — «QR-код».
+  - «Выбрать фото» — `PhotosPicker`, ему не нужен доступ к медиатеке. Все QR-коды на фото распознаёт `VisionQRCodeDecoder`, и они вместе идут в предпросмотр. Фото без кода и нечитаемое фото дают сообщение.
+  - Описание доступа к камере (`NSCameraUsageDescription`) лежит в `Info.plist` приложения iOS, перевод — в `Apps/iOSApp/InfoPlist.xcstrings`.
 - Тип `.conf` — импортированный `com.wireguard.config`, совместимый с `public.plain-text` (`UTType.wireGuardConfiguration` из `TunnelConfigurationPresentation`, общий с экспортом). Приложения объявляют его и `public.zip-archive` в `CFBundleDocumentTypes` (`LSHandlerRank = Alternate`), iOS открывает документы на месте (`LSSupportsOpeningDocumentsInPlace`).
 
 Адаптеры:
@@ -56,12 +67,13 @@ flowchart LR
 - `VisionQRCodeDecoder` выполняет `DetectBarcodesRequest` с символикой QR и возвращает тексты без повторов.
 - `SecurityScopedFileReader` читает файлы на своей очереди GCD через `NSFileCoordinator` (файлы iCloud скачиваются), с доступом security-scoped и лимитом 10 МБ на файл (`ImportFileBatch.maximumFileByteCount`).
 - `SystemClipboard` читает текст из `UIPasteboard` или `NSPasteboard` на главном акторе.
+- `SystemCameraAccess` сообщает и запрашивает доступ к камере через `AVCaptureDevice`.
 - `DroppedImportFile` — `Transferable` для перетаскивания: читает полученный файл тем же `SecurityScopedFileReader`, пока система держит его копию.
 - `TunnelImportAssembly` собирает сценарии и адаптеры для composition root.
 
 ## Публичный API
 
-`ImportPayload`, `ImportSource`, `ImportPreview`, `ImportPreviewCandidate`, `ImportSelection`, `ImportSourceFailure`, `ImportSourceFailureReason`, `ImportFileBatch`, `PrepareImportUseCase`, `ConfirmImportUseCase`; порты `ImportFileReader`, `ClipboardTextSource`; архивы — `ArchiveReader`, `ArchiveReadingError`, `ArchivedConfigurationFile`, `ArchiveEntryPath`, `ArchiveImportLimits`, `ZIPArchiveReader`; QR — `QRCodeDecoder`, `QRCodeDecodingError`, `VisionQRCodeDecoder`; адаптеры `SecurityScopedFileReader`, `SystemClipboard`, `DroppedImportFile`, сборка `TunnelImportAssembly`; экраны — `TunnelImportModel`, `TunnelImportActions`, `TunnelImportAlert`, `ImportPreviewModel`, `ImportPreviewRow`, `ImportSummary`, модификатор `tunnelImport(_:)`.
+`ImportPayload`, `ImportSource`, `ImportFallbackNames`, `ImportPreview`, `ImportPreviewCandidate`, `ImportSelection`, `ImportSourceFailure`, `ImportSourceFailureReason`, `ImportFileBatch`, `PrepareImportUseCase`, `ConfirmImportUseCase`; порты `ImportFileReader`, `ClipboardTextSource`, `CameraAccess` (`CameraAuthorization`); архивы — `ArchiveReader`, `ArchiveReadingError`, `ArchivedConfigurationFile`, `ArchiveEntryPath`, `ArchiveImportLimits`, `ZIPArchiveReader`; QR — `QRCodeDecoder`, `QRCodeDecodingError`, `VisionQRCodeDecoder`; адаптеры `SecurityScopedFileReader`, `SystemClipboard`, `SystemCameraAccess`, `DroppedImportFile`, сборка `TunnelImportAssembly`; экраны — `TunnelImportModel`, `TunnelImportActions`, `TunnelImportAlert`, `ImportPreviewModel`, `ImportPreviewRow`, `ImportSummary`, `QRScannerModel`, `QRScannerState`, `QRPhotoProblem`, модификатор `tunnelImport(_:)`.
 
 ## Решения
 
@@ -78,7 +90,10 @@ flowchart LR
 | Текст декодируется только как UTF-8 | Автоопределение UTF-16 и однобайтовых кодировок | Клиенты WireGuard пишут UTF-8, BOM обрабатывает парсер | Если придут конфиги в UTF-16 |
 | Дубликат — полное равенство конфигурации | Сравнение по публичным ключам | Те же ключи при других `AllowedIPs` — уже другой туннель | Если импортом захотят обновлять туннель |
 | QR через Vision; тесты на macOS, а не на симуляторе | `CIDetector`, который работает и в симуляторе | Vision лучше распознаёт фото. В симуляторе iOS Vision не создаёт детектор штрихкодов (`operationFailed`, ревизия 4 требует аппаратного ускорения) | Если симулятор начнёт поддерживать детектор |
-| Имя для текста и QR — `fallbackName` от composition root | Хост из `Endpoint`; строка в Core | Core не содержит локализованных строк | Нет |
+| Имена по умолчанию для текста и QR — `ImportFallbackNames` от composition root | Хост из `Endpoint`; строка в Core; одно имя для обоих источников | Core не содержит локализованных строк; «Вставленный туннель» для отсканированного кода сбивал бы с толку | Нет |
+| Камера — `DataScannerViewController` из VisionKit, а не `AVCaptureMetadataOutput` из плана M3-05 | Своя `AVCaptureSession` с `AVCaptureMetadataOutput` и слоем предпросмотра | `AVCaptureSession` не `Sendable`: общей сессии очереди захвата и слоя предпросмотра нужны `@unchecked Sendable` или `nonisolated(unsafe)`, которые правила запрещают. `DataScannerViewController` работает на главном акторе и сам ведёт камеру, предпросмотр, поворот и подсказки; его поддерживают все устройства с iOS 26 | Если понадобится управление камерой, которого нет в VisionKit |
+| Первый код закрывает сканер, остальные игнорируются | Собирать все коды, пока сканер открыт | Сканер держит в кадре один код (`recognizesMultipleItems = false`); несколько туннелей удобнее импортировать фото или архивом | Нет |
+| Посторонний QR-код тоже открывает предпросмотр с ошибкой | Подсказка в сканере и продолжение поиска | Предпросмотр одинаково объясняет ошибку разбора для любого источника | Если пользователи часто будут сканировать посторонние коды |
 | `ZIPArchiveReader` и `ZIPArchiveWriter` вместо `ZIPFoundationArchive…` из плана | Имена по библиотеке | Имя описывает формат, а не реализацию | Нет |
 | Дубликаты библиотеки по умолчанию не выбраны | Выбирать всё разобранное | Повторный импорт того же архива не должен молча удваивать туннели; пользователь может выбрать дубликат сам | Нет |
 | Буфер читается кодом по пункту меню, iOS спрашивает разрешение на вставку | `PasteButton` без запроса | `PasteButton` нельзя поместить в меню «+» и в пустое состояние вместе с другими способами | Если появится вставка без запроса в меню |
@@ -95,14 +110,14 @@ flowchart LR
 - В симуляторе проверены вставка из буфера с переименованием и предупреждением и открытие выбора файлов. Выбор файла, перетаскивание между приложениями на iPad и «Открыть в…» проверяются на устройстве; приложение macOS собирается, но без подписи не запускается (M0-04).
 - Два одинаковых кандидата в одном импорте не помечаются дубликатами друг друга, они получают имена «X» и «X 2».
 - Зашифрованные записи ZIP отклоняются как нечитаемые.
-- Распознавание фото с QR на устройстве проверяется вручную в M3-05.
+- Сканирование камерой и распознавание фото проверяются на устройстве: в симуляторе нет сканера камеры, а Vision не создаёт детектор штрихкодов. В симуляторе проверены пункт меню, лист сканера, состояние «Сканирование камерой недоступно», выбор фото и сообщение о нечитаемом фото.
 - Настоящего архива официального клиента в фикстурах нет. Совместимость покрыта синтетическими архивами и архивом Finder (`ditto -c -k --sequesterRsrc`) с дескрипторами данных, `__MACOSX` и `.DS_Store`.
 
 ## Тесты
 
-- 22 теста в `TunnelImportTests`:
+- 23 теста в `TunnelImportTests`:
   - правила путей в архиве;
-  - текст из буфера с лишними пробелами, файл без расширения;
+  - текст из буфера с лишними пробелами, QR-код (источник и имя по умолчанию), файл без расширения;
   - архив со смесью валидных и невалидных конфигов, повторный импорт;
   - конфликт имён внутри импорта;
   - файл не текст и не архив, архив сверх лимитов, архив без конфигов, `*.zip` без сигнатуры;
@@ -114,7 +129,11 @@ flowchart LR
   - 6 для `VisionQRCodeDecoder` на изображениях, которые генерирует CoreImage: один QR, два QR, один QR дважды, без QR, поворот на 30°, данные, которые не являются изображением;
   - 3 для `SecurityScopedFileReader` во временной папке: чтение под именем файла, нет файла, файл больше лимита;
   - архив, который выдал экспорт библиотеки (`ZIPArchiveWriter`), импортируется обратно с теми же конфигурациями и именами.
-- 11 тестов в `TunnelImportPresentationTests`: «Импортировать» недоступна без выбора и с неверным именем, итоговые имена, переименование с пробелами, итог «2 из 3» и перечитывание списка; файлы, нечитаемые файлы, буфер, пустой буфер, перетаскивание и выбор файлов ведут к одному предпросмотру.
+- 20 тестов в `TunnelImportPresentationTests`:
+  - «Импортировать» недоступна без выбора и с неверным именем, итоговые имена, переименование с пробелами, итог «2 из 3» и перечитывание списка;
+  - файлы, нечитаемые файлы, буфер, пустой буфер, перетаскивание и выбор файлов ведут к одному предпросмотру;
+  - сканер: доступ к камере (есть, запрошен и дан, запрошен и не дан, отказ, ограничение), нет сканера, отказ камеры, код только один раз, все коды фото, фото без кода, нечитаемое фото;
+  - предпросмотр кода после закрытия сканера и ничего при закрытии без кода.
 
 Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelImport`.
 
@@ -126,3 +145,4 @@ flowchart LR
 | 2026-10-29 | Предпросмотр и подтверждение импорта | M1-16 |
 | 2026-10-29 | `VisionQRCodeDecoder` | M1-17 |
 | 2026-10-29 | Экраны импорта, выбор кандидатов, чтение файлов, буфер, перетаскивание, типы документов | M3-04 |
+| 2026-10-29 | Сканер QR камерой и с фото, доступ к камере, `ImportPayload.qrCode`, `ImportFallbackNames` | M3-05 |

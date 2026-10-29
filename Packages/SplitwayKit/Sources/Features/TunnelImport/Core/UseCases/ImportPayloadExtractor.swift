@@ -12,7 +12,9 @@ struct ImportPayloadExtractor: Sendable {
         for payload in payloads {
             switch payload {
             case .text(let text):
-                extraction.addText(text)
+                extraction.addText(text, from: .text)
+            case .qrCode(let text):
+                extraction.addText(text, from: .qrCode)
             case .file(let name, let contents):
                 extractFile(named: name, contents: contents, into: &extraction)
             }

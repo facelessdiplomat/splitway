@@ -43,6 +43,32 @@ struct TunnelImportModelTests {
     }
 
     @Test
+    func previewsAScannedCodeOnceTheScannerHasClosed() async throws {
+        let model = try ImportTestFlow().model()
+        model.scanQRCode()
+        let scanner = try #require(model.qrScanner)
+        await scanner.prepare(isCameraScanningSupported: true)
+
+        scanner.recognize(WgQuickFixtures.minimal)
+
+        #expect(model.qrScanner == nil)
+        #expect(model.preview == nil)
+        await model.previewScannedCodes()
+        #expect(model.preview?.rows.map(\.name) == [ImportTestFlow.scannedName])
+    }
+
+    @Test
+    func showsNothingWhenTheScannerClosesWithoutACode() async throws {
+        let model = try ImportTestFlow().model()
+        model.scanQRCode()
+
+        model.qrScanner = nil
+        await model.previewScannedCodes()
+
+        #expect(model.preview == nil)
+    }
+
+    @Test
     func previewsDroppedFiles() async throws {
         let model = try ImportTestFlow().model()
 

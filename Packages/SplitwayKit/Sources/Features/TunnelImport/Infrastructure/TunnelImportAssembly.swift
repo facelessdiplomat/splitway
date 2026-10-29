@@ -22,12 +22,20 @@ public struct TunnelImportAssembly: Sendable {
         SystemClipboard()
     }
 
-    public func prepareImport(fallbackName: TunnelName) -> PrepareImportUseCase {
+    public var cameraAccess: SystemCameraAccess {
+        SystemCameraAccess()
+    }
+
+    public var qrCodeDecoder: VisionQRCodeDecoder {
+        VisionQRCodeDecoder()
+    }
+
+    public func prepareImport(fallbackNames: ImportFallbackNames) -> PrepareImportUseCase {
         PrepareImportUseCase(
             records: records,
             secrets: secrets,
             archiveReader: ZIPArchiveReader(),
-            fallbackName: fallbackName
+            fallbackNames: fallbackNames
         )
     }
 }

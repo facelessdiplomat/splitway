@@ -9,12 +9,17 @@ public final class TunnelImportModel {
     public var preview: ImportPreviewModel?
     public var isPickingFiles = false
     public private(set) var alert: TunnelImportAlert?
+    public var qrScanner: QRScannerModel?
+    private var scannedTexts: [String] = []
 
     private let actions: TunnelImportActions
     private let didImport: @MainActor () async -> Void
 
-    public static var pastedTunnelName: TunnelName {
-        (try? TunnelName(String(localized: "Pasted tunnel", bundle: .module))) ?? .untitled
+    public static var fallbackNames: ImportFallbackNames {
+        ImportFallbackNames(
+            pastedText: (try? TunnelName(String(localized: "Pasted tunnel", bundle: .module))) ?? .untitled,
+            scannedCode: (try? TunnelName(String(localized: "Scanned tunnel", bundle: .module))) ?? .untitled
+        )
     }
 
     public init(actions: TunnelImportActions, didImport: @escaping @MainActor () async -> Void) {
@@ -44,8 +49,29 @@ public final class TunnelImportModel {
         await showPreview(of: payloads)
     }
 
+    public func scanQRCode() {
+        qrScanner = QRScannerModel(
+            cameraAccess: actions.cameraAccess,
+            decoder: actions.qrCodeDecoder
+        ) { [weak self] texts in
+            self?.finishScanning(with: texts)
+        }
+    }
+
+    public func previewScannedCodes() async {
+        let texts = scannedTexts
+        scannedTexts = []
+        guard !texts.isEmpty else { return }
+        await showPreview(of: texts.map(ImportPayload.qrCode))
+    }
+
     public func dismissAlert() {
         alert = nil
+    }
+
+    private func finishScanning(with texts: [String]) {
+        scannedTexts = texts
+        qrScanner = nil
     }
 
     private func showPreview(of payloads: [ImportPayload], unreadableFileNames: [String] = []) async {
