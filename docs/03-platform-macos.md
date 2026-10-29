@@ -67,7 +67,7 @@ notInstalled → activationRequested → awaitingUserApproval → activated
 - Дескриптор `utun` находится перебором открытых дескрипторов с проверкой `UTUN_OPT_IFNAME` — тот же подход, что в WireGuardKit. Затем `tc_fd_tunnel_start`.
 - Endpoint резолвится в Swift через `getaddrinfo` (с поддержкой NAT64/DNS64) до передачи в Go. При смене сети (`NWPathMonitor`) — повторный резолвинг и `tc_tunnel_bump_sockets`.
 - Сон и пробуждение (`sleep`/`wake` у `NEProvider`) — пересоздание сокетов после пробуждения.
-- «Исключить локальные сети» — пересчёт `AllowedIPs` в домене (`AllowedIPsCalculator`).
+- «Исключить локальные сети» — пересчёт `AllowedIPs` в домене (`PrivateNetworkExclusion`).
 - Kill switch (`includeAllNetworks`) — в бэклоге: у этой опции много системных побочных эффектов.
 
 ## 5. Секреты в системном расширении
