@@ -208,7 +208,9 @@ let features: [FeatureModule] = [
     FeatureModule(
         "Diagnostics",
         layers: [.core, .infrastructure, .presentation],
+        infrastructureDependencies: [zipFoundation],
         presentationDependencies: ["DesignSystemPresentation"],
+        infrastructureTestDependencies: [zipFoundation],
         providesTestSupport: true
     ),
     FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),

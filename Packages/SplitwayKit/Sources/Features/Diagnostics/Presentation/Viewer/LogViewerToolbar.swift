@@ -27,6 +27,17 @@ struct LogViewerToolbar: ToolbarContent {
             .disabled(model.isLogEmpty)
         }
         ToolbarItem(placement: .secondaryAction) {
+            Button {
+                model.showCrashReport()
+            } label: {
+                Label {
+                    Text("Send Report…", bundle: .module)
+                } icon: {
+                    Image(systemName: "paperplane")
+                }
+            }
+        }
+        ToolbarItem(placement: .secondaryAction) {
             Button(role: .destructive) {
                 confirmClearing()
             } label: {

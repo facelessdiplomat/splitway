@@ -83,4 +83,15 @@ final class AccessibilityAuditTests: XCTestCase {
         application.waitForText("Splitway 0.1.0 started")
         try application.auditAccessibility(ofSheet: true)
     }
+
+    @MainActor
+    func testCrashReportPassesTheAccessibilityAudit() throws {
+        let application = SplitwayLaunch.application()
+
+        application.openMoreMenu(item: "Log")
+        application.waitForText("Splitway 0.1.0 started")
+        application.tapSecondaryAction("Send Report…", inNavigationBar: "Log")
+        application.waitForButton("Share Report")
+        try application.auditAccessibility(ofSheet: true)
+    }
 }

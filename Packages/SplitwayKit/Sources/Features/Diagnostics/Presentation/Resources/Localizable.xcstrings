@@ -31,6 +31,16 @@
         }
       }
     },
+    "Archive contents" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Состав архива"
+          }
+        }
+      }
+    },
     "Change the filter or the search text." : {
       "localizations" : {
         "ru" : {
@@ -161,6 +171,16 @@
         }
       }
     },
+    "No log entries or crash reports have been recorded yet." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записей журнала и отчётов о сбоях пока нет."
+          }
+        }
+      }
+    },
     "No matching entries" : {
       "localizations" : {
         "ru" : {
@@ -177,6 +197,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Send Report" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправить отчёт"
+          }
+        }
+      }
+    },
+    "Send Report…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправить отчёт…"
+          }
+        }
+      }
+    },
+    "Share Report" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поделиться отчётом"
           }
         }
       }
@@ -201,6 +251,26 @@
         }
       }
     },
+    "Splitway Report" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отчёт Splitway"
+          }
+        }
+      }
+    },
+    "Splitway never sends reports by itself. Keys are removed from the log and the crash reports." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway никогда не отправляет отчёты сам. Ключи удалены из журнала и отчётов о сбоях."
+          }
+        }
+      }
+    },
     "The log file couldn’t be read or written." : {
       "localizations" : {
         "ru" : {
@@ -217,6 +287,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Журнал недоступен"
+          }
+        }
+      }
+    },
+    "The log or the crash reports couldn’t be read." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать журнал или отчёты о сбоях."
+          }
+        }
+      }
+    },
+    "The oldest entries were left out to keep the archive small." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Самые старые записи не вошли, чтобы архив остался небольшим."
+          }
+        }
+      }
+    },
+    "The report couldn’t be prepared" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подготовить отчёт"
           }
         }
       }

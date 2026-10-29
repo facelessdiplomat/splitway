@@ -1,3 +1,4 @@
+import Diagnostics
 import DiagnosticsInfrastructure
 import DiagnosticsPresentation
 import OnboardingInfrastructure
@@ -36,6 +37,7 @@ struct AppComposition {
     let logViewer: LogViewerPresenter
     let settings: SettingsPresenter
     let onboarding: OnboardingModel
+    let reportCollector: MetricKitReportCollector
 
     init(configuration: AppConfiguration) {
         let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
@@ -51,7 +53,9 @@ struct AppComposition {
             logDirectory: configuration.logDirectory,
             subsystem: configuration.logSubsystem
         )
-        logViewer = Self.logViewer(diagnostics: diagnostics)
+        logViewer = Self.logViewer(diagnostics: diagnostics, configuration: configuration)
+        reportCollector = diagnostics.reportCollector
+        reportCollector.start()
         onboarding = Self.onboarding(configuration: configuration)
         settings = Self.settings(
             version: AppVersion(marketingVersion: configuration.version, build: configuration.build))
@@ -79,13 +83,21 @@ struct AppComposition {
         }
     }
 
-    private static func logViewer(diagnostics: DiagnosticsAssembly) -> LogViewerPresenter {
+    private static func logViewer(diagnostics: DiagnosticsAssembly, configuration: AppConfiguration)
+        -> LogViewerPresenter
+    {
         LogViewerPresenter(
             model: LogViewerModel(
                 actions: LogViewerActions(
                     loadEntries: diagnostics.loadLogEntries,
                     clearLog: diagnostics.clearLog,
-                    exportLog: diagnostics.exportLog
+                    exportLog: diagnostics.exportLog,
+                    prepareCrashReport: diagnostics.prepareCrashReport(
+                        environment: CrashReportEnvironment(
+                            application: "Splitway \(configuration.version) (\(configuration.build))",
+                            system: configuration.systemDescription
+                        )
+                    )
                 )
             )
         )
