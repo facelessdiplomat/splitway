@@ -34,8 +34,9 @@
   - тексты лицензий `.txt`, взятые из самих зависимостей.
 - `BundledThirdPartyNoticeSource` читает их на своей очереди, а не на главном потоке или кооперативном пуле. `LoadThirdPartyNoticesUseCase` сортирует записи по названию без учёта регистра.
 - Состав сейчас:
-  - Go: стандартная библиотека и рантайм, `golang.org/x/crypto`, `golang.org/x/net`, `golang.org/x/sys`; BSD-3-Clause;
+  - Go: стандартная библиотека и рантайм, `golang.org/x/crypto`, `golang.org/x/net`, `golang.org/x/sys`, `golang.org/x/time`; BSD-3-Clause;
   - wireguard-go (MIT);
+  - gVisor (Apache-2.0) и его зависимость btree (Apache-2.0) — стек netstack для `usernet`;
   - ZIPFoundation (MIT);
   - WireGuardKit (MIT): поиск дескриптора `utun` в `UtunDescriptorLocator` повторяет подход `WireGuardAdapter` из WireGuardKit.
 
@@ -52,7 +53,7 @@
 ## Решения
 
 - Список лицензий — данные (манифест и тексты), а не код: добавить запись можно без изменения Swift, а тест проверяет данные такими, какими они попадут в приложение.
-- Тексты лицензий копируются из самих зависимостей: из кэша модулей Go, установки Go и исходников ZIPFoundation. У wireguard-go в файле лицензии нет строки копирайта, поэтому она взята из заголовков его исходников. Текст WireGuardKit взят из файла `COPYING` репозитория wireguard-apple.
+- Тексты лицензий копируются из самих зависимостей: из кэша модулей Go, установки Go и исходников ZIPFoundation. У wireguard-go, gVisor и btree в файле лицензии нет строки копирайта, поэтому она взята из заголовков их исходников. Текст WireGuardKit взят из файла `COPYING` репозитория wireguard-apple.
 - Одна запись «Go» покрывает стандартную библиотеку и модули `golang.org/x`: у них один и тот же текст лицензии.
 - Тест ищет зависимости в `Packages/SplitwayKit/Package.resolved`, `Packages/TunnelCore/Package.resolved`, `Packages/TunnelCore/go/go.mod` (включая директиву `go`, то есть стандартную библиотеку) и в удалённых пакетах `project.yml`. Утилиты из `Scripts` в приложение не попадают и не проверяются.
 - Зависимости, которых нет в собранном приложении, перечислены в тесте явно: `go.uber.org/goleak` нужен только тестам, а `golang.zx2c4.com/wintun` — только Windows.
@@ -94,3 +95,4 @@
 | Дата | Изменение | Задача |
 |---|---|---|
 | 2026-10-29 | Экран настроек, «О приложении», лицензии открытого ПО с проверкой полноты | M3-13 |
+| 2026-10-30 | Лицензии gVisor, btree и `golang.org/x/time` для `usernet` | M4-05 |

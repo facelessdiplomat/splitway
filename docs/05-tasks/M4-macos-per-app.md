@@ -8,7 +8,7 @@
 - [x] M4-02 Каталог приложений (Core)
 - [x] M4-03 Сканирование и подписи (Infrastructure)
 - [ ] M4-04 Экран выбора приложений
-- [ ] M4-05 `usernet`: WireGuard поверх gVisor netstack
+- [ ] M4-05 `usernet`: WireGuard поверх gVisor netstack — пакет и тесты готовы, сравнение бенчмарка с SP-3 — после спайка
 - [ ] M4-06 Мост и адаптер `UserspaceNetworkEngine`
 - [x] M4-07 Политики ретрансляции (Core)
 - [x] M4-08 План сетевых правил прокси (Core)
