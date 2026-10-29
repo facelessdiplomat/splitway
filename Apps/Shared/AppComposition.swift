@@ -13,6 +13,7 @@ struct AppComposition {
     let statistics: TunnelStatisticsPolling
     let tunnelImport: TunnelImportModel
     let tunnelEditor: TunnelEditorFlow
+    let tunnelExport: TunnelExportModel
 
     init(configuration: AppConfiguration) {
         let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
@@ -23,6 +24,7 @@ struct AppComposition {
         let tunnelList = Self.tunnelList(library: library, connection: connection)
         self.tunnelList = tunnelList
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
+        tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels)
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
         tunnelEditor = Self.tunnelEditor(
             library: library,

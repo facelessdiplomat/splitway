@@ -170,7 +170,8 @@ let features: [FeatureModule] = [
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
         infrastructureDependencies: [zipFoundation],
         presentationDependencies: [
-            "TunnelConnection", "TunnelConnectionPresentation", "AppRoutingPresentation", "DesignSystemPresentation",
+            "TunnelConnection", "TunnelConnectionPresentation", "TunnelConfigurationPresentation",
+            "AppRoutingPresentation", "DesignSystemPresentation",
         ],
         testDependencies: ["TunnelConfigurationTestSupport"],
         infrastructureTestDependencies: [zipFoundation],
@@ -184,7 +185,7 @@ let features: [FeatureModule] = [
         infrastructureDependencies: [zipFoundation],
         presentationDependencies: ["TunnelConfigurationPresentation", "DesignSystemPresentation"],
         testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"],
-        infrastructureTestDependencies: [zipFoundation]
+        infrastructureTestDependencies: [zipFoundation, "TunnelLibraryInfrastructure"]
     ),
     FeatureModule(
         "TunnelEditor",

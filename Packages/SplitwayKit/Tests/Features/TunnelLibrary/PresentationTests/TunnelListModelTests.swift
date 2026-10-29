@@ -36,6 +36,7 @@ struct TunnelListModelTests {
         #expect(environment.model.rows.map(\.status) == [.unavailable])
         #expect(environment.model.rows.first?.canToggleConnection == false)
         #expect(environment.model.rows.first?.canDuplicate == false)
+        #expect(environment.model.rows.first?.canExport == false)
     }
 
     @Test

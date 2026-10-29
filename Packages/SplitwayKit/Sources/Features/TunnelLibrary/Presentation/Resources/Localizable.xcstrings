@@ -121,6 +121,16 @@
         }
       }
     },
+    "Couldn’t export" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось экспортировать"
+          }
+        }
+      }
+    },
     "Couldn’t update tunnels" : {
       "localizations" : {
         "ru" : {
@@ -217,6 +227,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Конечная точка"
+          }
+        }
+      }
+    },
+    "Export" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспортировать"
+          }
+        }
+      }
+    },
+    "Export All Tunnels" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспортировать все туннели"
+          }
+        }
+      }
+    },
+    "Export private keys?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспортировать приватные ключи?"
+          }
+        }
+      }
+    },
+    "Export…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Экспортировать…"
           }
         }
       }
@@ -381,6 +431,26 @@
         }
       }
     },
+    "Some tunnels weren’t exported" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не все туннели экспортированы"
+          }
+        }
+      }
+    },
+    "Splitway Tunnels" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннели Splitway"
+          }
+        }
+      }
+    },
     "Statistics are unavailable right now." : {
       "localizations" : {
         "ru" : {
@@ -411,6 +481,16 @@
         }
       }
     },
+    "The configuration of %@ couldn’t be read, so it isn’t in the archive." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать конфигурацию: %@. Этих туннелей нет в архиве."
+          }
+        }
+      }
+    },
     "The connected tunnel couldn’t be disconnected." : {
       "localizations" : {
         "ru" : {
@@ -431,6 +511,16 @@
         }
       }
     },
+    "The exported file contains private keys. Anyone who gets it can connect as you. Keep it safe." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В экспортированном файле есть приватные ключи. Любой, у кого он окажется, сможет подключаться от вашего имени. Храните его в надёжном месте."
+          }
+        }
+      }
+    },
     "The tunnel configuration and keys will be removed from this device." : {
       "localizations" : {
         "ru" : {
@@ -447,6 +537,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Конфигурацию туннеля не удаётся прочитать."
+          }
+        }
+      }
+    },
+    "The tunnel configuration couldn’t be read. Try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать конфигурацию туннеля. Попробуйте ещё раз."
           }
         }
       }

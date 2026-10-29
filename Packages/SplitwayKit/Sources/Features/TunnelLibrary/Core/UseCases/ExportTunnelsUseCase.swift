@@ -20,18 +20,22 @@ public struct ExportTunnelsUseCase: Sendable {
         )
     }
 
-    public func exportAll() async throws(TunnelLibraryError) -> Data {
-        let records = try await persistence.records.loadRecords()
-        let fileNames = ExportFileNaming.uniqueFileNames(for: records.map(\.name))
-        var files: [ExportedConfigurationFile] = []
-        for (record, fileName) in zip(records, fileNames) {
-            files.append(
-                ExportedConfigurationFile(
-                    fileName: fileName, contents: try await persistence.configurationText(for: record.id))
-            )
+    public func exportAll() async throws(TunnelLibraryError) -> ExportedArchive {
+        var readableTunnels: [(name: TunnelName, text: String)] = []
+        var skippedTunnels: [TunnelName] = []
+        for record in try await persistence.records.loadRecords() {
+            do {
+                readableTunnels.append((record.name, try await persistence.configurationText(for: record.id)))
+            } catch .storage(.missingConfiguration), .storage(.corruptedData) {
+                skippedTunnels.append(record.name)
+            }
+        }
+        let fileNames = ExportFileNaming.uniqueFileNames(for: readableTunnels.map(\.name))
+        let files = zip(readableTunnels, fileNames).map { tunnel, fileName in
+            ExportedConfigurationFile(fileName: fileName, contents: tunnel.text)
         }
         do {
-            return try archiveWriter.archive(files)
+            return ExportedArchive(contents: try archiveWriter.archive(files), skippedTunnels: skippedTunnels)
         } catch {
             throw .archiveFailed
         }

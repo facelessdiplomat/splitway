@@ -6,28 +6,32 @@ public struct TunnelLibraryRootView: View {
     private let statistics: TunnelStatisticsPolling
     private let addition: TunnelAdditionOptions
     private let editTunnel: @MainActor (Tunnel) -> Void
+    private let export: TunnelExportModel
     @State private var selection: TunnelIdentifier?
 
     public init(
         model: TunnelListModel,
         statistics: TunnelStatisticsPolling,
         addition: TunnelAdditionOptions,
+        export: TunnelExportModel,
         editTunnel: @escaping @MainActor (Tunnel) -> Void
     ) {
         self.model = model
         self.statistics = statistics
         self.addition = addition
         self.editTunnel = editTunnel
+        self.export = export
     }
 
     public var body: some View {
         NavigationSplitView {
-            TunnelListView(model: model, selection: $selection, addition: addition)
+            TunnelListView(model: model, selection: $selection, addition: addition, export: export)
         } detail: {
             detail
         }
         .modifier(TunnelListAlertPresentation(model: model, editTunnel: editTunnel))
         .modifier(SystemPromptExplanation(model: model))
+        .modifier(TunnelExportPresenter(model: export))
         .task { await model.load() }
         .task { await model.observeConnection() }
     }
