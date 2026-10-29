@@ -4,7 +4,6 @@ import TunnelEngine
 
 public actor PacketTunnelSession {
     private let engine: any WireGuardDeviceEngine
-    private let settingsApplier: any TunnelNetworkSettingsApplier
     private let interfaceLocator: any TunnelInterfaceLocator
     private let endpointResolver: any EndpointResolver
     private let pathMonitor: any NetworkPathMonitor
@@ -15,38 +14,41 @@ public actor PacketTunnelSession {
 
     public init(
         engine: any WireGuardDeviceEngine,
-        settingsApplier: any TunnelNetworkSettingsApplier,
         interfaceLocator: any TunnelInterfaceLocator,
         endpointResolver: any EndpointResolver,
         pathMonitor: any NetworkPathMonitor
     ) {
         self.engine = engine
-        self.settingsApplier = settingsApplier
         self.interfaceLocator = interfaceLocator
         self.endpointResolver = endpointResolver
         self.pathMonitor = pathMonitor
     }
 
-    public func start(configuration: TunnelConfiguration, routedBy policy: RoutingPolicy)
-        async throws(PacketTunnelError)
-    {
+    public var isRunning: Bool {
+        device != nil
+    }
+
+    public func prepareStart(
+        configuration: TunnelConfiguration,
+        routedBy policy: RoutingPolicy
+    ) async throws(PacketTunnelError) -> PreparedTunnelStart {
         let plan = try Self.networkPlan(for: configuration, routedBy: policy)
         let endpoints = try await resolvedEndpoints(of: configuration)
         try throwIfStopRequested()
-        do {
-            try await settingsApplier.apply(plan)
-        } catch {
-            throw .networkSettingsRejected
-        }
+        return PreparedTunnelStart(networkPlan: plan, configuration: configuration, endpoints: endpoints)
+    }
+
+    public func completeStart(_ preparedStart: PreparedTunnelStart) throws(PacketTunnelError) {
         try throwIfStopRequested()
         guard let descriptor = interfaceLocator.tunnelFileDescriptor() else { throw .tunnelInterfaceUnavailable }
-        let uapi = UAPIConfigurationEncoder.encode(configuration, resolvedEndpoints: endpoints)
+        let uapi = UAPIConfigurationEncoder.encode(
+            preparedStart.configuration, resolvedEndpoints: preparedStart.endpoints)
         do {
             device = try engine.startDevice(tunnelFileDescriptor: descriptor, configuration: uapi)
         } catch {
             throw .engineFailed(error)
         }
-        self.configuration = configuration
+        configuration = preparedStart.configuration
         observePathChanges()
     }
 

@@ -11,12 +11,12 @@
 - [x] M2-05 План сетевых настроек
 - [x] M2-06 Инфраструктура пакетного туннеля
 - [x] M2-07 Протокол сообщений «приложение ↔ расширение»
-- [ ] M2-08 Сборка расширений
+- [ ] M2-08 Сборка расширений — расширение iOS готово, macOS — вместе с M2-12, проверка на устройствах ждёт M0-04
 - [x] M2-09 Домен и сценарии подключения
 - [ ] M2-10 Системный слот пакетного туннеля — код и тесты готовы, проверка на устройстве ждёт M0-04
 - [ ] M2-11 Установка системного расширения — код и тесты готовы, установка ждёт подписи Developer ID (M0-04)
 - [ ] M2-12 Передача секретов в системное расширение
-- [ ] M2-13 Журнал в расширении и движке
+- [ ] M2-13 Журнал в расширении и движке — подключён в расширении iOS, проверка на устройстве ждёт M0-04
 - [ ] M2-14 Сквозная проверка «Весь трафик»
 - [ ] M2-15 Документы фич M2
 
@@ -78,9 +78,9 @@
 ### M2-08. Сборка расширений
 `iOS+iPadOS`, `macOS` · M · зависит от: M1-13, M1-14, M2-06, M2-07
 
-**Сделать:** composition root в `Apps/PacketTunnelExtension` и `Apps/NetworkSystemExtension` (`PacketTunnelProvider`): чтение id активного туннеля из `providerConfiguration`, загрузка конфига (iOS — Keychain; macOS — хранилище из M2-12), запуск сессии, обработка сообщений, `cancelTunnelWithError` с доменной ошибкой и запись последней ошибки в App Group.
-**Тесты сначала:** не требуются (связывание без логики; логика покрыта в M2-06 и M2-07).
-**Готово, когда:** тестовый туннель поднимается на iPhone и macOS через временную отладочную кнопку.
+**Сделать:** composition root расширения iOS (`Apps/PacketTunnelExtension`): `PacketTunnelComposition` собирает `PacketTunnelSession` (`TunnelCoreWireGuardEngine`, `UtunDescriptorLocator`, `SystemEndpointResolver`, `NetworkPathObserver`), `LoadActiveTunnelUseCase` над `KeychainTunnelSecretStore` и `ProviderMessageDispatcher` с `PacketTunnelMessageHandler`. Провайдер только делегирует: загрузить активный туннель из `providerConfiguration` → `prepareStart` → `setTunnelNetworkSettings` → `completeStart`. Настройки применяет сам провайдер, а не сессия: `NEPacketTunnelProvider` не `Sendable` и не может перейти в другой домен изоляции без `@unchecked`. Ошибки старта → `cancelTunnelWithError` с `TunnelStopReason`; сообщения приложения — через диспетчер; `wake` → `bumpSockets`. Последнюю ошибку приложение получает через `fetchLastDisconnectError` (минимальная ОС 26), поэтому файл ошибки в App Group не нужен. Сборка для симулятора — только arm64 (`EXCLUDED_ARCHS` для x86_64: Xcode 27 работает только на Apple silicon). Расширение macOS (`Apps/NetworkSystemExtension`) подключается вместе с M2-12: системное расширение работает от root и не видит Keychain пользователя.
+**Тесты сначала:** связывание без логики не тестируется; вынесенная логика покрыта: `LoadActiveTunnelUseCase` (загрузка, слот без туннеля, нет секрета, конфиг не разбирается), `TunnelStopReason(packetTunnelError:)`, `PacketTunnelMessageHandler` (статистика, здоровье, политика), разделённый старт сессии (остановка между шагами).
+**Готово, когда:** тестовый туннель поднимается на iPhone и macOS через временную отладочную кнопку — ждёт подписи (M0-04) и M2-12.
 
 ## TunnelConnection
 
@@ -119,9 +119,9 @@
 ### M2-13. Журнал в расширении и движке
 `shared` · S · зависит от: M1-18, M2-04
 
-**Сделать:** подключить `LogRecorder` с `RotatingFileLogStore` (директория в App Group) и `OSLogWriter` в расширениях; логи wireguard-go проходят маскирование до записи.
-**Тесты сначала:** тест, что строка лога движка с ключом записывается замаскированной.
-**Готово, когда:** журнал расширения виден в файле App Group и в Console.app, ключей в нём нет.
+**Сделать:** в расширении iOS `LogRecorder` расширения и движка пишут в `RotatingFileLogStore` в контейнере App Group (`Library/Logs/Splitway`; идентификатор группы — ключ `SplitwayAppGroupIdentifier` в Info.plist) и в `OSLogWriter`. Логи wireguard-go приходят через `TunnelCoreLogRouting` и маскируются в `LogEntry` до записи. Расширение macOS — вместе с M2-12.
+**Тесты сначала:** строка движка с hex-ключом сохраняется как `private_key=[redacted]` с источником `engine`; ошибки движка сохраняются с уровнем `error`.
+**Готово, когда:** журнал расширения виден в файле App Group и в Console.app, ключей в нём нет — проверка на устройстве ждёт M0-04.
 
 ### M2-14. Сквозная проверка «Весь трафик»
 `iOS+iPadOS`, `macOS` · M · зависит от: M2-08, M2-10, M2-12
