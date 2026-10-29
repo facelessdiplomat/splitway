@@ -111,7 +111,7 @@ flowchart LR
 
 | Фича | Ответственность | Платформы | Используется в расширении |
 |---|---|---|---|
-| `SharedKernel` | `IPAddress`, `IPNetwork` (CIDR), `Port`, `DomainName`, `ByteCount`, `WallClock` | все | да |
+| `SharedKernel` | `IPAddress`, `IPNetwork` (CIDR), `IPNetworkSet`, `NetworkPort`, `DomainName`, `ByteCount`, `WallClock` | все | да |
 | `DesignSystem` | Общие UI-компоненты: бейдж статуса, строка «ключ–значение», пустое состояние (только слой `Presentation`) | все | нет |
 | `TunnelConfiguration` | Модель конфига WireGuard, парсер и сериализатор wg-quick, валидация, ключи, «исключить локальные сети» | все | да |
 | `TunnelLibrary` | Коллекция туннелей: создание, импорт, изменение, удаление, дублирование, экспорт; хранение | все | да (чтение) |
