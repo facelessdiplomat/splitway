@@ -1,6 +1,5 @@
 public struct NetworkPort: Sendable, Hashable {
     public static let validRange: ClosedRange<Int> = 1...65_535
-    private static let maximumDigits = 5
 
     public let value: UInt16
 
@@ -10,8 +9,7 @@ public struct NetworkPort: Sendable, Hashable {
     }
 
     public init(_ text: String) throws(NetworkPortValidationError) {
-        guard CanonicalDecimalText.isCanonical(text[...], maximumDigits: Self.maximumDigits), let number = Int(text)
-        else { throw .notANumber }
+        guard let number = CanonicalDecimalText.integerValue(of: text) else { throw .notANumber }
         try self.init(number)
     }
 }
