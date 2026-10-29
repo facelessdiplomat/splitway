@@ -12,6 +12,7 @@ public final class LogViewerModel {
     public private(set) var problem: LogViewerProblem?
     public private(set) var exportedText: String?
     public private(set) var hasLoaded = false
+    public var crashReport: CrashReportModel?
     private var allEntries: [LogEntry] = []
 
     private let actions: LogViewerActions
@@ -89,6 +90,10 @@ public final class LogViewerModel {
 
     public func dismissProblem() {
         problem = nil
+    }
+
+    public func showCrashReport() {
+        crashReport = CrashReportModel(prepareReport: actions.prepareCrashReport)
     }
 
     private func applyFilter() {

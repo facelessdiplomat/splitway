@@ -26,6 +26,7 @@ struct LogViewerView: View {
         }
         .task { await model.followUpdates() }
         .modifier(LogViewerDialogs(model: model, isConfirmingClearing: $isConfirmingClearing))
+        .modifier(CrashReportPresenter(model: model))
     }
 
     private var searchText: Binding<String> {

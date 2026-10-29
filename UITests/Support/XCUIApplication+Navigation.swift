@@ -45,6 +45,16 @@ extension XCUIApplication {
         tapButton(method)
     }
 
+    func tapSecondaryAction(_ item: String, inNavigationBar title: String) {
+        let bar = navigationBars[title]
+        XCTAssertTrue(bar.waitForExistence(timeout: Self.elementTimeout), "No navigation bar \(title)")
+        let more = bar.buttons["More"]
+        if more.exists {
+            more.tap()
+        }
+        tapButton(item)
+    }
+
     func openMoreMenu(item: String) {
         tapButton("More")
         tapButton(item)

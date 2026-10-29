@@ -17,6 +17,7 @@ struct AppConfiguration {
     let logSubsystem: String
     let version: String
     let build: String
+    let systemDescription: String
 
     init(bundle: Bundle) {
         if UserDefaults.standard.bool(forKey: Self.temporaryStorageArgument) {
@@ -35,6 +36,16 @@ struct AppConfiguration {
         logSubsystem = bundle.bundleIdentifier ?? Self.fallbackSubsystem
         version = bundle.object(forInfoDictionaryKey: Self.versionInfoKey) as? String ?? ""
         build = bundle.object(forInfoDictionaryKey: Self.buildInfoKey) as? String ?? ""
+        systemDescription = Self.systemDescription(of: ProcessInfo.processInfo.operatingSystemVersion)
+    }
+
+    private static func systemDescription(of version: OperatingSystemVersion) -> String {
+        #if os(macOS)
+            let system = "macOS"
+        #else
+            let system = "iOS"
+        #endif
+        return "\(system) \(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
     }
 
     private static func groupContainer(of bundle: Bundle) -> URL? {

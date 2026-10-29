@@ -106,6 +106,16 @@ struct LogViewerModelTests {
     }
 
     @Test
+    func opensTheCrashReport() {
+        let model = viewer(InMemoryLogHistory())
+        #expect(model.crashReport == nil)
+
+        model.showCrashReport()
+
+        #expect(model.crashReport != nil)
+    }
+
+    @Test
     func explainsAnUnavailableLog() async {
         let model = viewer(InMemoryLogHistory(isAvailable: false))
 
@@ -120,7 +130,14 @@ struct LogViewerModelTests {
             actions: LogViewerActions(
                 loadEntries: LoadLogEntriesUseCase(history: history),
                 clearLog: ClearLogUseCase(history: history),
-                exportLog: ExportLogUseCase(history: history)
+                exportLog: ExportLogUseCase(history: history),
+                prepareCrashReport: PrepareCrashReportUseCase(
+                    logs: history,
+                    reports: InMemoryDiagnosticReportHistory(),
+                    archiver: StubCrashReportArchiver(),
+                    clock: FixedWallClock(Self.earlier.date),
+                    environment: CrashReportEnvironment(application: "Splitway", system: "iOS")
+                )
             ),
             ticker: ticker
         )
