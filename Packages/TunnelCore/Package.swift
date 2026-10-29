@@ -12,6 +12,7 @@ let package = Package(
     products: [
         .library(name: "TunnelCoreAdapter", targets: ["TunnelCoreAdapter"])
     ],
+    dependencies: [.package(path: "../SplitwayKit")],
     targets: [
         .binaryTarget(
             name: "TunnelCoreFramework",
@@ -19,13 +20,21 @@ let package = Package(
         ),
         .target(
             name: "TunnelCoreAdapter",
-            dependencies: ["TunnelCoreFramework"],
+            dependencies: [
+                "TunnelCoreFramework",
+                .product(name: "TunnelEngine", package: "SplitwayKit"),
+                .product(name: "Diagnostics", package: "SplitwayKit"),
+            ],
             path: "Sources/TunnelCoreAdapter",
             swiftSettings: strictSwiftSettings
         ),
         .testTarget(
             name: "TunnelCoreAdapterTests",
-            dependencies: ["TunnelCoreAdapter"],
+            dependencies: [
+                "TunnelCoreAdapter",
+                .product(name: "TunnelEngine", package: "SplitwayKit"),
+                .product(name: "TunnelConfiguration", package: "SplitwayKit"),
+            ],
             path: "Tests/TunnelCoreAdapterTests",
             swiftSettings: strictSwiftSettings
         ),

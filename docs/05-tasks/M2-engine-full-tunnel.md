@@ -7,7 +7,7 @@
 - [x] M2-01 Кодирование UAPI и разбор статистики
 - [x] M2-02 Мост Go: API режима fd
 - [x] M2-03 `fdtunnel`: wireguard-go поверх utun
-- [ ] M2-04 Swift-адаптер `TunnelCoreAdapter` (режим fd)
+- [x] M2-04 Swift-адаптер `TunnelCoreAdapter` (режим fd)
 - [ ] M2-05 План сетевых настроек
 - [ ] M2-06 Инфраструктура пакетного туннеля
 - [ ] M2-07 Протокол сообщений «приложение ↔ расширение»
@@ -46,9 +46,9 @@
 ### M2-04. Swift-адаптер `TunnelCoreAdapter` (режим fd)
 `shared` · M · зависит от: M2-01, M2-03
 
-**Сделать:** `TunnelCoreWireGuardDevice` реализует `WireGuardDeviceEngine`: владение хэндлом, преобразование ошибок в доменные, log-callback → `Diagnostics`, освобождение C-строк.
-**Тесты сначала:** интеграционные: старт с заведомо неверным дескриптором → доменная ошибка; запрос конфигурации после старта на тестовом устройстве.
-**Готово, когда:** адаптер не допускает утечек памяти (проверка в Instruments или через счётчики в тестах).
+**Сделать:** `TunnelCoreWireGuardEngine` реализует `WireGuardDeviceEngine`, а `TunnelCoreWireGuardDevice` — `RunningWireGuardDevice`: устройство владеет хэндлом и останавливает туннель в `deinit`; коды `TCStatus` преобразуются в `TunnelEngineError` (добавлен случай `socketsUnavailable`); строка `tc_tunnel_get_config` освобождается через `tc_free` и разбирается `UAPIRuntimeStatisticsParser`. `TunnelCoreLogRouting.route(to:)` направляет логи wireguard-go в `LogRecorder` (verbose → `debug`, error → `error`); направления хранятся до конца процесса, поэтому обратный вызов из Go никогда не видит освобождённый контекст. Пакет `TunnelCore` зависит от `SplitwayKit` (продукты `TunnelEngine` и `Diagnostics`).
+**Тесты сначала:** интеграционные на настоящем Go-ядре: закрытый дескриптор и файл, который не utun, → `tunnelInterfaceUnavailable`, а дескриптор вызывающего остаётся открытым; таблица соответствия всех `TCStatus` доменным ошибкам. Отступление: успешный старт, конфигурацию и статистику на macOS без root проверить нельзя — utun создаётся только привилегированным процессом, поэтому этот путь проверяется на устройстве в M2-08.
+**Готово, когда:** адаптер не допускает утечек: хэндл освобождается в `deinit`, C-строки — в `defer`; проверка в Instruments — вместе с M2-08.
 
 ## PacketTunnel
 
