@@ -62,6 +62,10 @@ targets:
         product: DiagnosticsInfrastructure
       - package: SplitwayKit
         product: DiagnosticsPresentation
+      - package: SplitwayKit
+        product: SettingsInfrastructure
+      - package: SplitwayKit
+        product: SettingsPresentation
     scheme:
       testTargets:
         - iOSIntegrationTests
@@ -138,6 +142,10 @@ targets:
         product: DiagnosticsInfrastructure
       - package: SplitwayKit
         product: DiagnosticsPresentation
+      - package: SplitwayKit
+        product: SettingsInfrastructure
+      - package: SplitwayKit
+        product: SettingsPresentation
     scheme: {}
   NetworkSystemExtension:
     type: system-extension

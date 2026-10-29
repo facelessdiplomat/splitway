@@ -30,7 +30,7 @@ public struct TunnelLibraryRootView: View {
                 selection: $selection,
                 addition: addition,
                 export: export,
-                showLog: navigation.showLog
+                navigation: navigation
             )
         } detail: {
             detail

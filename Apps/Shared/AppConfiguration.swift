@@ -4,6 +4,7 @@ struct AppConfiguration {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
     private static let tunnelProviderInfoKey = "SplitwayTunnelProviderBundleIdentifier"
     private static let versionInfoKey = "CFBundleShortVersionString"
+    private static let buildInfoKey = "CFBundleVersion"
     private static let storageDirectoryName = "Splitway"
     private static let groupStoragePath = "Library/Application Support"
     private static let logsPath = "Library/Logs/Splitway"
@@ -14,6 +15,7 @@ struct AppConfiguration {
     let tunnelProviderBundleIdentifier: String
     let logSubsystem: String
     let version: String
+    let build: String
 
     init(bundle: Bundle) {
         let groupIdentifier = bundle.object(forInfoDictionaryKey: Self.appGroupInfoKey) as? String
@@ -28,5 +30,6 @@ struct AppConfiguration {
         tunnelProviderBundleIdentifier = tunnelProvider ?? ""
         logSubsystem = bundle.bundleIdentifier ?? Self.fallbackSubsystem
         version = bundle.object(forInfoDictionaryKey: Self.versionInfoKey) as? String ?? ""
+        build = bundle.object(forInfoDictionaryKey: Self.buildInfoKey) as? String ?? ""
     }
 }

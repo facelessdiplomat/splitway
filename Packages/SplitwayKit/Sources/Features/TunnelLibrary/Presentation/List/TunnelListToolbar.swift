@@ -4,7 +4,7 @@ struct TunnelListToolbar: ToolbarContent {
     let addition: TunnelAdditionOptions
     let export: TunnelExportModel
     let hasTunnels: Bool
-    let showLog: @MainActor () -> Void
+    let navigation: TunnelLibraryNavigation
 
     var body: some ToolbarContent {
         #if os(iOS)
@@ -29,7 +29,7 @@ struct TunnelListToolbar: ToolbarContent {
         }
         ToolbarItem(placement: .secondaryAction) {
             Button {
-                showLog()
+                navigation.showLog()
             } label: {
                 Label {
                     Text("Log", bundle: .module)
@@ -47,6 +47,19 @@ struct TunnelListToolbar: ToolbarContent {
                         Text("Export All Tunnels", bundle: .module)
                     } icon: {
                         Image(systemName: "square.and.arrow.up.on.square")
+                    }
+                }
+            }
+        }
+        if let showSettings = navigation.showSettings {
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    showSettings()
+                } label: {
+                    Label {
+                        Text("Settings", bundle: .module)
+                    } icon: {
+                        Image(systemName: "gearshape")
                     }
                 }
             }

@@ -1,0 +1,37 @@
+[
+  {
+    "name" : "Go",
+    "license" : "BSD-3-Clause",
+    "dependencies" : [
+      "go",
+      "golang.org/x/crypto",
+      "golang.org/x/net",
+      "golang.org/x/sys"
+    ],
+    "textFile" : "Go"
+  },
+  {
+    "name" : "wireguard-go",
+    "license" : "MIT",
+    "dependencies" : [
+      "golang.zx2c4.com/wireguard"
+    ],
+    "textFile" : "wireguard-go"
+  },
+  {
+    "name" : "WireGuardKit",
+    "license" : "MIT",
+    "dependencies" : [
+
+    ],
+    "textFile" : "WireGuardKit"
+  },
+  {
+    "name" : "ZIPFoundation",
+    "license" : "MIT",
+    "dependencies" : [
+      "zipfoundation"
+    ],
+    "textFile" : "ZIPFoundation"
+  }
+]
