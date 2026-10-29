@@ -5,7 +5,11 @@ public enum IPv6LeakProtection {
     public static let blockedNetwork = IPNetwork.ipv6GlobalUnicast
     public static let placeholderInterfaceAddress = IPNetwork(host: .ipv6(0xFDC6_3A2B_91E4_0000_0000_0000_0000_0001))
 
-    static func isNeeded(for routes: IPNetworkSet) -> Bool {
+    public static func applying(to routes: IPNetworkSet) -> IPNetworkSet {
+        isNeeded(for: routes) ? routes.union(IPNetworkSet([blockedNetwork])) : routes
+    }
+
+    private static func isNeeded(for routes: IPNetworkSet) -> Bool {
         capturesAllPublicIPv4(routes) && !routes.contains(blockedNetwork)
     }
 
