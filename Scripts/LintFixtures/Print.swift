@@ -1,0 +1,3 @@
+func printFixture() {
+    print("value")
+}

@@ -1,0 +1,2 @@
+/* explanation */
+struct BlockCommentFixture {}

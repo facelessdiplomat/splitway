@@ -1,0 +1,77 @@
+included:
+  - Packages
+  - Apps
+excluded:
+  - Packages/SplitwayKit/.build
+  - Packages/TunnelCore/.build
+  - Packages/TunnelCore/build
+  - Packages/TunnelCore/Artifacts
+disabled_rules:
+  - trailing_comma
+  - todo
+opt_in_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - discouraged_optional_boolean
+  - empty_count
+  - first_where
+  - contains_over_first_not_nil
+  - sorted_first_last
+  - redundant_nil_coalescing
+  - fatal_error_message
+force_cast: error
+force_try: error
+force_unwrapping: error
+line_length:
+  warning: 120
+  error: 160
+  ignores_urls: true
+type_body_length:
+  warning: 200
+  error: 300
+function_body_length:
+  warning: 30
+  error: 50
+file_length:
+  warning: 300
+  error: 400
+function_parameter_count:
+  warning: 5
+  error: 7
+cyclomatic_complexity:
+  warning: 8
+  error: 12
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - i
+    - j
+custom_rules:
+  no_comments:
+    name: "No comments"
+    regex: "(//(?! swift-tools-version:)|/\\*)"
+    match_kinds:
+      - comment
+      - comment.mark
+      - comment.url
+      - doccomment
+      - doccomment.field
+    message: "Comments are forbidden. Express intent with names, types, tests and feature documents."
+    severity: error
+  core_layer_imports:
+    name: "Core layer imports"
+    included: ".*/Core/.*\\.swift"
+    regex: "^\\s*import\\s+(SwiftUI|UIKit|AppKit|NetworkExtension|Security|SystemExtensions)\\b"
+    message: "Core must not import UI or system frameworks."
+    severity: error
+  no_print:
+    name: "No print"
+    regex: "\\b(print|debugPrint|NSLog)\\s*\\("
+    excluded_match_kinds:
+      - comment
+      - doccomment
+      - string
+    message: "Use Logger instead of print, debugPrint or NSLog."
+    severity: error
