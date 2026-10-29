@@ -1,3 +1,5 @@
+import DiagnosticsInfrastructure
+import DiagnosticsPresentation
 import TunnelConnectionInfrastructure
 import TunnelEditorPresentation
 import TunnelImportInfrastructure
@@ -14,6 +16,7 @@ struct AppComposition {
     let tunnelImport: TunnelImportModel
     let tunnelEditor: TunnelEditorFlow
     let tunnelExport: TunnelExportModel
+    let logViewer: LogViewerPresenter
 
     init(configuration: AppConfiguration) {
         let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
@@ -25,6 +28,13 @@ struct AppComposition {
         self.tunnelList = tunnelList
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
         tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels)
+        let diagnostics = DiagnosticsAssembly(
+            logDirectory: configuration.logDirectory,
+            subsystem: configuration.logSubsystem
+        )
+        logViewer = Self.logViewer(diagnostics: diagnostics)
+        diagnostics.recorder(for: .application, category: "App").record(
+            .info, "Splitway \(configuration.version) started")
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
         tunnelEditor = Self.tunnelEditor(
             library: library,
@@ -45,6 +55,18 @@ struct AppComposition {
         case .scanQRCode:
             break
         }
+    }
+
+    private static func logViewer(diagnostics: DiagnosticsAssembly) -> LogViewerPresenter {
+        LogViewerPresenter(
+            model: LogViewerModel(
+                actions: LogViewerActions(
+                    loadEntries: diagnostics.loadLogEntries,
+                    clearLog: diagnostics.clearLog,
+                    exportLog: diagnostics.exportLog
+                )
+            )
+        )
     }
 
     private static func tunnelList(library: TunnelLibraryAssembly, connection: TunnelConnectionAssembly)

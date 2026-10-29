@@ -6,12 +6,12 @@ public struct TunnelStatisticsPolling: Sendable {
 
     let fetchStatistics: FetchRuntimeStatisticsUseCase
     let clock: any WallClock
-    let ticker: any StatisticsTicker
+    let ticker: any Ticker
 
     public init(
         fetchStatistics: FetchRuntimeStatisticsUseCase,
         clock: any WallClock = SystemWallClock(),
-        ticker: any StatisticsTicker = RepeatingTicker(interval: refreshInterval)
+        ticker: any Ticker = RepeatingTicker(interval: refreshInterval)
     ) {
         self.fetchStatistics = fetchStatistics
         self.clock = clock

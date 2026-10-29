@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 
 struct TunnelExportPresenter: ViewModifier {
@@ -24,7 +25,7 @@ struct TunnelExportPresenter: ViewModifier {
             }
             .fileExporter(
                 isPresented: isExporting,
-                document: model.document.map { document in ExportFileDocument(contents: document.contents) },
+                document: model.document.map { document in ExportedDataDocument(contents: document.contents) },
                 contentType: model.document?.kind.contentType ?? .data,
                 defaultFilename: model.document?.fileName
             ) { result in
