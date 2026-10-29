@@ -12,6 +12,8 @@
 2. `Scripts/check.sh` — все проверки: линтеры, тесты Go и Swift, сборка iOS и macOS. Хук `pre-merge-commit` запускает его при каждом слиянии в `main`.
 3. Открыть `Splitway.xcodeproj` в Xcode.
 
+Тестовый туннель для спайков и тестов утечек настраивается по [Scripts/test-tunnel/README.md](Scripts/test-tunnel/README.md). Реальные конфиги и ключи в репозиторий не попадают.
+
 Если `xcode-select -p` указывает на Command Line Tools, скрипты сами используют `/Applications/Xcode.app`. Постоянное исправление: `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
 
 ## Документация

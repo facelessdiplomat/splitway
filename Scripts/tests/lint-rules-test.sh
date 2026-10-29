@@ -39,6 +39,32 @@ expect_suppression_found() {
     fi
 }
 
+expect_secret_found() {
+    local fixture="$1"
+    if ! find_wireguard_secrets "$fixtures/$fixture" >/dev/null; then
+        record_failure "expected a WireGuard key to be found in $fixture"
+    fi
+}
+
+expect_no_secret() {
+    local fixture="$1"
+    if find_wireguard_secrets "$fixtures/$fixture" >/dev/null; then
+        record_failure "expected no WireGuard key in $fixture"
+    fi
+}
+
+expect_fixture_path() {
+    if ! is_fixture_path "$1"; then
+        record_failure "expected $1 to be treated as a fixture"
+    fi
+}
+
+expect_regular_path() {
+    if is_fixture_path "$1"; then
+        record_failure "expected $1 not to be treated as a fixture"
+    fi
+}
+
 expect_rule_violation no_comments LineComment.swift
 expect_rule_violation no_comments DocumentationComment.swift
 expect_rule_violation no_comments BlockComment.swift
@@ -50,6 +76,12 @@ expect_no_violations UrlInString.swift
 expect_no_violations PackageManifest/Package.swift
 expect_no_violations Infrastructure/FrameworkImport.swift
 expect_suppression_found LinterSuppression.swift
+expect_secret_found Secrets/LeakedKey.txt
+expect_no_secret Secrets/RedactedKey.txt
+expect_fixture_path Packages/SplitwayKit/Tests/Fixtures/wg-quick/minimal.conf
+expect_fixture_path Scripts/LintFixtures/Secrets/LeakedKey.txt
+expect_regular_path Scripts/test-tunnel/prague.conf
+expect_regular_path docs/FixturesGuide.md
 
 if ((failures > 0)); then
     printf '%d lint rule checks failed\n' "$failures" >&2

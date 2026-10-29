@@ -35,6 +35,29 @@ while IFS= read -r directory; do
     go_roots+=("$repository_root/$directory")
 done < <(existing_directories "${go_module_roots[@]}")
 
+secret_scan_files=()
+stray_tunnel_configurations=()
+while IFS= read -r -d '' file; do
+    if [[ ! -f "$file" ]] || is_fixture_path "$file"; then
+        continue
+    fi
+    secret_scan_files+=("$file")
+    if [[ "$file" == *.conf ]]; then
+        stray_tunnel_configurations+=("$file")
+    fi
+done < <(git ls-files -z --cached --others --exclude-standard)
+
+printf '==> WireGuard secrets\n'
+if (( ${#stray_tunnel_configurations[@]} > 0 )); then
+    printf 'Tunnel configurations must stay outside the repository:\n' >&2
+    printf '  %s\n' "${stray_tunnel_configurations[@]}" >&2
+    exit 1
+fi
+if (( ${#secret_scan_files[@]} > 0 )) && find_wireguard_secrets "${secret_scan_files[@]}" >&2; then
+    printf 'WireGuard keys must never be committed, keep real configurations outside the repository\n' >&2
+    exit 1
+fi
+
 if (( ${#swift_files[@]} > 0 )); then
     printf '==> Linter suppressions\n'
     if find_linter_suppressions "${swift_files[@]}"; then
