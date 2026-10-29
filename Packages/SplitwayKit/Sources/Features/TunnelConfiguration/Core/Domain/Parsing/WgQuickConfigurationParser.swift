@@ -14,6 +14,11 @@ public enum WgQuickConfigurationParser {
         return WgQuickParsingResult(configuration: configuration, issues: issues.sorted(by: Self.isOrderedBefore))
     }
 
+    public static func rawSections(of text: String) -> [WgQuickRawSection] {
+        guard text.utf8.count <= maximumConfigurationSize else { return [] }
+        return WgQuickSectionGrouping(lines: WgQuickLineTokenizer.lines(of: text)).sections
+    }
+
     private static func isOrderedBefore(_ first: ConfigurationIssue, _ second: ConfigurationIssue) -> Bool {
         (first.line ?? 0) < (second.line ?? 0)
     }

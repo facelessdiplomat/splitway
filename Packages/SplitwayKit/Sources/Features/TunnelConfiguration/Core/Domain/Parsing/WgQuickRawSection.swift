@@ -1,11 +1,11 @@
-struct WgQuickRawEntry {
-    let key: String
-    let value: String
-    let line: Int
+public struct WgQuickRawEntry: Sendable, Equatable {
+    public let key: String
+    public let value: String
+    public let line: Int
 }
 
-struct WgQuickRawSection {
-    let section: WgQuickSection
-    let headerLine: Int
-    var entries: [WgQuickRawEntry]
+public struct WgQuickRawSection: Sendable, Equatable {
+    public let section: WgQuickSection
+    public let headerLine: Int
+    public internal(set) var entries: [WgQuickRawEntry]
 }

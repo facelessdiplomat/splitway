@@ -180,6 +180,11 @@ let features: [FeatureModule] = [
         testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"],
         infrastructureTestDependencies: [zipFoundation]
     ),
+    FeatureModule(
+        "TunnelEditor",
+        coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
+        testDependencies: ["TunnelConfigurationTestSupport"]
+    ),
     FeatureModule("Diagnostics", layers: [.core, .infrastructure]),
     FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
     FeatureModule(
