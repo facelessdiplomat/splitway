@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ ago" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ назад"
+          }
+        }
+      }
+    },
     "Add tunnel" : {
       "localizations" : {
         "ru" : {
@@ -37,6 +47,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подключён"
+          }
+        }
+      }
+    },
+    "Connected for" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время подключения"
           }
         }
       }
@@ -161,6 +181,16 @@
         }
       }
     },
+    "Endpoint" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конечная точка"
+          }
+        }
+      }
+    },
     "Import a WireGuard configuration to get started." : {
       "localizations" : {
         "ru" : {
@@ -177,6 +207,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Импорт из файла"
+          }
+        }
+      }
+    },
+    "Latest handshake" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последнее рукопожатие"
+          }
+        }
+      }
+    },
+    "No handshake yet" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё не было"
           }
         }
       }
@@ -207,6 +257,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вставить из буфера обмена"
+          }
+        }
+      }
+    },
+    "Peer" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пир"
+          }
+        }
+      }
+    },
+    "Public key" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публичный ключ"
+          }
+        }
+      }
+    },
+    "Received" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Получено"
           }
         }
       }
@@ -267,6 +347,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбранные сервисы"
+          }
+        }
+      }
+    },
+    "Sent" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлено"
+          }
+        }
+      }
+    },
+    "Statistics are unavailable right now." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статистика сейчас недоступна."
           }
         }
       }

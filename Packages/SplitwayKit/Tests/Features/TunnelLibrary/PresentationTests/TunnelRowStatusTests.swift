@@ -44,4 +44,20 @@ struct TunnelRowStatusTests {
     func treatsEveryOtherStatusAsInactive(status: TunnelRowStatus) {
         #expect(!status.isActive)
     }
+
+    @Test(arguments: [TunnelRowStatus.connected(since: connectedMoment), .reconnecting])
+    func expectsStatisticsFromARunningTunnel(status: TunnelRowStatus) {
+        #expect(status.reportsStatistics)
+    }
+
+    @Test(arguments: [TunnelRowStatus.disconnected, .connecting, .disconnecting, .failed(.unknown), .unavailable])
+    func expectsNoStatisticsFromATunnelThatIsNotRunning(status: TunnelRowStatus) {
+        #expect(!status.reportsStatistics)
+    }
+
+    @Test
+    func knowsWhenTheTunnelConnected() {
+        #expect(TunnelRowStatus.connected(since: Self.connectedMoment).connectedSince == Self.connectedMoment)
+        #expect(TunnelRowStatus.reconnecting.connectedSince == nil)
+    }
 }

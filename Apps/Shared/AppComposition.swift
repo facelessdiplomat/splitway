@@ -5,6 +5,7 @@ import TunnelLibraryPresentation
 @MainActor
 struct AppComposition {
     let tunnelList: TunnelListModel
+    let statistics: TunnelStatisticsPolling
 
     init(configuration: AppConfiguration) {
         let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
@@ -24,5 +25,6 @@ struct AppComposition {
                 observeConnection: connection.observeConnection
             )
         )
+        statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
     }
 }

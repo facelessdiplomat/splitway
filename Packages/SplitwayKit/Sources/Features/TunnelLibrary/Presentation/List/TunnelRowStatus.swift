@@ -29,6 +29,17 @@ public enum TunnelRowStatus: Sendable, Hashable {
         }
     }
 
+    public var reportsStatistics: Bool {
+        switch self {
+        case .connected, .reconnecting: true
+        case .disconnected, .connecting, .disconnecting, .failed, .unavailable: false
+        }
+    }
+
+    public var connectedSince: Date? {
+        if case .connected(let since) = self { since } else { nil }
+    }
+
     public var tone: StatusTone {
         switch self {
         case .disconnected: .neutral

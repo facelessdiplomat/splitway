@@ -3,10 +3,12 @@ import TunnelConnection
 public struct TunnelConnectionAssembly: Sendable {
     private let controller: PacketTunnelSlotController
     private let coordinator: ConnectionCoordinator
+    private let messenger: PacketTunnelSlotMessenger
 
     public init(providerBundleIdentifier: String) {
         controller = PacketTunnelSlotController(providerBundleIdentifier: providerBundleIdentifier)
         coordinator = ConnectionCoordinator(controller: controller)
+        messenger = PacketTunnelSlotMessenger(providerBundleIdentifier: providerBundleIdentifier)
     }
 
     public var activateTunnel: ActivateTunnelUseCase {
@@ -19,6 +21,10 @@ public struct TunnelConnectionAssembly: Sendable {
 
     public var observeConnection: ObserveConnectionStateUseCase {
         ObserveConnectionStateUseCase(controller: controller)
+    }
+
+    public var fetchStatistics: FetchRuntimeStatisticsUseCase {
+        FetchRuntimeStatisticsUseCase(messenger: messenger)
     }
 
     public var activityProbe: ConnectionActivityProbe {

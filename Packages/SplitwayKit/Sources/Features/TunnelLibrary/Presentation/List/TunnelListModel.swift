@@ -33,6 +33,13 @@ public final class TunnelListModel {
         pendingDeletion?.tunnelID == id ? pendingDeletion : nil
     }
 
+    public func tunnel(withID id: TunnelIdentifier) -> Tunnel? {
+        for case .readable(let tunnel) in entries where tunnel.id == id {
+            return tunnel
+        }
+        return nil
+    }
+
     public func load() async {
         do {
             entries = try await library.loadTunnels.execute().entries
@@ -111,13 +118,6 @@ public final class TunnelListModel {
 
     public func dismissAlert() {
         alert = nil
-    }
-
-    private func tunnel(withID id: TunnelIdentifier) -> Tunnel? {
-        for case .readable(let tunnel) in entries where tunnel.id == id {
-            return tunnel
-        }
-        return nil
     }
 
     private func rebuildRows() {

@@ -8,6 +8,7 @@ struct SplitwayRootScene: Scene {
         WindowGroup {
             TunnelLibraryRootView(
                 model: composition.tunnelList,
+                statistics: composition.statistics,
                 addition: TunnelAdditionOptions(methods: []) { _ in }
             )
         }

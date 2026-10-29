@@ -3,6 +3,8 @@ import NetworkExtension
 import ProviderMessaging
 
 public actor TunnelProviderSessionMessenger: ProviderMessenger {
+    private static let replyTimeout = Duration.seconds(3)
+
     private let session: NETunnelProviderSession
     private let codec = ProviderMessageCodec()
 
@@ -26,14 +28,23 @@ public actor TunnelProviderSessionMessenger: ProviderMessenger {
         let reply: Data?
         do {
             reply = try await withCheckedThrowingContinuation { continuation in
+                let pendingReply = PendingProviderReply(continuation)
+                let timeout = Task {
+                    try await Task.sleep(for: Self.replyTimeout)
+                    pendingReply.resume(with: .failure(ProviderReplyTimeout()))
+                }
                 do {
                     try session.sendProviderMessage(message) { response in
-                        continuation.resume(returning: response)
+                        timeout.cancel()
+                        pendingReply.resume(with: .success(response))
                     }
                 } catch {
-                    continuation.resume(throwing: error)
+                    timeout.cancel()
+                    pendingReply.resume(with: .failure(error))
                 }
             }
+        } catch is ProviderReplyTimeout {
+            throw .noResponse
         } catch {
             throw .extensionUnavailable
         }

@@ -155,6 +155,18 @@ struct TunnelListModelTests {
     }
 
     @Test
+    func providesTheConfigurationOnlyOfAReadableTunnel() async throws {
+        let environment = TunnelListTestEnvironment()
+        let office = try await environment.storeTunnel(named: "Office")
+        let broken = try await environment.storeTunnel(named: "Broken")
+        try await environment.secrets.deleteConfigurationText(for: broken.id)
+        await environment.model.load()
+
+        #expect(environment.model.tunnel(withID: office.id) == office)
+        #expect(environment.model.tunnel(withID: broken.id) == nil)
+    }
+
+    @Test
     func connectsAnInactiveTunnelAndDisconnectsAnActiveOne() async throws {
         let environment = TunnelListTestEnvironment()
         let office = try await environment.storeTunnel(named: "Office")
