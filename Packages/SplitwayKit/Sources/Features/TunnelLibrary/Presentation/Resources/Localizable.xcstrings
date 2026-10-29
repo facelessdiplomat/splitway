@@ -201,16 +201,6 @@
         }
       }
     },
-    "Edit" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Изменить"
-          }
-        }
-      }
-    },
     "Edit Tunnel" : {
       "localizations" : {
         "ru" : {

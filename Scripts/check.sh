@@ -16,6 +16,7 @@ case "${1-}" in
 esac
 
 derived_data="$repository_root/build/DerivedData"
+ui_test_time_allowance=180
 go_modules=(Packages/TunnelCore/go Scripts/go-comment-check)
 started_at=$SECONDS
 
@@ -41,8 +42,10 @@ run_ui_tests() {
         printf 'No available %s simulator, install one in Xcode\n' "$device" >&2
         exit 1
     fi
+    xcrun simctl bootstatus "$simulator" -b >/dev/null
     xcodebuild -project Splitway.xcodeproj -scheme iOSUITests -destination "id=$simulator" \
-        -derivedDataPath "$derived_data" test -quiet
+        -derivedDataPath "$derived_data" -collect-test-diagnostics never \
+        -test-timeouts-enabled YES -default-test-execution-time-allowance "$ui_test_time_allowance" test -quiet
 }
 
 build_scheme() {

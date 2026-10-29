@@ -47,7 +47,7 @@ final class AccessibilityAuditTests: XCTestCase {
         application.waitForText("New tunnel")
         try application.auditAccessibility()
         application.tapText(startingWith: "New tunnel")
-        application.waitForButton("Edit")
+        application.waitForButton("Edit Tunnel")
         try application.auditAccessibility()
     }
 

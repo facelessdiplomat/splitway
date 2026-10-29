@@ -55,7 +55,11 @@ public struct TunnelLibraryRootView: View {
                         Button {
                             navigation.editTunnel(tunnel)
                         } label: {
-                            Text("Edit", bundle: .module)
+                            Label {
+                                Text("Edit Tunnel", bundle: .module)
+                            } icon: {
+                                Image(systemName: "pencil")
+                            }
                         }
                         .keyboardShortcut("e")
                     }
