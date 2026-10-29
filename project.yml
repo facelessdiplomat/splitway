@@ -1,0 +1,89 @@
+name: Splitway
+options:
+  bundleIdPrefix: com.company
+  deploymentTarget:
+    iOS: "26.0"
+    macOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+settings:
+  base:
+    SPLITWAY_BUNDLE_ID_PREFIX: com.company
+    MARKETING_VERSION: 0.1.0
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_VERSION: "6.0"
+    SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    GENERATE_INFOPLIST_FILE: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+packages:
+  SplitwayKit:
+    path: Packages/SplitwayKit
+  TunnelCore:
+    path: Packages/TunnelCore
+targets:
+  iOSApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: Apps/iOSApp
+    settings:
+      base:
+        PRODUCT_NAME: Splitway
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_ENTITLEMENTS: Apps/iOSApp/iOSApp.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Splitway
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+    dependencies:
+      - target: PacketTunnelExtension
+    scheme: {}
+  PacketTunnelExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Apps/PacketTunnelExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.packet-tunnel
+        INFOPLIST_FILE: Apps/PacketTunnelExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/PacketTunnelExtension/PacketTunnelExtension.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Splitway Tunnel
+  macOSApp:
+    type: application
+    platform: macOS
+    sources:
+      - path: Apps/macOSApp
+    settings:
+      base:
+        PRODUCT_NAME: Splitway
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway
+        CODE_SIGN_ENTITLEMENTS: Apps/macOSApp/macOSApp.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Splitway
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_NSHumanReadableCopyright: Copyright © 2026 facelessdiplomat
+    dependencies:
+      - target: NetworkSystemExtension
+    scheme: {}
+  NetworkSystemExtension:
+    type: system-extension
+    platform: macOS
+    sources:
+      - path: Apps/NetworkSystemExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension
+        PRODUCT_NAME: $(PRODUCT_BUNDLE_IDENTIFIER)
+        PRODUCT_MODULE_NAME: NetworkSystemExtension
+        INFOPLIST_FILE: Apps/NetworkSystemExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/NetworkSystemExtension/NetworkSystemExtension.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Splitway Network Extension
