@@ -11,22 +11,23 @@ public actor PacketTunnelSlotController: SystemTunnelController {
 
     private let providerBundleIdentifier: String
     private let clock: any WallClock
-    private let statusStream: AsyncStream<SystemConnectionStatus>
-    private let statusContinuation: AsyncStream<SystemConnectionStatus>.Continuation
     private var manager: NETunnelProviderManager?
     private var hasLoadedManager = false
     private var statusObserver: (any NSObjectProtocol)?
+    private var statusSubscribers: [AsyncStream<SystemConnectionStatus>.Continuation] = []
     private var disconnectionWaiters: [CheckedContinuation<Void, Never>] = []
 
     public init(providerBundleIdentifier: String, clock: any WallClock = SystemWallClock()) {
         self.providerBundleIdentifier = providerBundleIdentifier
         self.clock = clock
-        (statusStream, statusContinuation) = AsyncStream.makeStream()
     }
 
     isolated deinit {
         if let statusObserver {
             NotificationCenter.default.removeObserver(statusObserver)
+        }
+        for subscriber in statusSubscribers {
+            subscriber.finish()
         }
     }
 
@@ -43,8 +44,9 @@ public actor PacketTunnelSlotController: SystemTunnelController {
     }
 
     public nonisolated func statusUpdates() -> AsyncStream<SystemConnectionStatus> {
-        Task { await self.startPublishingStatus() }
-        return statusStream
+        let (updates, subscriber) = AsyncStream<SystemConnectionStatus>.makeStream()
+        Task { await self.subscribe(subscriber) }
+        return updates
     }
 
     public func lastDisconnectFailure() async -> ConnectionFailure? {
@@ -79,7 +81,8 @@ public actor PacketTunnelSlotController: SystemTunnelController {
             throw VPNErrorMapping.failureOfSaving(error)
         }
         manager = slot
-        startPublishingStatus()
+        observeStatusNotifications()
+        publish(status(of: slot.connection))
     }
 
     public func start() async throws(ConnectionFailure) {
@@ -93,15 +96,16 @@ public actor PacketTunnelSlotController: SystemTunnelController {
 
     public func stop() async {
         guard let connection = await loadedManager()?.connection, !Self.hasEnded(connection.status) else { return }
-        startPublishingStatus()
+        observeStatusNotifications()
         connection.stopVPNTunnel()
         await waitUntilDisconnected()
     }
 
     private func loadedManager() async -> NETunnelProviderManager? {
+        guard !hasLoadedManager else { return manager }
+        let savedManagers = (try? await NETunnelProviderManager.loadAllFromPreferences()) ?? []
         if !hasLoadedManager {
             hasLoadedManager = true
-            let savedManagers = (try? await NETunnelProviderManager.loadAllFromPreferences()) ?? []
             manager = savedManagers.first { savedManager in
                 (savedManager.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier
                     == providerBundleIdentifier
@@ -110,7 +114,13 @@ public actor PacketTunnelSlotController: SystemTunnelController {
         return manager
     }
 
-    private func startPublishingStatus() {
+    private func subscribe(_ subscriber: AsyncStream<SystemConnectionStatus>.Continuation) async {
+        statusSubscribers.append(subscriber)
+        observeStatusNotifications()
+        subscriber.yield(await currentStatus())
+    }
+
+    private func observeStatusNotifications() {
         guard statusObserver == nil else { return }
         statusObserver = NotificationCenter.default.addObserver(
             forName: .NEVPNStatusDidChange,
@@ -121,16 +131,19 @@ public actor PacketTunnelSlotController: SystemTunnelController {
             let connectionIdentifier = ObjectIdentifier(connection)
             Task { await self?.connectionStatusDidChange(connectionIdentifier) }
         }
-        if let connection = manager?.connection {
-            statusContinuation.yield(status(of: connection))
-        }
     }
 
     private func connectionStatusDidChange(_ connectionIdentifier: ObjectIdentifier) {
         guard let connection = manager?.connection, ObjectIdentifier(connection) == connectionIdentifier else { return }
-        statusContinuation.yield(status(of: connection))
+        publish(status(of: connection))
         if Self.hasEnded(connection.status) {
             resumeDisconnectionWaiters()
+        }
+    }
+
+    private func publish(_ status: SystemConnectionStatus) {
+        statusSubscribers.removeAll { subscriber in
+            if case .terminated = subscriber.yield(status) { true } else { false }
         }
     }
 

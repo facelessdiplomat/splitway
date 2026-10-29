@@ -66,6 +66,7 @@ flowchart LR
 ├── Apps/                            тонкие оболочки, только точки входа и composition root
 │   ├── iOSApp/
 │   ├── macOSApp/
+│   ├── Shared/                      общий composition root и корневая сцена приложений iOS и macOS
 │   ├── PacketTunnelExtension/
 │   ├── NetworkSystemExtension/
 │   └── ControlsExtension/

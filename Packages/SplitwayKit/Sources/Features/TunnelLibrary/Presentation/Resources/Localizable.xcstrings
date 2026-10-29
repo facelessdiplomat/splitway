@@ -1,0 +1,386 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Add tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить туннель"
+          }
+        }
+      }
+    },
+    "All traffic" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Весь трафик"
+          }
+        }
+      }
+    },
+    "Configuration unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация недоступна"
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключён"
+          }
+        }
+      }
+    },
+    "Connecting…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключение…"
+          }
+        }
+      }
+    },
+    "Connection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключение"
+          }
+        }
+      }
+    },
+    "Connection failed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ошибка подключения"
+          }
+        }
+      }
+    },
+    "Connects or disconnects the tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключает или отключает туннель"
+          }
+        }
+      }
+    },
+    "Couldn’t connect" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подключиться"
+          }
+        }
+      }
+    },
+    "Couldn’t update tunnels" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось обновить туннели"
+          }
+        }
+      }
+    },
+    "Create from scratch" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать с нуля"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить"
+          }
+        }
+      }
+    },
+    "Delete “%@”?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить «%@»?"
+          }
+        }
+      }
+    },
+    "Disconnected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключён"
+          }
+        }
+      }
+    },
+    "Disconnecting…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключение…"
+          }
+        }
+      }
+    },
+    "Duplicate" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дублировать"
+          }
+        }
+      }
+    },
+    "Import a WireGuard configuration to get started." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортируйте конфигурацию WireGuard, чтобы начать."
+          }
+        }
+      }
+    },
+    "Import from file" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импорт из файла"
+          }
+        }
+      }
+    },
+    "No tunnels yet" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннелей пока нет"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Paste from clipboard" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставить из буфера обмена"
+          }
+        }
+      }
+    },
+    "Reconnecting…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переподключение…"
+          }
+        }
+      }
+    },
+    "Routing" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маршрутизация"
+          }
+        }
+      }
+    },
+    "Scan QR code" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сканировать QR-код"
+          }
+        }
+      }
+    },
+    "Select a tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите туннель"
+          }
+        }
+      }
+    },
+    "Selected apps" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбранные приложения"
+          }
+        }
+      }
+    },
+    "Selected services" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбранные сервисы"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статус"
+          }
+        }
+      }
+    },
+    "The archive couldn’t be created." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось создать архив."
+          }
+        }
+      }
+    },
+    "The connected tunnel couldn’t be disconnected." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось отключить подключённый туннель."
+          }
+        }
+      }
+    },
+    "The connected tunnel will be disconnected, and its configuration and keys removed from this device." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключённый туннель будет отключён, а его конфигурация и ключи — удалены с этого устройства."
+          }
+        }
+      }
+    },
+    "The tunnel configuration and keys will be removed from this device." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация туннеля и ключи будут удалены с этого устройства."
+          }
+        }
+      }
+    },
+    "The tunnel configuration can’t be read." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурацию туннеля не удаётся прочитать."
+          }
+        }
+      }
+    },
+    "The tunnel list has changed. Try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Список туннелей изменился. Попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "The tunnel storage couldn’t be read or written." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать или записать хранилище туннелей."
+          }
+        }
+      }
+    },
+    "This tunnel no longer exists." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этого туннеля больше нет."
+          }
+        }
+      }
+    },
+    "Try again in a moment. If it keeps failing, check the tunnel configuration." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте ещё раз чуть позже. Если ошибка повторяется, проверьте конфигурацию туннеля."
+          }
+        }
+      }
+    },
+    "Tunnels" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннели"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

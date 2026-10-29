@@ -1,15 +1,15 @@
 import TunnelConnection
 import TunnelLibrary
 
-actor FakeSystemTunnelController: SystemTunnelController {
-    enum Operation: Equatable {
+public actor FakeSystemTunnelController: SystemTunnelController {
+    public enum Operation: Equatable, Sendable {
         case install(TunnelIdentifier)
         case start
         case stop
     }
 
-    private(set) var operations: [Operation] = []
-    private(set) var status: SystemConnectionStatus
+    public private(set) var operations: [Operation] = []
+    public private(set) var status: SystemConnectionStatus
     private var installed: TunnelIdentifier?
     private let installFailure: ConnectionFailure?
     private let disconnectFailure: ConnectionFailure?
@@ -19,7 +19,7 @@ actor FakeSystemTunnelController: SystemTunnelController {
     private let updates: AsyncStream<SystemConnectionStatus>
     private let updatesContinuation: AsyncStream<SystemConnectionStatus>.Continuation
 
-    init(
+    public init(
         installed: TunnelIdentifier? = nil,
         status: SystemConnectionStatus = .disconnected,
         installFailure: ConnectionFailure? = nil,
@@ -32,23 +32,23 @@ actor FakeSystemTunnelController: SystemTunnelController {
         (updates, updatesContinuation) = AsyncStream.makeStream()
     }
 
-    func installedTunnel() -> TunnelIdentifier? {
+    public func installedTunnel() -> TunnelIdentifier? {
         installed
     }
 
-    func currentStatus() -> SystemConnectionStatus {
+    public func currentStatus() -> SystemConnectionStatus {
         status
     }
 
-    nonisolated func statusUpdates() -> AsyncStream<SystemConnectionStatus> {
+    public nonisolated func statusUpdates() -> AsyncStream<SystemConnectionStatus> {
         updates
     }
 
-    func lastDisconnectFailure() -> ConnectionFailure? {
+    public func lastDisconnectFailure() -> ConnectionFailure? {
         disconnectFailure
     }
 
-    func install(_ tunnel: Tunnel) async throws(ConnectionFailure) {
+    public func install(_ tunnel: Tunnel) async throws(ConnectionFailure) {
         operations.append(.install(tunnel.id))
         if isNextInstallHeld {
             isNextInstallHeld = false
@@ -66,32 +66,32 @@ actor FakeSystemTunnelController: SystemTunnelController {
         installed = tunnel.id
     }
 
-    func start() async throws(ConnectionFailure) {
+    public func start() async throws(ConnectionFailure) {
         operations.append(.start)
         status = .connecting
     }
 
-    func stop() async {
+    public func stop() async {
         operations.append(.stop)
         status = .disconnected
     }
 
-    nonisolated func emit(_ statuses: SystemConnectionStatus...) {
+    public nonisolated func emit(_ statuses: SystemConnectionStatus...) {
         for status in statuses {
             updatesContinuation.yield(status)
         }
     }
 
-    func holdNextInstall() {
+    public func holdNextInstall() {
         isNextInstallHeld = true
     }
 
-    func waitUntilInstallIsHeld() async {
+    public func waitUntilInstallIsHeld() async {
         guard heldInstall == nil else { return }
         await withCheckedContinuation { continuation in installHoldWaiters.append(continuation) }
     }
 
-    func releaseHeldInstall() {
+    public func releaseHeldInstall() {
         heldInstall?.resume()
         heldInstall = nil
     }

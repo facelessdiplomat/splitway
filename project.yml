@@ -30,12 +30,14 @@ targets:
     platform: iOS
     sources:
       - path: Apps/iOSApp
+      - path: Apps/Shared
     settings:
       base:
         PRODUCT_NAME: Splitway
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_ENTITLEMENTS: Apps/iOSApp/iOSApp.entitlements
+        INFOPLIST_FILE: Apps/iOSApp/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
@@ -44,6 +46,12 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
     dependencies:
       - target: PacketTunnelExtension
+      - package: SplitwayKit
+        product: TunnelLibraryPresentation
+      - package: SplitwayKit
+        product: TunnelLibraryInfrastructure
+      - package: SplitwayKit
+        product: TunnelConnectionInfrastructure
     scheme:
       testTargets:
         - iOSIntegrationTests
@@ -91,17 +99,25 @@ targets:
     platform: macOS
     sources:
       - path: Apps/macOSApp
+      - path: Apps/Shared
     settings:
       base:
         PRODUCT_NAME: Splitway
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway
         CODE_SIGN_ENTITLEMENTS: Apps/macOSApp/macOSApp.entitlements
+        INFOPLIST_FILE: Apps/macOSApp/Info.plist
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_NSHumanReadableCopyright: Copyright © 2026 facelessdiplomat
     dependencies:
       - target: NetworkSystemExtension
+      - package: SplitwayKit
+        product: TunnelLibraryPresentation
+      - package: SplitwayKit
+        product: TunnelLibraryInfrastructure
+      - package: SplitwayKit
+        product: TunnelConnectionInfrastructure
     scheme: {}
   NetworkSystemExtension:
     type: system-extension

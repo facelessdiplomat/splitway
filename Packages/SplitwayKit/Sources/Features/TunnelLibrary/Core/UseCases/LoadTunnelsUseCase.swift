@@ -1,8 +1,3 @@
-public struct TunnelLibrarySnapshot: Sendable, Hashable {
-    public let tunnels: [Tunnel]
-    public let unreadableRecords: [TunnelRecord]
-}
-
 public struct LoadTunnelsUseCase: Sendable {
     private let persistence: TunnelPersistence
 
@@ -11,15 +6,14 @@ public struct LoadTunnelsUseCase: Sendable {
     }
 
     public func execute() async throws(TunnelLibraryError) -> TunnelLibrarySnapshot {
-        var tunnels: [Tunnel] = []
-        var unreadableRecords: [TunnelRecord] = []
+        var entries: [TunnelLibraryEntry] = []
         for record in try await persistence.records.loadRecords() {
             do {
-                tunnels.append(try await persistence.tunnel(for: record))
+                entries.append(.readable(try await persistence.tunnel(for: record)))
             } catch .unreadableConfiguration, .storage(.missingConfiguration), .storage(.corruptedData) {
-                unreadableRecords.append(record)
+                entries.append(.unreadable(record))
             }
         }
-        return TunnelLibrarySnapshot(tunnels: tunnels, unreadableRecords: unreadableRecords)
+        return TunnelLibrarySnapshot(entries: entries)
     }
 }

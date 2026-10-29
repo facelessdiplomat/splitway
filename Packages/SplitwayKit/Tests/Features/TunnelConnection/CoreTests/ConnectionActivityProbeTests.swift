@@ -1,5 +1,6 @@
 import Testing
 import TunnelConnection
+import TunnelConnectionTestSupport
 import TunnelLibrary
 
 @Suite
