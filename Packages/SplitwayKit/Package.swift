@@ -107,8 +107,8 @@ struct FeatureModule {
     private func dependencies(for layer: FeatureLayer) -> [Target.Dependency] {
         switch layer {
         case .core: ["SharedKernel"] + coreDependencies
-        case .infrastructure: [.target(name: name)] + infrastructureDependencies
-        case .presentation: [.target(name: name)] + presentationDependencies
+        case .infrastructure: [.target(name: name), "SharedKernel"] + infrastructureDependencies
+        case .presentation: [.target(name: name), "SharedKernel"] + presentationDependencies
         }
     }
 }
@@ -138,6 +138,7 @@ let features: [FeatureModule] = [
     FeatureModule("AppRouting"),
     FeatureModule(
         "TunnelLibrary",
+        layers: [.core, .infrastructure],
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         providesTestSupport: true
