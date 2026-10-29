@@ -32,11 +32,7 @@ public enum TunnelNetworkPlanner {
     }
 
     private static func ipv6Plan(addresses: [IPNetwork], routes: IPNetworkSet) -> TunnelAddressFamilyPlan? {
-        let protectedRoutes =
-            IPv6LeakProtection.isNeeded(for: routes)
-            ? routes.union(IPNetworkSet([IPv6LeakProtection.blockedNetwork]))
-            : routes
-        let ipv6Routes = protectedRoutes.networks.filter { network in network.family == .ipv6 }
+        let ipv6Routes = IPv6LeakProtection.applying(to: routes).networks.filter { network in network.family == .ipv6 }
         guard !ipv6Routes.isEmpty else { return nil }
         let ipv6Addresses = addresses.filter { address in address.family == .ipv6 }
         return TunnelAddressFamilyPlan(
