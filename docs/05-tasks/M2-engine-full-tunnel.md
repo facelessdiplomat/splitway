@@ -9,7 +9,7 @@
 - [x] M2-03 `fdtunnel`: wireguard-go поверх utun
 - [x] M2-04 Swift-адаптер `TunnelCoreAdapter` (режим fd)
 - [x] M2-05 План сетевых настроек
-- [ ] M2-06 Инфраструктура пакетного туннеля
+- [x] M2-06 Инфраструктура пакетного туннеля
 - [x] M2-07 Протокол сообщений «приложение ↔ расширение»
 - [ ] M2-08 Сборка расширений
 - [x] M2-09 Домен и сценарии подключения
@@ -62,9 +62,9 @@
 ### M2-06. Инфраструктура пакетного туннеля
 `shared` · L · зависит от: M2-04, M2-05
 
-**Сделать:** `NetworkSettingsMapper` (план → `NEPacketTunnelNetworkSettings`), `UtunDescriptorLocator`, `SystemEndpointResolver` (`getaddrinfo`, синтез NAT64), `NetworkPathObserver` (`NWPathMonitor`), `PacketTunnelSession`: старт, стоп, смена сети (повторный резолвинг + `bump_sockets`), сон и пробуждение. Класс провайдера в `Apps/*` только делегирует сессии.
-**Тесты сначала:** `PacketTunnelSession` с фейковыми портами: порядок шагов старта; повторный резолвинг при смене пути; остановка во время старта. Маппер проверяется тестом на сравнение полей.
-**Готово, когда:** логика сессии покрыта тестами, провайдер содержит только вызовы сессии.
+**Сделать:** Core: `PacketTunnelSession` (actor) над портами `WireGuardDeviceEngine`, `TunnelNetworkSettingsApplier`, `TunnelInterfaceLocator`, `EndpointResolver` и `NetworkPathMonitor`. Старт: план → резолвинг endpoint всех пиров (любой нерезолвящийся → `endpointUnresolvable`) → сетевые настройки → дескриптор utun → устройство; `stop()` во время старта прерывает его до запуска устройства (`cancelled`). Возврат сети (`available`): повторный резолвинг (неудачные endpoint пропускаются), новая конфигурация UAPI и `bumpSockets`; пропажа сети — ожидание. Пробуждение — `bumpSockets`. Статистика работающего устройства, иначе `notRunning`. Infrastructure: `NetworkSettingsMapper` (план → `NEPacketTunnelNetworkSettings`: адреса и маски, маршруты, DNS с `matchDomains = [""]`, MTU или `tunnelOverheadBytes`), `PacketTunnelSettingsApplier` (actor над `setTunnelNetworkSettings`), `UtunDescriptorLocator` (перебор дескрипторов 0…1024 с `UTUN_OPT_IFNAME`), `SystemEndpointResolver` (`getaddrinfo` с `AI_DEFAULT` на отдельной очереди GCD — блокирующий вызов не занимает кооперативный пул; синтез NAT64; IPv4 предпочтительнее), `NetworkPathObserver` (`NWPathMonitor`).
+**Тесты сначала:** `PacketTunnelSession` с фейками: порядок шагов старта; повторный резолвинг и перепривязка при возврате сети (endpoint NAT64); пропажа сети; остановка во время старта; нерезолвящийся endpoint, отклонённые настройки, нет utun, ошибка движка; пробуждение; остановка; статистика. Маппер — сравнение полей для двухстекового плана и для плана без IPv6, DNS и MTU; резолвер — адресные литералы и `localhost` без сети; локатор — процесс без utun.
+**Готово, когда:** логика сессии покрыта тестами; провайдер только делегирует сессии (связывание — M2-08).
 
 ## ProviderMessaging
 
