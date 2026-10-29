@@ -9,6 +9,15 @@ extension TunnelAdditionMethod {
         }
     }
 
+    var keyboardShortcut: KeyboardShortcut? {
+        switch self {
+        case .importFromFile: KeyboardShortcut("o")
+        case .pasteFromClipboard: KeyboardShortcut("v", modifiers: [.command, .shift])
+        case .createFromScratch: KeyboardShortcut("n")
+        case .scanQRCode: nil
+        }
+    }
+
     private var title: Text {
         switch self {
         case .importFromFile: Text("Import from file", bundle: .module)

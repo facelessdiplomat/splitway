@@ -16,15 +16,9 @@ struct SplitwayRootScene: Scene {
             TunnelLibraryRootView(
                 model: composition.tunnelList,
                 statistics: composition.statistics,
-                addition: TunnelAdditionOptions(methods: AppComposition.additionMethods) { method in
-                    composition.add(method)
-                },
+                addition: addition,
                 export: composition.tunnelExport,
-                navigation: TunnelLibraryNavigation(
-                    editTunnel: { tunnel in composition.tunnelEditor.edit(tunnel) },
-                    showLog: { composition.logViewer.show() },
-                    showSettings: showSettings
-                )
+                navigation: navigation
             )
             .tunnelImport(composition.tunnelImport)
             .tunnelEditor(composition.tunnelEditor)
@@ -46,6 +40,23 @@ struct SplitwayRootScene: Scene {
             }
             .task { await composition.onboarding.activateSystemExtensionOnLaunch() }
         }
+        .commands {
+            TunnelLibraryCommands(addition: addition, navigation: navigation)
+        }
+    }
+
+    private var addition: TunnelAdditionOptions {
+        TunnelAdditionOptions(methods: AppComposition.additionMethods) { method in
+            composition.add(method)
+        }
+    }
+
+    private var navigation: TunnelLibraryNavigation {
+        TunnelLibraryNavigation(
+            editTunnel: { tunnel in composition.tunnelEditor.edit(tunnel) },
+            showLog: { composition.logViewer.show() },
+            showSettings: showSettings
+        )
     }
 
     private var showSettings: (@MainActor @Sendable () -> Void)? {

@@ -21,6 +21,7 @@ struct PeerStatisticsSection: View {
             }
         } header: {
             Text("Peer", bundle: .module)
+                .foregroundStyle(.supportingText)
         }
     }
 

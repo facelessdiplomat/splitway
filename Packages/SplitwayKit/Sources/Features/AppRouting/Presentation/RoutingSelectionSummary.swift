@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 
 struct RoutingSelectionSummary: View {
@@ -9,10 +10,10 @@ struct RoutingSelectionSummary: View {
             EmptyView()
         case .selectedApplications:
             Text("\(model.selectedApplicationCount) apps selected", bundle: .module)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.supportingText)
         case .selectedServices:
             Text("\(model.selectedServiceCount) services selected", bundle: .module)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.supportingText)
         }
         ForEach(model.warnings, id: \.self) { warning in
             Label {

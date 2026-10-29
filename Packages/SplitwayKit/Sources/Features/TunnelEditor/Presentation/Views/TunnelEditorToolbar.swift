@@ -12,6 +12,7 @@ struct TunnelEditorToolbar: ToolbarContent {
             } label: {
                 Text("Cancel", bundle: .module)
             }
+            .keyboardShortcut(.cancelAction)
         }
         ToolbarItem(placement: .principal) {
             Picker(selection: mode) {
@@ -28,6 +29,7 @@ struct TunnelEditorToolbar: ToolbarContent {
             } label: {
                 Text("Save", bundle: .module)
             }
+            .keyboardShortcut("s")
             .disabled(!model.canSave)
         }
     }

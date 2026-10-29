@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 
 struct OnboardingIntroduction: View {
@@ -17,7 +18,7 @@ struct OnboardingIntroduction: View {
                 .multilineTextAlignment(.center)
             page.message
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.supportingText)
                 .multilineTextAlignment(.center)
         }
         .accessibilityElement(children: .combine)

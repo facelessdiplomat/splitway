@@ -57,6 +57,7 @@ public struct TunnelLibraryRootView: View {
                         } label: {
                             Text("Edit", bundle: .module)
                         }
+                        .keyboardShortcut("e")
                     }
                 }
             } else {

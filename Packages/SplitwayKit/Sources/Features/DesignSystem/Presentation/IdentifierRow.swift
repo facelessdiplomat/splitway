@@ -5,6 +5,7 @@ public struct IdentifierRow: View {
 
     private let title: Text
     private let identifier: String
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(_ title: Text, identifier: String) {
         self.title = title
@@ -16,9 +17,9 @@ public struct IdentifierRow: View {
             title
             Text(verbatim: identifier)
                 .font(.footnote.monospaced())
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(Self.minimumScaleFactor)
+                .foregroundStyle(.supportingText)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : Self.minimumScaleFactor)
                 .textSelection(.enabled)
         }
         .accessibilityElement(children: .combine)

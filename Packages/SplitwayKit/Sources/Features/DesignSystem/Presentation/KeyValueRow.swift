@@ -16,10 +16,12 @@ public struct KeyValueRow: View {
             value
                 .font(usesMonospacedValue ? .body.monospaced() : .body)
                 .multilineTextAlignment(.trailing)
+                .foregroundStyle(.supportingText)
                 .textSelection(.enabled)
         } label: {
             key
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

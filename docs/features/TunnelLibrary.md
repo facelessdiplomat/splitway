@@ -4,7 +4,7 @@
 |---|---|
 | Статус | в работе: Core, хранилища и экран списка готовы; запуск на macOS и прогон Keychain там ждут M0-04, передача секрета в системное расширение — M2-12 |
 | Платформы | shared |
-| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03, M3-04 (`TunnelName.untitled`), M3-07 (кнопка «Изменить»), M3-09 (подключение и ошибки), M3-11 (экспорт), M3-12 (пункт «Журнал»), M3-13 (пункт «Настройки») |
+| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03, M3-04 (`TunnelName.untitled`), M3-07 (кнопка «Изменить»), M3-09 (подключение и ошибки), M3-11 (экспорт), M3-12 (пункт «Журнал»), M3-13 (пункт «Настройки»), M3-14 (доступность, команды меню) |
 | Таргеты | `TunnelLibrary`, `TunnelLibraryInfrastructure`, `TunnelLibraryPresentation`, `TunnelLibraryTestSupport` |
 
 ## Назначение
@@ -66,6 +66,13 @@ flowchart LR
 - `TunnelLibraryRootView` — `NavigationSplitView`: список в боковой колонке, детали туннеля справа. На iPhone SwiftUI сворачивает его в стек. Корень загружает библиотеку и наблюдает за слотом, пока виден.
 - Переходы в другие фичи — к редактору туннеля, журналу и настройкам — задаёт composition root через `TunnelLibraryNavigation`. В меню «⋯» панели списка — «Журнал», «Экспортировать все туннели» и «Настройки». Пункт «Настройки» есть, только если передан его обработчик: на macOS настройки открываются из меню приложения.
 - Способы добавления туннеля (`TunnelAdditionMethod`) и их обработчик передаёт composition root через `TunnelAdditionOptions`. Меню «+» и кнопки пустого состояния показывают только переданные способы.
+- **Доступность.** VoiceOver читает строку туннеля одной фразой (имя, режим, статус) и отдельным переключателем. На крупных размерах шрифта доступности переключатель уходит под текст.
+- **Команды меню** `TunnelLibraryCommands` (строка меню macOS и iPadOS):
+  - способы добавления: ⌘N — создать, ⌘O — импорт файла, ⇧⌘V — вставить из буфера;
+  - ⌥⌘L — журнал;
+  - на iPad ⌘, — настройки.
+
+  В деталях туннеля ⌘E открывает редактор.
 
 **Экспорт.**
 
@@ -90,7 +97,7 @@ flowchart LR
 - **Сценарии:** `LoadTunnelsUseCase` (`TunnelLibrarySnapshot`, `TunnelLibraryEntry`), `CreateTunnelUseCase`, `ImportTunnelsUseCase` (`ImportCandidate`, `ImportReport`, `ImportFailure`), `UpdateTunnelUseCase`, `RenameTunnelUseCase`, `DeleteTunnelUseCase`, `DuplicateTunnelUseCase`, `ReorderTunnelsUseCase`, `ExportTunnelsUseCase`, ошибка `TunnelLibraryError`.
 - **Адаптеры:** `FileTunnelRecordRepository`, `JSONDocumentMigrator`, `JSONDocumentMigrationError`, `KeychainTunnelSecretStore`, `ZIPArchiveWriter`, сборка `TunnelLibraryAssembly`.
 - **Экспорт:** `ExportedArchive`; экран — `TunnelExportModel`, `TunnelExportRequest`, `ExportedDocument`, `ExportedDocumentKind`, `TunnelExportProblem`.
-- **Экран:** `TunnelListModel`, `TunnelRow`, `TunnelRowStatus`, `TunnelDeletionRequest`, `TunnelListAlert`, `TunnelLibraryActions`, `TunnelConnectionActions`, `TunnelAdditionMethod`, `TunnelAdditionOptions`, `TunnelLibraryNavigation`, `TunnelLibraryRootView`; детали — `TunnelDetailModel`, `PeerStatisticsRow`, `PeerActivity`, `HandshakeRecency`, `TunnelStatisticsPolling`.
+- **Экран:** `TunnelListModel`, `TunnelRow`, `TunnelRowStatus`, `TunnelDeletionRequest`, `TunnelListAlert`, `TunnelLibraryActions`, `TunnelConnectionActions`, `TunnelAdditionMethod`, `TunnelAdditionOptions`, `TunnelLibraryNavigation`, `TunnelLibraryCommands`, `TunnelLibraryRootView`; детали — `TunnelDetailModel`, `PeerStatisticsRow`, `PeerActivity`, `HandshakeRecency`, `TunnelStatisticsPolling`.
 
 ## Решения
 
@@ -173,3 +180,4 @@ flowchart LR
 | 2026-10-29 | Экспорт одного и всех туннелей с предупреждением о ключах | M3-11 |
 | 2026-10-29 | Пункт «Журнал», переходы через `TunnelLibraryNavigation`; `Ticker` переехал в `SharedKernel`, документ экспорта — в `DesignSystemPresentation` | M3-12 |
 | 2026-10-29 | Пункт «Настройки» в меню «⋯» на iOS и iPadOS | M3-13 |
+| 2026-10-29 | Строка для VoiceOver и крупного шрифта, команды меню и сочетания клавиш | M3-14 |

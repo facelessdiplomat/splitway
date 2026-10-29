@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 import TunnelConfiguration
 
@@ -15,7 +16,7 @@ public struct ConfigurationIssueLabel: View {
                 if let line = issue.line {
                     Text("Line \(line)", bundle: .module)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.supportingText)
                 }
             }
         } icon: {

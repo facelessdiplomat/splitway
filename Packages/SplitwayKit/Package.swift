@@ -161,7 +161,12 @@ let sharedKernelTargets: [Target] = [
 let zipFoundation: Target.Dependency = .product(name: "ZIPFoundation", package: "ZIPFoundation")
 
 let features: [FeatureModule] = [
-    FeatureModule("TunnelConfiguration", layers: [.core, .presentation], providesTestSupport: true),
+    FeatureModule(
+        "TunnelConfiguration",
+        layers: [.core, .presentation],
+        presentationDependencies: ["DesignSystemPresentation"],
+        providesTestSupport: true
+    ),
     FeatureModule(
         "AppRouting",
         layers: [.core, .presentation],

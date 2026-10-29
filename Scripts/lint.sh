@@ -23,7 +23,7 @@ existing_directories() {
 swift_files=()
 while IFS= read -r file; do
     [[ -f "$file" ]] && swift_files+=("$file")
-done < <(repository_files 'Packages/*.swift' 'Apps/*.swift' 'IntegrationTests/*.swift')
+done < <(repository_files 'Packages/*.swift' 'Apps/*.swift' 'IntegrationTests/*.swift' 'UITests/*.swift')
 
 go_files=()
 while IFS= read -r file; do

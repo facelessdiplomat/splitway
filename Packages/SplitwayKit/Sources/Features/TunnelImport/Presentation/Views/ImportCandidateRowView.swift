@@ -1,3 +1,4 @@
+import DesignSystemPresentation
 import SwiftUI
 import TunnelConfigurationPresentation
 import TunnelLibrary
@@ -16,7 +17,7 @@ struct ImportCandidateRowView: View {
             .disabled(!row.isImportable || model.summary != nil)
             row.source.title
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.supportingText)
             if row.hasInvalidName {
                 Text("Enter a name of up to \(TunnelName.maximumLength) characters.", bundle: .module)
                     .font(.subheadline)
@@ -24,7 +25,7 @@ struct ImportCandidateRowView: View {
             } else if row.importsUnderAnotherName, let importName = row.importName {
                 Text("Will be imported as “\(importName)”", bundle: .module)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.supportingText)
             }
             if let alreadyImportedAs = row.alreadyImportedAs {
                 Label {

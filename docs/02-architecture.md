@@ -81,6 +81,8 @@ flowchart LR
 │       ├── Package.swift            binaryTarget TunnelCoreFramework + target TunnelCoreAdapter
 │       ├── go/                      go.mod, пакеты по фичам: bridge, fdtunnel, usernet, servicerouting, logbridge
 │       └── Scripts/build-xcframework.sh
+├── IntegrationTests/                интеграционные тесты с хост-приложением (Keychain)
+├── UITests/                         UI-тесты и аудит доступности (XCUITest)
 ├── Resources/ServiceCatalog/        каталог сервисов (JSON) для iOS
 ├── Scripts/                         check.sh, bootstrap, lint, git-хуки, проверка комментариев
 └── docs/                            эта документация + docs/features/*.md

@@ -38,6 +38,8 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_ENTITLEMENTS: Apps/iOSApp/iOSApp.entitlements
         INFOPLIST_FILE: Apps/iOSApp/Info.plist
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
@@ -114,6 +116,17 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/Splitway.app/Splitway
+  iOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: iOSApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.ui-tests
+        TEST_TARGET_NAME: iOSApp
   macOSApp:
     type: application
     platform: macOS
@@ -126,6 +139,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway
         CODE_SIGN_ENTITLEMENTS: Apps/macOSApp/macOSApp.entitlements
         INFOPLIST_FILE: Apps/macOSApp/Info.plist
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
@@ -176,3 +191,12 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         INFOPLIST_KEY_CFBundleDisplayName: Splitway Network Extension
+schemes:
+  iOSUITests:
+    build:
+      targets:
+        iOSApp: all
+        iOSUITests: [test]
+    test:
+      targets:
+        - iOSUITests

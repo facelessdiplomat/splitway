@@ -13,6 +13,7 @@ struct SettingsForm: View {
                 KeyValueRow(Text("Build", bundle: .module), value: Text(verbatim: version.build))
             } header: {
                 Text("About", bundle: .module)
+                    .foregroundStyle(.supportingText)
             }
             Section {
                 NavigationLink {
