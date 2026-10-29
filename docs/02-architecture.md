@@ -95,7 +95,7 @@ flowchart LR
 |---|---|---|---|
 | `Core/Domain` | `<Feature>` | Сущности, value objects, доменные сервисы, доменные ошибки | `Foundation`, `CryptoKit`, `SharedKernel`, `Core` других фич |
 | `Core/UseCases` | `<Feature>` | Сценарии приложения, оркестрация домена и портов | то же |
-| `Core/Ports` | `<Feature>` | Протоколы внешнего мира (`TunnelRepository`, `SystemTunnelController`…) | то же |
+| `Core/Ports` | `<Feature>` | Протоколы внешнего мира (`TunnelRecordRepository`, `SystemTunnelController`…) | то же |
 | `Infrastructure` | `<Feature>Infrastructure` | Адаптеры портов: Keychain, NetworkExtension, файлы, Security | `Core` + системные фреймворки |
 | `Presentation` | `<Feature>Presentation` | SwiftUI-экраны и `@Observable` модели представления | `Core` + `SwiftUI` |
 
