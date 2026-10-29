@@ -3,5 +3,5 @@ import TunnelLibrary
 
 public enum TunnelListAlert: Sendable, Equatable {
     case library(TunnelLibraryError)
-    case connection(ConnectionFailure)
+    case connection(ConnectionFailure, tunnel: TunnelIdentifier)
 }

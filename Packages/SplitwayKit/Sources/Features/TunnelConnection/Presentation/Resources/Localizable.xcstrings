@@ -1,0 +1,206 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Configuration missing" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет конфигурации"
+          }
+        }
+      }
+    },
+    "Configuration rejected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация отклонена"
+          }
+        }
+      }
+    },
+    "Couldn’t connect" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подключиться"
+          }
+        }
+      }
+    },
+    "Network settings rejected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сетевые настройки отклонены"
+          }
+        }
+      }
+    },
+    "Only All traffic works in this version. Choose it in the tunnel’s routing settings." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этой версии работает только режим «Весь трафик». Выберите его в настройках маршрутизации туннеля."
+          }
+        }
+      }
+    },
+    "Routing mode not supported yet" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Режим маршрутизации пока не поддерживается"
+          }
+        }
+      }
+    },
+    "Server not found" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервер не найден"
+          }
+        }
+      }
+    },
+    "Something went wrong while connecting. Try again in a moment." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При подключении что-то пошло не так. Попробуйте ещё раз чуть позже."
+          }
+        }
+      }
+    },
+    "Splitway isn’t allowed to add a VPN configuration. Allow it in Settings, then try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не разрешено добавить конфигурацию VPN. Разрешите это в Настройках и попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "The server in Endpoint couldn’t be found. Check the endpoint and your connection." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервер из Endpoint не найден. Проверьте endpoint и подключение к интернету."
+          }
+        }
+      }
+    },
+    "The system VPN configuration couldn’t be read or saved. Try again or restart the device." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать или сохранить системную конфигурацию VPN. Попробуйте ещё раз или перезапустите устройство."
+          }
+        }
+      }
+    },
+    "The system refused to start the tunnel. Make sure no other VPN is connecting." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Система не дала запустить туннель. Убедитесь, что сейчас не подключается другой VPN."
+          }
+        }
+      }
+    },
+    "The system rejected the tunnel addresses, routes or DNS servers. Check them in the editor." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Система отклонила адреса, маршруты или DNS-серверы туннеля. Проверьте их в редакторе."
+          }
+        }
+      }
+    },
+    "The tunnel configuration couldn’t be read. Edit the tunnel or import it again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать конфигурацию туннеля. Измените туннель или импортируйте его заново."
+          }
+        }
+      }
+    },
+    "The tunnel didn’t start" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель не запустился"
+          }
+        }
+      }
+    },
+    "The tunnel stopped" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель остановился"
+          }
+        }
+      }
+    },
+    "VPN configuration unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация VPN недоступна"
+          }
+        }
+      }
+    },
+    "VPN permission needed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно разрешение на VPN"
+          }
+        }
+      }
+    },
+    "WireGuard couldn’t use this configuration. Check the keys and the allowed IPs." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WireGuard не смог использовать эту конфигурацию. Проверьте ключи и разрешённые IP."
+          }
+        }
+      }
+    },
+    "WireGuard stopped unexpectedly. Try connecting again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WireGuard неожиданно остановился. Попробуйте подключиться ещё раз."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

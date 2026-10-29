@@ -26,6 +26,8 @@ public struct TunnelLibraryRootView: View {
         } detail: {
             detail
         }
+        .modifier(TunnelListAlertPresentation(model: model, editTunnel: editTunnel))
+        .modifier(SystemPromptExplanation(model: model))
         .task { await model.load() }
         .task { await model.observeConnection() }
     }

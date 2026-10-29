@@ -36,6 +36,10 @@ public enum TunnelRowStatus: Sendable, Hashable {
         }
     }
 
+    public var failure: ConnectionFailure? {
+        if case .failed(let failure) = self { failure } else { nil }
+    }
+
     public var connectedSince: Date? {
         if case .connected(let since) = self { since } else { nil }
     }

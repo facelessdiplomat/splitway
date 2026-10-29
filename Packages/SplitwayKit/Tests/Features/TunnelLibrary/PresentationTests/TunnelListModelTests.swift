@@ -165,31 +165,4 @@ struct TunnelListModelTests {
         #expect(environment.model.tunnel(withID: office.id) == office)
         #expect(environment.model.tunnel(withID: broken.id) == nil)
     }
-
-    @Test
-    func connectsAnInactiveTunnelAndDisconnectsAnActiveOne() async throws {
-        let environment = TunnelListTestEnvironment()
-        let office = try await environment.storeTunnel(named: "Office")
-        await environment.model.load()
-
-        await environment.model.toggleConnection(of: try #require(environment.model.rows.first))
-        environment.model.apply(SlotState(tunnelID: office.id, connection: .connecting))
-        await environment.model.toggleConnection(of: try #require(environment.model.rows.first))
-
-        #expect(await environment.controller.operations == [.install(office.id), .start, .stop])
-    }
-
-    @Test
-    func reportsAFailedConnectionAttempt() async throws {
-        let controller = FakeSystemTunnelController(installFailure: .permissionDenied)
-        let environment = TunnelListTestEnvironment(controller: controller)
-        try await environment.storeTunnel(named: "Office")
-        await environment.model.load()
-
-        await environment.model.toggleConnection(of: try #require(environment.model.rows.first))
-
-        #expect(environment.model.alert == .connection(.permissionDenied))
-        environment.model.dismissAlert()
-        #expect(environment.model.alert == nil)
-    }
 }

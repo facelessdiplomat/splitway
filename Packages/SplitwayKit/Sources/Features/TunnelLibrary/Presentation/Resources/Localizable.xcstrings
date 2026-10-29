@@ -21,6 +21,26 @@
         }
       }
     },
+    "Before you connect" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перед подключением"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить"
+          }
+        }
+      }
+    },
     "Configuration unavailable" : {
       "localizations" : {
         "ru" : {
@@ -91,12 +111,12 @@
         }
       }
     },
-    "Couldn’t connect" : {
+    "Continue" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Не удалось подключиться"
+            "value" : "Продолжить"
           }
         }
       }
@@ -181,6 +201,16 @@
         }
       }
     },
+    "Edit Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить туннель"
+          }
+        }
+      }
+    },
     "Endpoint" : {
       "localizations" : {
         "ru" : {
@@ -247,6 +277,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть Настройки"
           }
         }
       }
@@ -441,22 +481,22 @@
         }
       }
     },
-    "Try again in a moment. If it keeps failing, check the tunnel configuration." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Попробуйте ещё раз чуть позже. Если ошибка повторяется, проверьте конфигурацию туннеля."
-          }
-        }
-      }
-    },
     "Tunnels" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Туннели"
+          }
+        }
+      }
+    },
+    "Your device will ask to add a VPN configuration for Splitway. Allow it to connect." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устройство попросит добавить конфигурацию VPN для Splitway. Разрешите это, чтобы подключиться."
           }
         }
       }

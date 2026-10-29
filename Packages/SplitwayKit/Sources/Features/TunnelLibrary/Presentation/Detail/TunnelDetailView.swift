@@ -2,6 +2,7 @@ import AppRoutingPresentation
 import DesignSystemPresentation
 import SwiftUI
 import TunnelConnection
+import TunnelConnectionPresentation
 
 struct TunnelDetailView: View {
     let row: TunnelRow
@@ -30,6 +31,16 @@ struct TunnelDetailView: View {
             } footer: {
                 if statisticsProblem != nil {
                     Text("Statistics are unavailable right now.", bundle: .module)
+                }
+            }
+            if let failure = row.status.failure {
+                Section {
+                    VStack(alignment: .leading) {
+                        Text(failure.explanation.title)
+                            .font(.headline)
+                        Text(failure.explanation.message)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             ForEach(peers) { peer in

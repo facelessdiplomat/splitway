@@ -43,7 +43,6 @@ struct TunnelListView: View {
                 }
             }
         #endif
-        .modifier(TunnelListAlertPresentation(model: model))
     }
 
     private func duplicateButton(for row: TunnelRow) -> some View {
