@@ -43,7 +43,9 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
     dependencies:
       - target: PacketTunnelExtension
-    scheme: {}
+    scheme:
+      testTargets:
+        - iOSIntegrationTests
   PacketTunnelExtension:
     type: app-extension
     platform: iOS
@@ -55,6 +57,19 @@ targets:
         INFOPLIST_FILE: Apps/PacketTunnelExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Apps/PacketTunnelExtension/PacketTunnelExtension.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Splitway Tunnel
+  iOSIntegrationTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: IntegrationTests
+    dependencies:
+      - target: iOSApp
+      - package: SplitwayKit
+        product: TunnelLibraryInfrastructure
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Splitway.app/Splitway
   macOSApp:
     type: application
     platform: macOS

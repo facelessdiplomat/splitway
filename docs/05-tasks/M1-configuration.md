@@ -17,7 +17,7 @@
 - [x] M1-11 `Tunnel`, `TunnelName`, уникальность имён
 - [x] M1-12 Порты и сценарии библиотеки
 - [x] M1-13 Репозиторий метаданных в App Group
-- [ ] M1-14 Хранилище секретов в Keychain
+- [ ] M1-14 Хранилище секретов в Keychain — iOS готово, прогон на macOS ждёт M0-04
 - [ ] M1-15 Архивы `.zip`
 - [ ] M1-16 Конвейер импорта и предпросмотр
 - [ ] M1-17 Распознавание QR с изображения
@@ -126,8 +126,8 @@
 ### M1-14. Хранилище секретов в Keychain
 `shared` · M · зависит от: M1-12
 
-**Сделать:** `KeychainTunnelSecretStore` (data protection keychain, общая access group, `AfterFirstUnlockThisDeviceOnly`, без синхронизации в iCloud): сохранить, прочитать, удалить конфиг по id туннеля. Это главная копия секретов для обеих платформ; передача копии в системное расширение macOS — задача M2-12.
-**Тесты сначала:** интеграционные тесты в тест-таргете с хост-приложением (нужны entitlements): запись, перезапись, удаление, чтение отсутствующего.
+**Сделать:** `KeychainTunnelSecretStore` в `TunnelLibraryInfrastructure` (data protection keychain, общая access group передаёт composition root, `AfterFirstUnlockThisDeviceOnly`, `kSecAttrSynchronizable = false`): сохранить (добавление, при дубликате — обновление), прочитать, удалить конфиг по id туннеля; удаление отсутствующего не считается ошибкой. Запись: `kSecAttrService` = `Splitway tunnel configuration`, `kSecAttrAccount` = UUID туннеля. Это главная копия секретов для обеих платформ; передача копии в системное расширение macOS — задача M2-12.
+**Тесты сначала:** интеграционные тесты в `IntegrationTests`, таргет `iOSIntegrationTests` с хост-приложением `iOSApp` (нужны entitlements; `check.sh` прогоняет их на симуляторе iPhone): запись, перезапись, удаление, чтение отсутствующего, атрибуты доступности и синхронизации. Таргет для macOS добавляется после M0-04: data protection keychain на macOS требует профиля с Team ID.
 **Готово, когда:** тесты проходят на симуляторе iOS и на macOS.
 
 ### M1-15. Архивы `.zip`

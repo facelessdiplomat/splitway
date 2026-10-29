@@ -18,6 +18,12 @@ step() {
     printf '\n==> %s\n' "$1"
 }
 
+iphone_simulator_identifier() {
+    xcrun simctl list devices available \
+        | grep -m 1 -E '^[[:space:]]+iPhone' \
+        | grep -oE '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' || true
+}
+
 build_scheme() {
     local scheme="$1"
     local destination="$2"
@@ -51,8 +57,14 @@ swift test --package-path Packages/TunnelCore --quiet
 step "Xcode project"
 Scripts/generate-project.sh
 
-step "iOS build"
-build_scheme iOSApp 'generic/platform=iOS Simulator'
+step "iOS build and integration tests"
+iphone_simulator="$(iphone_simulator_identifier)"
+if [[ -z "$iphone_simulator" ]]; then
+    printf 'No available iPhone simulator, install an iOS simulator runtime in Xcode\n' >&2
+    exit 1
+fi
+xcodebuild -project Splitway.xcodeproj -scheme iOSApp -destination "id=$iphone_simulator" \
+    -derivedDataPath "$derived_data" test -quiet
 
 step "macOS build"
 build_scheme macOSApp 'generic/platform=macOS'
