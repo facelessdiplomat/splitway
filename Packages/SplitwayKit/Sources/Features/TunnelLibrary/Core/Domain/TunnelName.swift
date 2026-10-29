@@ -2,6 +2,7 @@ import Foundation
 
 public struct TunnelName: Sendable, Hashable {
     public static let maximumLength = 64
+    public static let untitled = TunnelName(validatedText: "Tunnel")
 
     private let value: String
 
@@ -13,6 +14,10 @@ public struct TunnelName: Sendable, Hashable {
             throw .containsControlCharacters
         }
         value = trimmedText
+    }
+
+    private init(validatedText: String) {
+        value = validatedText
     }
 
     var text: String {

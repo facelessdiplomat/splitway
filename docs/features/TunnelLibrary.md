@@ -4,7 +4,7 @@
 |---|---|
 | Статус | в работе: Core, хранилища и экран списка готовы; запуск на macOS и прогон Keychain там ждут M0-04, передача секрета в системное расширение — M2-12 |
 | Платформы | shared |
-| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03 |
+| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03, M3-04 (`TunnelName.untitled`) |
 | Таргеты | `TunnelLibrary`, `TunnelLibraryInfrastructure`, `TunnelLibraryPresentation`, `TunnelLibraryTestSupport` |
 
 ## Назначение
@@ -34,7 +34,7 @@ flowchart LR
 
 - `Tunnel` — id, имя, конфигурация и политика маршрутизации.
 - `TunnelRecord` — та же запись без секретов (id, имя, политика), её хранит `TunnelRecordRepository`. Текст конфигурации с ключами хранит `TunnelSecretStore` под id туннеля.
-- `TunnelName` — 1…64 символа после обрезки пробелов, без управляющих символов. `derived(fromFileName:)` получает имя из имени файла, `UniqueTunnelNameResolver` подбирает свободное: «Office», «Office 2» (регистр не учитывается).
+- `TunnelName` — 1…64 символа после обрезки пробелов, без управляющих символов; `untitled` — заведомо правильное имя на случай, если локализованное имя по умолчанию не пройдёт проверку. `derived(fromFileName:)` получает имя из имени файла, `UniqueTunnelNameResolver` подбирает свободное: «Office», «Office 2» (регистр не учитывается).
 
 **Сценарии.**
 
@@ -52,7 +52,7 @@ flowchart LR
   - Документ более новой версии остаётся на месте, сценарий получает `unsupportedSchemaVersion`.
 - `KeychainTunnelSecretStore` хранит generic password в data protection keychain: service `Splitway tunnel configuration`, account — UUID туннеля, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, без синхронизации. Access group передаёт composition root.
 - `ZIPArchiveWriter` пишет архив: deflate, имена в UTF-8, права `0600`.
-- `TunnelLibraryAssembly` собирает граф фичи для composition root: директория хранения и access group Keychain приходят снаружи, проба активности — из `TunnelConnection`.
+- `TunnelLibraryAssembly` собирает граф фичи для composition root: директория хранения и access group Keychain приходят снаружи, проба активности — из `TunnelConnection`. Хранилища она отдаёт и сборке импорта.
 
 **Экран списка.**
 

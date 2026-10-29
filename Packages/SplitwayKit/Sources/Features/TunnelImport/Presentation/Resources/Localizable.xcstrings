@@ -1,0 +1,246 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Already in the library as “%@”" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уже есть в библиотеке как «%@»"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить"
+          }
+        }
+      }
+    },
+    "Clipboard" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Буфер обмена"
+          }
+        }
+      }
+    },
+    "Configurations" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурации"
+          }
+        }
+      }
+    },
+    "Copy a WireGuard configuration and try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопируйте конфигурацию WireGuard и попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "Couldn’t import" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось импортировать"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        }
+      }
+    },
+    "Enter a name of up to %lld characters." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите имя длиной до %lld символов."
+          }
+        }
+      }
+    },
+    "Import" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортировать"
+          }
+        }
+      }
+    },
+    "Import Tunnels" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импорт туннелей"
+          }
+        }
+      }
+    },
+    "Imported %lld of %lld" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортировано %lld из %lld"
+          }
+        }
+      }
+    },
+    "Not imported" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не будут импортированы"
+          }
+        }
+      }
+    },
+    "Nothing to paste" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нечего вставить"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Pasted tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель из буфера"
+          }
+        }
+      }
+    },
+    "The archive couldn’t be opened." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось открыть архив."
+          }
+        }
+      }
+    },
+    "The archive has more than %lld configurations." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В архиве больше %lld конфигураций."
+          }
+        }
+      }
+    },
+    "The archive has no configurations." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В архиве нет конфигураций."
+          }
+        }
+      }
+    },
+    "The configurations in the archive are too large." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурации в архиве слишком большие."
+          }
+        }
+      }
+    },
+    "The file couldn’t be read." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать файл."
+          }
+        }
+      }
+    },
+    "The tunnel storage couldn’t be read or written. Try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать или записать хранилище туннелей. Попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "This file isn’t a WireGuard configuration or a ZIP archive." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это не конфигурация WireGuard и не ZIP-архив."
+          }
+        }
+      }
+    },
+    "Tunnel name" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Имя туннеля"
+          }
+        }
+      }
+    },
+    "Will be imported as “%@”" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Будет импортирован как «%@»"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

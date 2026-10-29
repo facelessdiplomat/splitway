@@ -7,7 +7,7 @@ public struct ConfirmImportUseCase: Sendable {
         importTunnels = ImportTunnelsUseCase(records: records, secrets: secrets)
     }
 
-    public func execute(_ candidates: [ImportPreviewCandidate]) async throws(TunnelLibraryError) -> ImportReport {
-        try await importTunnels.execute(candidates.compactMap(\.importCandidate))
+    public func execute(_ selection: ImportSelection) async throws(TunnelLibraryError) -> ImportReport {
+        try await importTunnels.execute(selection.candidatesToImport)
     }
 }

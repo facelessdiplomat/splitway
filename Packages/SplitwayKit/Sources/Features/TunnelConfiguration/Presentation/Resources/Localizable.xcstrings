@@ -1,0 +1,216 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ appears more than once." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ указан больше одного раза."
+          }
+        }
+      }
+    },
+    "%@ belongs to AmneziaWG, which is not supported yet." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ относится к AmneziaWG, который пока не поддерживается."
+          }
+        }
+      }
+    },
+    "%@ is a wg-quick setting and will be ignored." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — параметр wg-quick, он будет пропущен."
+          }
+        }
+      }
+    },
+    "%@ is not allowed in this section." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ нельзя указывать в этой секции."
+          }
+        }
+      }
+    },
+    "%@ is outside any section." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находится вне секции."
+          }
+        }
+      }
+    },
+    "A peer has no allowed IPs." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У пира нет AllowedIPs."
+          }
+        }
+      }
+    },
+    "A peer has no public key." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У пира нет публичного ключа."
+          }
+        }
+      }
+    },
+    "A peer uses the public key of this interface." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пир использует публичный ключ этого интерфейса."
+          }
+        }
+      }
+    },
+    "Line %lld" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Строка %lld"
+          }
+        }
+      }
+    },
+    "The [Interface] section is missing." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет секции [Interface]."
+          }
+        }
+      }
+    },
+    "The configuration has no peers." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В конфигурации нет пиров."
+          }
+        }
+      }
+    },
+    "The configuration is invalid." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация неверна."
+          }
+        }
+      }
+    },
+    "The configuration is too large." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация слишком большая."
+          }
+        }
+      }
+    },
+    "The interface has no addresses." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У интерфейса нет адресов."
+          }
+        }
+      }
+    },
+    "The private key is missing." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет приватного ключа."
+          }
+        }
+      }
+    },
+    "The value of %@ is invalid." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неверное значение %@."
+          }
+        }
+      }
+    },
+    "There is more than one [Interface] section." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Секция [Interface] указана больше одного раза."
+          }
+        }
+      }
+    },
+    "This line is not a section, a key with a value or a comment." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Строка не похожа ни на секцию, ни на параметр со значением, ни на комментарий."
+          }
+        }
+      }
+    },
+    "Two peers have the same public key." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У двух пиров одинаковый публичный ключ."
+          }
+        }
+      }
+    },
+    "Unknown key %@." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неизвестный параметр %@."
+          }
+        }
+      }
+    },
+    "Unknown section [%@]." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неизвестная секция [%@]."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

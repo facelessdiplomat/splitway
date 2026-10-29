@@ -80,6 +80,25 @@ struct PrepareImportUseCaseTests {
     }
 
     @Test
+    func remembersTheNamesAlreadyInTheLibrary() async throws {
+        let environment = ImportTestEnvironment()
+        try await environment.storeTunnel(named: "Office", fixture: WgQuickFixtures.minimal)
+
+        let preview = try await environment.prepareImport().execute([.text(WgQuickFixtures.full)])
+
+        #expect(preview.existingNames.map(\.description) == ["Office"])
+    }
+
+    @Test
+    func reportsFilesThatCouldNotBeRead() async throws {
+        let preview = try await ImportTestEnvironment().prepareImport()
+            .execute([.text(WgQuickFixtures.minimal)], unreadableFileNames: ["locked.conf"])
+
+        #expect(preview.failures == [ImportSourceFailure(source: .file(name: "locked.conf"), reason: .unreadable)])
+        #expect(preview.candidates.count == 1)
+    }
+
+    @Test
     func keepsNamesUniqueWithinOneImport() async throws {
         let preview = try await ImportTestEnvironment().prepareImport().execute([
             .file(name: "Office.conf", contents: Data(WgQuickFixtures.minimal.utf8)),

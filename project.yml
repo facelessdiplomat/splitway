@@ -52,6 +52,10 @@ targets:
         product: TunnelLibraryInfrastructure
       - package: SplitwayKit
         product: TunnelConnectionInfrastructure
+      - package: SplitwayKit
+        product: TunnelImportPresentation
+      - package: SplitwayKit
+        product: TunnelImportInfrastructure
     scheme:
       testTargets:
         - iOSIntegrationTests
@@ -118,6 +122,10 @@ targets:
         product: TunnelLibraryInfrastructure
       - package: SplitwayKit
         product: TunnelConnectionInfrastructure
+      - package: SplitwayKit
+        product: TunnelImportPresentation
+      - package: SplitwayKit
+        product: TunnelImportInfrastructure
     scheme: {}
   NetworkSystemExtension:
     type: system-extension
