@@ -154,7 +154,9 @@ let features: [FeatureModule] = [
     FeatureModule(
         "TunnelImport",
         layers: [.core, .infrastructure],
+        coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
         infrastructureDependencies: [zipFoundation],
+        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"],
         infrastructureTestDependencies: [zipFoundation]
     ),
 ]
