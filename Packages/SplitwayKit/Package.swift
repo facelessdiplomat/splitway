@@ -231,7 +231,20 @@ let features: [FeatureModule] = [
         coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging"],
         testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"]
     ),
-    FeatureModule("SystemExtension", layers: [.core, .infrastructure]),
+    FeatureModule(
+        "SystemExtension",
+        layers: [.core, .infrastructure, .presentation],
+        presentationDependencies: ["DesignSystemPresentation"],
+        providesTestSupport: true
+    ),
+    FeatureModule(
+        "Onboarding",
+        layers: [.core, .infrastructure, .presentation],
+        presentationDependencies: ["SystemExtension", "SystemExtensionPresentation", "DesignSystemPresentation"],
+        presentationTestDependencies: ["SystemExtensionTestSupport"],
+        layersWithoutTests: [.core],
+        providesTestSupport: true
+    ),
     FeatureModule(
         "TunnelConnection",
         layers: [.core, .infrastructure, .presentation],

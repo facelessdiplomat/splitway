@@ -1,0 +1,276 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Allow the extension" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешите расширение"
+          }
+        }
+      }
+    },
+    "Authorization required" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужна авторизация"
+          }
+        }
+      }
+    },
+    "Blocked by a policy" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрещено политикой"
+          }
+        }
+      }
+    },
+    "Download Splitway again and replace the app." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скачайте Splitway заново и замените приложение."
+          }
+        }
+      }
+    },
+    "Enter an administrator password when macOS asks, then try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите пароль администратора, когда macOS попросит, и попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "In System Settings › General › Login Items & Extensions, turn on Splitway under Network Extensions." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В Системных настройках › Основные › Объекты входа и расширения включите Splitway в разделе «Сетевые расширения»."
+          }
+        }
+      }
+    },
+    "Install" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установить"
+          }
+        }
+      }
+    },
+    "Install the network extension" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установите сетевое расширение"
+          }
+        }
+      }
+    },
+    "Installation cancelled" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Установка отменена"
+          }
+        }
+      }
+    },
+    "Installing the extension…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Устанавливаем расширение…"
+          }
+        }
+      }
+    },
+    "Later" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позже"
+          }
+        }
+      }
+    },
+    "Move Splitway to Applications" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переместите Splitway в «Программы»"
+          }
+        }
+      }
+    },
+    "Open System Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть Системные настройки"
+          }
+        }
+      }
+    },
+    "Restart your Mac" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезагрузите Mac"
+          }
+        }
+      }
+    },
+    "Splitway runs the tunnel in a system extension. macOS asks you to allow it once." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель Splitway работает в системном расширении. macOS один раз попросит его разрешить."
+          }
+        }
+      }
+    },
+    "System extensions work only for apps in the Applications folder. Move Splitway there and reopen it." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Системные расширения работают только у приложений из папки «Программы». Переместите туда Splitway и откройте его снова."
+          }
+        }
+      }
+    },
+    "The app is damaged" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение повреждено"
+          }
+        }
+      }
+    },
+    "The extension is ready" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расширение готово"
+          }
+        }
+      }
+    },
+    "The extension isn’t installed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расширение не установлено"
+          }
+        }
+      }
+    },
+    "This takes a few seconds." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это займёт несколько секунд."
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторить"
+          }
+        }
+      }
+    },
+    "Try again and allow the extension in System Settings." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте ещё раз и разрешите расширение в Системных настройках."
+          }
+        }
+      }
+    },
+    "Try again. If it keeps failing, restart your Mac." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте ещё раз. Если не получится, перезагрузите Mac."
+          }
+        }
+      }
+    },
+    "Waiting for your approval…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ждём вашего разрешения…"
+          }
+        }
+      }
+    },
+    "You can connect your tunnels." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно подключать туннели."
+          }
+        }
+      }
+    },
+    "Your organization doesn’t allow this extension. Contact your administrator." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша организация не разрешает это расширение. Обратитесь к администратору."
+          }
+        }
+      }
+    },
+    "macOS finishes installing the extension after a restart." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS завершит установку расширения после перезагрузки."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

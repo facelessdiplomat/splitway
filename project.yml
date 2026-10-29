@@ -66,6 +66,12 @@ targets:
         product: SettingsInfrastructure
       - package: SplitwayKit
         product: SettingsPresentation
+      - package: SplitwayKit
+        product: OnboardingInfrastructure
+      - package: SplitwayKit
+        product: OnboardingPresentation
+      - package: SplitwayKit
+        product: SystemExtensionPresentation
     scheme:
       testTargets:
         - iOSIntegrationTests
@@ -146,6 +152,14 @@ targets:
         product: SettingsInfrastructure
       - package: SplitwayKit
         product: SettingsPresentation
+      - package: SplitwayKit
+        product: OnboardingInfrastructure
+      - package: SplitwayKit
+        product: OnboardingPresentation
+      - package: SplitwayKit
+        product: SystemExtensionPresentation
+      - package: SplitwayKit
+        product: SystemExtensionInfrastructure
     scheme: {}
   NetworkSystemExtension:
     type: system-extension

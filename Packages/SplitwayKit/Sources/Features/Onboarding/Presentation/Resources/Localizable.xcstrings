@@ -1,0 +1,126 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Back" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить"
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать"
+          }
+        }
+      }
+    },
+    "Import your WireGuard tunnel and choose which apps use it. Everything else stays direct." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортируйте свой туннель WireGuard и выберите приложения, которые пойдут через него. Остальное — напрямую."
+          }
+        }
+      }
+    },
+    "Import your WireGuard tunnel and choose which services use it. Everything else stays direct." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Импортируйте свой туннель WireGuard и выберите сервисы, которые пойдут через него. Остальное — напрямую."
+          }
+        }
+      }
+    },
+    "No accounts, analytics or ads. Tunnels, keys and the log stay on this device until you share them." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без аккаунтов, аналитики и рекламы. Туннели, ключи и журнал остаются на этом устройстве, пока вы сами ими не поделитесь."
+          }
+        }
+      }
+    },
+    "Not Now" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не сейчас"
+          }
+        }
+      }
+    },
+    "Welcome to Splitway" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добро пожаловать в Splitway"
+          }
+        }
+      }
+    },
+    "What the system will ask" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "О чём спросит система"
+          }
+        }
+      }
+    },
+    "Your data stays with you" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваши данные остаются у вас"
+          }
+        }
+      }
+    },
+    "iOS asks to add a VPN configuration on the first connection. The camera is only for QR codes." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "При первом подключении iOS попросит добавить конфигурацию VPN. Камера нужна только для QR-кодов."
+          }
+        }
+      }
+    },
+    "macOS asks once to allow the Splitway network extension and to add a VPN configuration." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS один раз попросит разрешить сетевое расширение Splitway и добавить конфигурацию VPN."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

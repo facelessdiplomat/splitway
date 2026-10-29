@@ -1,6 +1,8 @@
 import DiagnosticsPresentation
+import OnboardingPresentation
 import SettingsPresentation
 import SwiftUI
+import SystemExtensionPresentation
 import TunnelEditorPresentation
 import TunnelImportInfrastructure
 import TunnelImportPresentation
@@ -27,6 +29,11 @@ struct SplitwayRootScene: Scene {
             .tunnelImport(composition.tunnelImport)
             .tunnelEditor(composition.tunnelEditor)
             .logViewer(composition.logViewer)
+            .onboarding(composition.onboarding)
+            .systemExtensionAttention(
+                composition.onboarding.systemExtension,
+                isSuppressed: composition.onboarding.isPresented
+            )
             #if os(iOS)
                 .settingsSheet(composition.settings)
             #endif
@@ -37,6 +44,7 @@ struct SplitwayRootScene: Scene {
             .onOpenURL { url in
                 Task.immediate { await composition.tunnelImport.importFiles([url]) }
             }
+            .task { await composition.onboarding.activateSystemExtensionOnLaunch() }
         }
     }
 
