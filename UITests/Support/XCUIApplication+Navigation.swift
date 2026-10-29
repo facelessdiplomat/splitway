@@ -37,7 +37,7 @@ extension XCUIApplication {
         let field = textFields[label].firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: Self.elementTimeout), "No field \(label)")
         field.tap()
-        field.typeText(text)
+        field.typeText(text + XCUIKeyboardKey.return.rawValue)
     }
 
     func addTunnel(by method: String) {

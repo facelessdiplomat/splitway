@@ -66,7 +66,7 @@ flowchart LR
 - `ZIPArchiveReader` считает реально распакованные байты, а не размеры из заголовков. Он сверяет CRC-32 и пропускает каталоги и символьные ссылки.
 - `VisionQRCodeDecoder` выполняет `DetectBarcodesRequest` с символикой QR и возвращает тексты без повторов.
 - `SecurityScopedFileReader` читает файлы на своей очереди GCD через `NSFileCoordinator` (файлы iCloud скачиваются), с доступом security-scoped и лимитом 10 МБ на файл (`ImportFileBatch.maximumFileByteCount`).
-- `SystemClipboard` читает текст из `UIPasteboard` или `NSPasteboard` на главном акторе.
+- `SystemClipboard` читает текст буфера обмена. На iOS чтение `UIPasteboard` идёт на своей очереди: пока открыт системный запрос «Разрешить вставку», чтение ждёт ответа и не должно останавливать главный поток. На macOS `NSPasteboard` читается на главном акторе.
 - `SystemCameraAccess` сообщает и запрашивает доступ к камере через `AVCaptureDevice`.
 - `DroppedImportFile` — `Transferable` для перетаскивания: читает полученный файл тем же `SecurityScopedFileReader`, пока система держит его копию.
 - `TunnelImportAssembly` собирает сценарии и адаптеры для composition root.
@@ -135,7 +135,9 @@ flowchart LR
   - сканер: доступ к камере (есть, запрошен и дан, запрошен и не дан, отказ, ограничение), нет сканера, отказ камеры, код только один раз, все коды фото, фото без кода, нечитаемое фото;
   - предпросмотр кода после закрытия сканера и ничего при закрытии без кода.
 
-Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelImport`.
+- Smoke UI-тест `TunnelSmokeTests.testImportsAPastedTunnelAndRenamesIt` на симуляторах iPhone и iPad. Он кладёт в буфер конфигурацию с ключами, созданными во время теста, отвечает «Разрешить вставку» на системный запрос, импортирует туннель, открывает детали и редактор и сохраняет новое имя.
+
+Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelImport`; UI-тесты — `Scripts/check.sh --ui`.
 
 ## История изменений
 
@@ -146,3 +148,4 @@ flowchart LR
 | 2026-10-29 | `VisionQRCodeDecoder` | M1-17 |
 | 2026-10-29 | Экраны импорта, выбор кандидатов, чтение файлов, буфер, перетаскивание, типы документов | M3-04 |
 | 2026-10-29 | Сканер QR камерой и с фото, доступ к камере, `ImportPayload.qrCode`, `ImportFallbackNames` | M3-05 |
+| 2026-10-29 | Буфер обмена iOS читается не на главном потоке, smoke UI-тест вставки | M3-15 |
