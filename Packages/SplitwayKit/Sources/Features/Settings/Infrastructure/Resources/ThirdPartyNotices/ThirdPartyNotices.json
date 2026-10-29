@@ -1,14 +1,31 @@
 [
   {
+    "name" : "btree",
+    "license" : "Apache-2.0",
+    "dependencies" : [
+      "github.com/google/btree"
+    ],
+    "textFile" : "btree"
+  },
+  {
     "name" : "Go",
     "license" : "BSD-3-Clause",
     "dependencies" : [
       "go",
       "golang.org/x/crypto",
       "golang.org/x/net",
-      "golang.org/x/sys"
+      "golang.org/x/sys",
+      "golang.org/x/time"
     ],
     "textFile" : "Go"
+  },
+  {
+    "name" : "gVisor",
+    "license" : "Apache-2.0",
+    "dependencies" : [
+      "gvisor.dev/gvisor"
+    ],
+    "textFile" : "gVisor"
   },
   {
     "name" : "wireguard-go",
@@ -21,9 +38,7 @@
   {
     "name" : "WireGuardKit",
     "license" : "MIT",
-    "dependencies" : [
-
-    ],
+    "dependencies" : [],
     "textFile" : "WireGuardKit"
   },
   {
