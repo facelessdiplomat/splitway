@@ -6,13 +6,15 @@ public struct ApplicationIdentity: Sendable, Hashable {
     public let path: String
     public let signingIdentifiers: [String]
     public let teamIdentifier: String?
+    public let bundleVersion: String?
 
     public init(
         kind: ApplicationKind,
         displayName: String,
         path: String,
         signingIdentifiers: [String] = [],
-        teamIdentifier: String? = nil
+        teamIdentifier: String? = nil,
+        bundleVersion: String? = nil
     ) throws(ApplicationIdentityError) {
         guard !displayName.trimmingCharacters(in: .whitespaces).isEmpty else { throw .emptyDisplayName }
         guard !path.isEmpty else { throw .emptyPath }
@@ -21,5 +23,6 @@ public struct ApplicationIdentity: Sendable, Hashable {
         self.path = path
         self.signingIdentifiers = Set(signingIdentifiers).sorted()
         self.teamIdentifier = teamIdentifier
+        self.bundleVersion = bundleVersion
     }
 }

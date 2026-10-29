@@ -215,6 +215,11 @@ let features: [FeatureModule] = [
     ),
     FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
     FeatureModule(
+        "ApplicationCatalog",
+        coreDependencies: ["AppRouting"],
+        providesTestSupport: true
+    ),
+    FeatureModule(
         "Settings",
         layers: [.core, .infrastructure, .presentation],
         presentationDependencies: ["DesignSystemPresentation"],

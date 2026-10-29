@@ -5,6 +5,7 @@ extension ApplicationIdentity: Codable {
         case path
         case signingIdentifiers
         case teamIdentifier
+        case bundleVersion
     }
 
     public init(from decoder: any Decoder) throws {
@@ -15,7 +16,8 @@ extension ApplicationIdentity: Codable {
                 displayName: container.decode(String.self, forKey: .displayName),
                 path: container.decode(String.self, forKey: .path),
                 signingIdentifiers: container.decodeIfPresent([String].self, forKey: .signingIdentifiers) ?? [],
-                teamIdentifier: container.decodeIfPresent(String.self, forKey: .teamIdentifier)
+                teamIdentifier: container.decodeIfPresent(String.self, forKey: .teamIdentifier),
+                bundleVersion: container.decodeIfPresent(String.self, forKey: .bundleVersion)
             )
         } catch let error as ApplicationIdentityError {
             throw DecodingError.dataCorruptedError(
@@ -33,5 +35,6 @@ extension ApplicationIdentity: Codable {
         try container.encode(path, forKey: .path)
         try container.encode(signingIdentifiers, forKey: .signingIdentifiers)
         try container.encodeIfPresent(teamIdentifier, forKey: .teamIdentifier)
+        try container.encodeIfPresent(bundleVersion, forKey: .bundleVersion)
     }
 }
