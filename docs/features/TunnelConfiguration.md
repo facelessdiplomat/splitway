@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Статус | завершена (M1) |
+| Статус | завершена (M1); тексты проблем — M3-04 |
 | Платформы | shared |
-| Задачи | M1-04, M1-05, M1-06, M1-07, M1-08, M1-09 |
-| Таргеты | `TunnelConfiguration`, `TunnelConfigurationTestSupport` |
+| Задачи | M1-04, M1-05, M1-06, M1-07, M1-08, M1-09, M3-04 |
+| Таргеты | `TunnelConfiguration`, `TunnelConfigurationPresentation`, `TunnelConfigurationTestSupport` |
 
 ## Назначение
 
@@ -47,12 +47,13 @@ flowchart LR
 
 ## Публичный API
 
-`TunnelConfiguration`, `InterfaceConfiguration`, `PeerConfiguration`, `TunnelConfigurationError`, `TunnelConfigurationWarning`; `PrivateKey`, `PublicKey`, `PresharedKey`, `WireGuardKeyParsingError`; `MTU`, `PersistentKeepalive`, `Endpoint`, `EndpointHost`, `DNSConfiguration`, `AllowedIPs` и их ошибки; `WgQuickConfigurationParser`, `WgQuickParsingResult`, `ConfigurationIssue`, `ConfigurationIssueKind`, `ConfigurationIssueSeverity`, `ConfigurationValueError`, `WgQuickKey`, `WgQuickSection`; `WgQuickConfigurationSerializer`; `PrivateNetworkExclusion`.
+`TunnelConfiguration`, `InterfaceConfiguration`, `PeerConfiguration`, `TunnelConfigurationError`, `TunnelConfigurationWarning`; `PrivateKey`, `PublicKey`, `PresharedKey`, `WireGuardKeyParsingError`; `MTU`, `PersistentKeepalive`, `Endpoint`, `EndpointHost`, `DNSConfiguration`, `AllowedIPs` и их ошибки; `WgQuickConfigurationParser`, `WgQuickParsingResult`, `ConfigurationIssue`, `ConfigurationIssueKind`, `ConfigurationIssueSeverity`, `ConfigurationValueError`, `WgQuickKey`, `WgQuickSection`; `WgQuickConfigurationSerializer`; `PrivateNetworkExclusion`. Слой `Presentation`: `ConfigurationIssueKind.message`, `TunnelConfigurationWarning.message` (`LocalizedStringResource`) и `ConfigurationIssueLabel` — проблема с номером строки для предпросмотра импорта и редактора.
 
 ## Решения
 
 - Парсер не бросает ошибок: он возвращает результат и полный список проблем, чтобы предпросмотр импорта (M1-16) показал всё сразу.
 - Пир в предупреждениях определяется публичным ключом, а не позицией: ключ уникален, позиция меняется.
+- Тексты проблем разбиты на три группы (документ, параметры, содержимое), потому что один `switch` на 16 случаев превысил бы порог цикломатической сложности. Табличный тест проверяет текст каждого случая, поэтому ни один не попадает в общий запасной текст.
 - Невалидный агрегат создать нельзя: конструкторы value objects и `TunnelConfiguration` бросают типизированные ошибки.
 
 ## Спорные решения
@@ -87,7 +88,9 @@ flowchart LR
 - round-trip `parse(serialize(x)) == x` для фикстур и для конфигураций `RandomTunnelConfigurationGenerator` с фиксированным seed;
 - эталонный набор 30 сетей для исключения локальных сетей.
 
-Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelConfigurationTests`.
+2 теста в `TunnelConfigurationPresentationTests`: текст каждой проблемы и предупреждения.
+
+Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelConfiguration`.
 
 ## История изменений
 
@@ -99,3 +102,4 @@ flowchart LR
 | 2026-10-29 | Парсер wg-quick | M1-07 |
 | 2026-10-29 | Сериализатор wg-quick | M1-08 |
 | 2026-10-29 | «Исключить локальные сети» | M1-09 |
+| 2026-10-29 | Тексты проблем конфигурации | M3-04 |

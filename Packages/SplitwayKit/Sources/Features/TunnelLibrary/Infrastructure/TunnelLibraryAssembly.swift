@@ -2,8 +2,8 @@ import Foundation
 import TunnelLibrary
 
 public struct TunnelLibraryAssembly: Sendable {
-    private let records: FileTunnelRecordRepository
-    private let secrets: KeychainTunnelSecretStore
+    public let records: FileTunnelRecordRepository
+    public let secrets: KeychainTunnelSecretStore
 
     public init(storageDirectory: URL, keychainAccessGroup: String? = nil) {
         records = FileTunnelRecordRepository(directory: storageDirectory)

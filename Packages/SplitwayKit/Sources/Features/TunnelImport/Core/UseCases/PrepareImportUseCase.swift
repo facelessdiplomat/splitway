@@ -16,10 +16,21 @@ public struct PrepareImportUseCase: Sendable {
         self.fallbackName = fallbackName
     }
 
-    public func execute(_ payloads: [ImportPayload]) async throws(TunnelLibraryError) -> ImportPreview {
+    public func execute(
+        _ payloads: [ImportPayload],
+        unreadableFileNames: [String] = []
+    ) async throws(TunnelLibraryError) -> ImportPreview {
         let extraction = extractor.extract(payloads)
-        var evaluator = ImportCandidateEvaluator(library: try await loadTunnels.execute(), fallbackName: fallbackName)
+        let library = try await loadTunnels.execute()
+        var evaluator = ImportCandidateEvaluator(library: library, fallbackName: fallbackName)
         let candidates = extraction.configurations.map { configuration in evaluator.evaluate(configuration) }
-        return ImportPreview(candidates: candidates, failures: extraction.failures)
+        let unreadableFiles = unreadableFileNames.map { fileName in
+            ImportSourceFailure(source: .file(name: fileName), reason: .unreadable)
+        }
+        return ImportPreview(
+            candidates: candidates,
+            failures: unreadableFiles + extraction.failures,
+            existingNames: library.entries.map(\.name)
+        )
     }
 }

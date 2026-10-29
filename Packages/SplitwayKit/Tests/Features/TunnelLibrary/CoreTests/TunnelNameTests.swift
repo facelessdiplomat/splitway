@@ -55,4 +55,9 @@ struct TunnelNameTests {
 
         #expect(TunnelName.derived(fromFileName: fileName)?.description.count == TunnelName.maximumLength)
     }
+
+    @Test
+    func offersAnUntitledNameThatFollowsTheRules() throws {
+        #expect(try TunnelName(TunnelName.untitled.description) == TunnelName.untitled)
+    }
 }

@@ -7,9 +7,56 @@
 		<string>en</string>
 		<string>ru</string>
 	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>WireGuard Configuration</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.wireguard.config</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>ZIP Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.zip-archive</string>
+			</array>
+		</dict>
+	</array>
 	<key>SplitwayAppGroupIdentifier</key>
 	<string>$(TeamIdentifierPrefix)$(SPLITWAY_BUNDLE_ID_PREFIX).splitway</string>
 	<key>SplitwayTunnelProviderBundleIdentifier</key>
 	<string>$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>WireGuard Configuration</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.wireguard.config</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>conf</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

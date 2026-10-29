@@ -24,8 +24,4 @@ public struct ImportPreviewCandidate: Sendable, Equatable {
     public var warnings: [ConfigurationIssue] {
         issues.filter { issue in issue.severity == .warning }
     }
-
-    var importCandidate: ImportCandidate? {
-        configuration.map { configuration in ImportCandidate(proposedName: proposedName, configuration: configuration) }
-    }
 }
