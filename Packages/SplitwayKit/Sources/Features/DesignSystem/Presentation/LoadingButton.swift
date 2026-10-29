@@ -28,10 +28,12 @@ public struct LoadingButton<Label: View>: View {
 
 #Preview("Loading buttons") {
     VStack {
-        LoadingButton(isLoading: false, action: {}) {
+        LoadingButton(isLoading: false) {
+        } label: {
             Text(verbatim: "Connect")
         }
-        LoadingButton(isLoading: true, action: {}) {
+        LoadingButton(isLoading: true) {
+        } label: {
             Text(verbatim: "Connect")
         }
     }
