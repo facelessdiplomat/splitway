@@ -120,7 +120,7 @@ sequenceDiagram
 2. Проверка и запасной путь — `sourceAppAuditToken` → `SecCodeCopyGuestWithAttributes` → Team ID и путь исполняемого файла. Результат кэшируется по `(pid, pidversion)` из audit token.
 3. `ApplicationIdentity` выбранного приложения содержит: signing identifier главного бандла, Team ID, путь бандла и **signing identifiers всех вложенных бандлов** (`Contents/Frameworks/*.app`, `Contents/XPCServices/*.xpc`, `Contents/Helpers`, `Contents/Library/LoginItems`). Их собирает `ApplicationCatalog` при выборе приложения и пересобирает, если поменялась версия бандла. Так автоматически покрываются Chrome Helper и хелперы Electron-приложений.
 4. CLI-утилиты сопоставляются по пути исполняемого файла и (если есть) по signing identifier, например `com.apple.curl`.
-5. Защита от подмены: если у выбранного приложения есть Team ID, совпадения одного signing identifier недостаточно, Team ID процесса тоже должен совпасть.
+5. Защита от подмены: если у выбранного приложения есть Team ID, совпадения одного signing identifier недостаточно, Team ID процесса тоже должен совпасть. Identifier кода без Team ID учитывается, только если код подписан Apple (`anchor apple`); ad-hoc программа узнаётся лишь по пути.
 
 Документация Apple пишет, что метаданные потока есть только у per-app VPN-провайдеров, но на форумах их успешно используют и в transparent proxy ([тред](https://developer.apple.com/forums/thread/763912)). Это главный риск, его проверяет спайк **SP-2**, причём на конкретных приложениях: Safari, WebKit-приложения, Chrome, Firefox, Electron, `curl`, `nsurlsessiond`.
 
