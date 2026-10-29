@@ -20,10 +20,14 @@ final class EngineLogDestination: Sendable {
     init(recorder: LogRecorder) {
         self.recorder = recorder
     }
+
+    func forward(level: TCLogLevel, message: String) {
+        recorder.record(level == .error ? .error : .debug, message)
+    }
 }
 
 private func forwardEngineLog(context: UnsafeMutableRawPointer?, level: TCLogLevel, message: UnsafePointer<CChar>) {
     guard let context else { return }
     let destination = Unmanaged<EngineLogDestination>.fromOpaque(context).takeUnretainedValue()
-    destination.recorder.record(level == .error ? .error : .debug, String(cString: message))
+    destination.forward(level: level, message: String(cString: message))
 }

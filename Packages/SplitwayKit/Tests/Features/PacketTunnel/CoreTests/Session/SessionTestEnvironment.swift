@@ -10,22 +10,18 @@ struct SessionTestEnvironment {
 
     let log = SessionEventLog()
     let resolver: FakeEndpointResolver
-    let settingsApplier: FakeTunnelNetworkSettingsApplier
     let device: FakeWireGuardDevice
     let session: PacketTunnelSession
     let configuration: TunnelConfiguration
 
     init(
-        rejectsSettings: Bool = false,
         tunnelDescriptor: Int32? = 7,
         engineFailure: TunnelEngineError? = nil
     ) throws {
         resolver = FakeEndpointResolver(log: log)
-        settingsApplier = FakeTunnelNetworkSettingsApplier(log: log, rejectsSettings: rejectsSettings)
         device = FakeWireGuardDevice(log: log, startFailure: engineFailure)
         session = PacketTunnelSession(
             engine: device,
-            settingsApplier: settingsApplier,
             interfaceLocator: FakeTunnelInterfaceLocator(log: log, descriptor: tunnelDescriptor),
             endpointResolver: resolver,
             pathMonitor: SilentNetworkPathMonitor()
@@ -39,6 +35,8 @@ struct SessionTestEnvironment {
     }
 
     func start() async throws {
-        try await session.start(configuration: configuration, routedBy: .default)
+        let preparedStart = try await session.prepareStart(configuration: configuration, routedBy: .default)
+        log.record(.appliedSettings)
+        try await session.completeStart(preparedStart)
     }
 }

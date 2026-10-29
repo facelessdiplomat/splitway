@@ -75,19 +75,35 @@ struct PacketTunnelSessionTests {
         let configuration = try SessionTestEnvironmentWithoutAnswers.configuration()
 
         await #expect(throws: PacketTunnelError.endpointUnresolvable) {
-            try await session.start(configuration: configuration, routedBy: .default)
+            try await session.prepareStart(configuration: configuration, routedBy: .default)
         }
         #expect(environment.log.events.isEmpty)
     }
 
     @Test
-    func reportsRejectedNetworkSettingsWithoutStartingTheDevice() async throws {
-        let environment = try SessionTestEnvironment(rejectsSettings: true)
+    func abandonsAStartStoppedWhileTheProviderAppliesSettings() async throws {
+        let environment = try SessionTestEnvironment()
+        let preparedStart = try await environment.session.prepareStart(
+            configuration: environment.configuration,
+            routedBy: .default
+        )
 
-        await #expect(throws: PacketTunnelError.networkSettingsRejected) {
-            try await environment.start()
+        await environment.session.stop()
+
+        await #expect(throws: PacketTunnelError.cancelled) {
+            try await environment.session.completeStart(preparedStart)
         }
         #expect(environment.log.events == [.resolved(SessionTestEnvironment.endpoint)])
+    }
+
+    @Test
+    func reportsWhetherTheDeviceIsRunning() async throws {
+        let environment = try SessionTestEnvironment()
+        #expect(await !environment.session.isRunning)
+
+        try await environment.start()
+
+        #expect(await environment.session.isRunning)
     }
 
     @Test

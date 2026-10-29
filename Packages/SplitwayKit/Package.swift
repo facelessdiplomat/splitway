@@ -180,8 +180,8 @@ let features: [FeatureModule] = [
     FeatureModule(
         "PacketTunnel",
         layers: [.core, .infrastructure],
-        coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging"],
+        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"]
     ),
     FeatureModule("SystemExtension", layers: [.core, .infrastructure]),
     FeatureModule(
