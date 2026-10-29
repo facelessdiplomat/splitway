@@ -301,6 +301,16 @@
         }
       }
     },
+    "Log" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Журнал"
+          }
+        }
+      }
+    },
     "No handshake yet" : {
       "localizations" : {
         "ru" : {

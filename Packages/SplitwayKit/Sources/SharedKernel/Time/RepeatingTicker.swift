@@ -1,4 +1,4 @@
-public struct RepeatingTicker: StatisticsTicker {
+public struct RepeatingTicker: Ticker {
     private let interval: Duration
 
     public init(interval: Duration) {

@@ -4,19 +4,19 @@
 |---|---|
 | Статус | завершена (M1) |
 | Платформы | shared |
-| Задачи | M0-05, M1-01, M1-02, M1-03, M1-05 |
+| Задачи | M0-05, M1-01, M1-02, M1-03, M1-05, M3-12 (`Ticker`) |
 | Таргеты | `SharedKernel`, `SharedKernelTestSupport` |
 
 ## Назначение
 
-Общие value objects, на которых построены остальные фичи: IP-адреса и сети CIDR с алгеброй множеств, сетевой порт, доменное имя, строгий разбор десятичных чисел и часы. Все типы неизменяемые, `Sendable` и проверяют инварианты при создании.
+Общие value objects, на которых построены остальные фичи: IP-адреса и сети CIDR с алгеброй множеств, сетевой порт, доменное имя, строгий разбор десятичных чисел, часы и периодические тики. Все типы неизменяемые, `Sendable` и проверяют инварианты при создании.
 
 ## Зависимости
 
 | Тип | Что | Зачем |
 |---|---|---|
 | Фичи проекта | нет | общее ядро, от него зависят все фичи |
-| Системные фреймворки | Foundation | `Date`, `Codable`, `CharacterSet` |
+| Системные фреймворки | Foundation, Synchronization | `Date`, `Codable`, `CharacterSet`; `Mutex` в `ManualTicker` |
 | Сторонние библиотеки | нет | |
 
 ## Принцип работы
@@ -27,16 +27,18 @@
 - `NetworkPort` — 1…65535, `Codable` числом. `DomainName` — ASCII и punycode, метка до 63 символов, имя до 253, нижний регистр, завершающая точка отбрасывается; `isSameOrSubdomain(of:)` сравнивает по суффиксу меток.
 - `CanonicalDecimalText` — единое строгое правило для чисел из конфигураций: только цифры, без знака, пробелов и ведущих нулей; `integerValue` принимает до 9 цифр.
 - `WallClock` и `SystemWallClock` — источник времени для сценариев. В `SharedKernelTestSupport` есть `FixedWallClock` и `SeededRandomNumberGenerator` (SplitMix64) для воспроизводимых property-тестов.
+- `Ticker` — поток тиков для периодической работы моделей (опрос статистики, обновление журнала). `RepeatingTicker` даёт первый тик сразу, затем раз в заданный интервал, пока поток не отменят. `ManualTicker` в `SharedKernelTestSupport` даёт тики по команде теста и сообщает, идёт ли подписка.
 
 ## Публичный API
 
-`IPAddress`, `IPAddressFamily`, `IPAddressParsingError`, `IPNetwork`, `IPNetworkParsingError`, `IPNetworkSet`, `NetworkPort`, `NetworkPortValidationError`, `DomainName`, `DomainNameValidationError`, `CanonicalDecimalText`, `WallClock`, `SystemWallClock`.
+`IPAddress`, `IPAddressFamily`, `IPAddressParsingError`, `IPNetwork`, `IPNetworkParsingError`, `IPNetworkSet`, `NetworkPort`, `NetworkPortValidationError`, `DomainName`, `DomainNameValidationError`, `CanonicalDecimalText`, `WallClock`, `SystemWallClock`, `Ticker`, `RepeatingTicker`.
 
 ## Решения
 
 - Адрес внутри — число `UInt128`, а не строка или массив байтов: сравнение, маски и диапазоны сводятся к арифметике без аллокаций.
 - Множество сетей построено на диапазонах, а не на дереве префиксов: операции над `AllowedIPs` и списками исключений — слияние отсортированных массивов.
 - Классификация адресов перенесена из M1-01 в M1-02, потому что естественно выражается через известные сети.
+- `Ticker` переехал из `TunnelLibraryPresentation` в M3-12: его используют две фичи, статистика туннеля и журнал.
 
 ## Спорные решения
 
@@ -56,6 +58,7 @@
 
 - `DomainName` не преобразует IDN: имя на кириллице отклоняется ошибкой.
 - `CanonicalDecimalText.integerValue` ограничен 9 цифрами. Этого хватает для портов, MTU, интервалов и длин префиксов.
+- `RepeatingTicker` не покрыт тестами: он только повторяет `Task.sleep`, а тесты по правилам идут без ожиданий. Модели проверяются с `ManualTicker`.
 
 ## Тесты
 
@@ -78,3 +81,4 @@
 | 2026-10-29 | `IPNetwork`, `IPNetworkSet`, классификация адресов | M1-02 |
 | 2026-10-29 | `NetworkPort`, `DomainName` | M1-03 |
 | 2026-10-29 | `CanonicalDecimalText` стал публичным | M1-05 |
+| 2026-10-29 | `Ticker`, `RepeatingTicker`, `ManualTicker` из `TunnelLibraryPresentation` | M3-12 |

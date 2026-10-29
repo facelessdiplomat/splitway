@@ -6,6 +6,7 @@ struct TunnelListView: View {
     @Binding var selection: TunnelIdentifier?
     let addition: TunnelAdditionOptions
     let export: TunnelExportModel
+    let showLog: @MainActor () -> Void
 
     var body: some View {
         List(selection: $selection) {
@@ -36,7 +37,7 @@ struct TunnelListView: View {
         }
         .navigationTitle(Text("Tunnels", bundle: .module))
         .toolbar {
-            TunnelListToolbar(addition: addition, export: export, hasTunnels: !model.rows.isEmpty)
+            TunnelListToolbar(addition: addition, export: export, hasTunnels: !model.rows.isEmpty, showLog: showLog)
         }
         #if os(macOS)
             .onDeleteCommand {

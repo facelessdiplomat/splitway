@@ -4,6 +4,7 @@ struct TunnelListToolbar: ToolbarContent {
     let addition: TunnelAdditionOptions
     let export: TunnelExportModel
     let hasTunnels: Bool
+    let showLog: @MainActor () -> Void
 
     var body: some ToolbarContent {
         #if os(iOS)
@@ -23,6 +24,17 @@ struct TunnelListToolbar: ToolbarContent {
                     } icon: {
                         Image(systemName: "plus")
                     }
+                }
+            }
+        }
+        ToolbarItem(placement: .secondaryAction) {
+            Button {
+                showLog()
+            } label: {
+                Label {
+                    Text("Log", bundle: .module)
+                } icon: {
+                    Image(systemName: "doc.text.magnifyingglass")
                 }
             }
         }

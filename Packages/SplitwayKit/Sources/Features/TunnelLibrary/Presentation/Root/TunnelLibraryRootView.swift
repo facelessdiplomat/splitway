@@ -5,7 +5,7 @@ public struct TunnelLibraryRootView: View {
     private let model: TunnelListModel
     private let statistics: TunnelStatisticsPolling
     private let addition: TunnelAdditionOptions
-    private let editTunnel: @MainActor (Tunnel) -> Void
+    private let navigation: TunnelLibraryNavigation
     private let export: TunnelExportModel
     @State private var selection: TunnelIdentifier?
 
@@ -14,22 +14,28 @@ public struct TunnelLibraryRootView: View {
         statistics: TunnelStatisticsPolling,
         addition: TunnelAdditionOptions,
         export: TunnelExportModel,
-        editTunnel: @escaping @MainActor (Tunnel) -> Void
+        navigation: TunnelLibraryNavigation
     ) {
         self.model = model
         self.statistics = statistics
         self.addition = addition
-        self.editTunnel = editTunnel
+        self.navigation = navigation
         self.export = export
     }
 
     public var body: some View {
         NavigationSplitView {
-            TunnelListView(model: model, selection: $selection, addition: addition, export: export)
+            TunnelListView(
+                model: model,
+                selection: $selection,
+                addition: addition,
+                export: export,
+                showLog: navigation.showLog
+            )
         } detail: {
             detail
         }
-        .modifier(TunnelListAlertPresentation(model: model, editTunnel: editTunnel))
+        .modifier(TunnelListAlertPresentation(model: model, editTunnel: navigation.editTunnel))
         .modifier(SystemPromptExplanation(model: model))
         .modifier(TunnelExportPresenter(model: export))
         .task { await model.load() }
@@ -47,7 +53,7 @@ public struct TunnelLibraryRootView: View {
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
-                            editTunnel(tunnel)
+                            navigation.editTunnel(tunnel)
                         } label: {
                             Text("Edit", bundle: .module)
                         }
