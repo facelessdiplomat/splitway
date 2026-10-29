@@ -216,6 +216,7 @@ let features: [FeatureModule] = [
     FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
     FeatureModule(
         "ApplicationCatalog",
+        layers: [.core, .infrastructure],
         coreDependencies: ["AppRouting"],
         providesTestSupport: true
     ),
