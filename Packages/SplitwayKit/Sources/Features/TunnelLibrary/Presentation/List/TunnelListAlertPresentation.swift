@@ -1,19 +1,17 @@
 import SwiftUI
+import TunnelLibrary
 
 struct TunnelListAlertPresentation: ViewModifier {
     let model: TunnelListModel
+    let editTunnel: @MainActor (Tunnel) -> Void
 
     func body(content: Content) -> some View {
         content.alert(
             model.alert?.title ?? Text(verbatim: ""),
             isPresented: isPresented,
             presenting: model.alert
-        ) { _ in
-            Button(role: .cancel) {
-                model.dismissAlert()
-            } label: {
-                Text("OK", bundle: .module)
-            }
+        ) { alert in
+            TunnelListAlertActions(alert: alert, model: model, editTunnel: editTunnel)
         } message: { alert in
             alert.message
         }

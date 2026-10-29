@@ -60,4 +60,10 @@ struct TunnelRowStatusTests {
         #expect(TunnelRowStatus.connected(since: Self.connectedMoment).connectedSince == Self.connectedMoment)
         #expect(TunnelRowStatus.reconnecting.connectedSince == nil)
     }
+
+    @Test
+    func knowsWhyTheConnectionFailed() {
+        #expect(TunnelRowStatus.failed(.endpointUnresolvable).failure == .endpointUnresolvable)
+        #expect(TunnelRowStatus.disconnected.failure == nil)
+    }
 }

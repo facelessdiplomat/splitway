@@ -9,7 +9,10 @@ public final class TunnelListModel {
     public private(set) var rows: [TunnelRow] = []
     public private(set) var pendingDeletion: TunnelDeletionRequest?
     public private(set) var alert: TunnelListAlert?
+    public private(set) var tunnelAwaitingSystemPrompt: TunnelIdentifier?
     private var hasLoaded = false
+    private var hasExplainedSystemPrompt = false
+    private var pendingActivation: TunnelIdentifier?
     private var entries: [TunnelLibraryEntry] = []
     private var slot = SlotState.empty
 
@@ -63,15 +66,27 @@ public final class TunnelListModel {
 
     public func toggleConnection(of row: TunnelRow) async {
         guard !row.isConnectionActive else {
+            pendingActivation = nil
+            rebuildRows()
             await connection.deactivateTunnel.execute()
             return
         }
-        guard let tunnel = tunnel(withID: row.id) else { return }
-        do {
-            try await connection.activateTunnel.execute(tunnel)
-        } catch {
-            alert = .connection(error)
+        guard slot.tunnelID != nil || hasExplainedSystemPrompt else {
+            tunnelAwaitingSystemPrompt = row.id
+            return
         }
+        await activate(row.id)
+    }
+
+    public func continueToSystemPrompt() async {
+        guard let tunnelID = tunnelAwaitingSystemPrompt else { return }
+        tunnelAwaitingSystemPrompt = nil
+        hasExplainedSystemPrompt = true
+        await activate(tunnelID)
+    }
+
+    public func dismissSystemPromptExplanation() {
+        tunnelAwaitingSystemPrompt = nil
     }
 
     public func requestDeletion(of row: TunnelRow) {
@@ -120,7 +135,22 @@ public final class TunnelListModel {
         alert = nil
     }
 
+    private func activate(_ tunnelID: TunnelIdentifier) async {
+        guard let tunnel = tunnel(withID: tunnelID) else { return }
+        pendingActivation = tunnelID
+        rebuildRows()
+        do {
+            try await connection.activateTunnel.execute(tunnel)
+        } catch {
+            alert = .connection(error, tunnel: tunnelID)
+        }
+        if pendingActivation == tunnelID {
+            pendingActivation = nil
+            rebuildRows()
+        }
+    }
+
     private func rebuildRows() {
-        rows = entries.map { entry in entry.row(in: slot) }
+        rows = entries.map { entry in entry.row(in: slot, activating: pendingActivation) }
     }
 }

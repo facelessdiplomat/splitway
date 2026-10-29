@@ -169,7 +169,9 @@ let features: [FeatureModule] = [
         layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
         infrastructureDependencies: [zipFoundation],
-        presentationDependencies: ["TunnelConnection", "AppRoutingPresentation", "DesignSystemPresentation"],
+        presentationDependencies: [
+            "TunnelConnection", "TunnelConnectionPresentation", "AppRoutingPresentation", "DesignSystemPresentation",
+        ],
         testDependencies: ["TunnelConfigurationTestSupport"],
         infrastructureTestDependencies: [zipFoundation],
         presentationTestDependencies: ["TunnelConnectionTestSupport"],
@@ -216,7 +218,7 @@ let features: [FeatureModule] = [
     FeatureModule("SystemExtension", layers: [.core, .infrastructure]),
     FeatureModule(
         "TunnelConnection",
-        layers: [.core, .infrastructure],
+        layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
         infrastructureDependencies: ["ProviderMessagingInfrastructure"],
         testDependencies: ["TunnelConfigurationTestSupport"],
