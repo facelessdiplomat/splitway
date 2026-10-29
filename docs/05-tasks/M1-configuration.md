@@ -8,7 +8,7 @@
 - [x] M1-02 `IPNetwork` и `IPNetworkSet`
 - [x] M1-03 `NetworkPort` и `DomainName`
 - [x] M1-04 Ключи WireGuard
-- [ ] M1-05 Value objects интерфейса и пира
+- [x] M1-05 Value objects интерфейса и пира
 - [ ] M1-06 Агрегат `TunnelConfiguration`
 - [ ] M1-07 Парсер wg-quick
 - [ ] M1-08 Сериализатор wg-quick
@@ -59,7 +59,7 @@
 ### M1-05. Value objects интерфейса и пира
 `shared` · M · зависит от: M1-02, M1-03
 
-**Сделать:** `MTU` (576…9000), `ListenPort`, `PersistentKeepalive` (0…65535, 0 = выключено), `Endpoint` (`host:port`, IPv6 в скобках, доменное имя), `DNSConfiguration` (строка wg-quick `DNS` смешивает адреса и домены поиска — разделить), `AllowedIPs` (обёртка над `IPNetworkSet`).
+**Сделать:** `MTU` (576…9000), порт прослушивания — `NetworkPort` из SharedKernel, `PersistentKeepalive` (1…65535 секунд; `0` и `off` означают «выключено» и дают `nil`), `Endpoint` (`host:port`, IPv6 в скобках, доменное имя), `DNSConfiguration` (строка wg-quick `DNS` смешивает адреса и домены поиска — разделить), `AllowedIPs` (сети в порядке записи и нормализованное `IPNetworkSet`). В SharedKernel `CanonicalDecimalText` становится публичным: все числа в конфиге разбираются одинаково строго.
 **Тесты сначала:** табличные тесты разбора и форматирования каждого типа, включая `[::1]:51820`, `vpn.example.com:51820`, порт вне диапазона.
 **Готово, когда:** каждый тип отклоняет невалидный ввод доменной ошибкой с указанием причины.
 
