@@ -4,8 +4,8 @@ struct ImportPayloadExtraction {
     private(set) var configurations: [ExtractedConfiguration] = []
     private(set) var failures: [ImportSourceFailure] = []
 
-    mutating func addText(_ text: String) {
-        configurations.append(ExtractedConfiguration(source: .text, fileName: nil, text: text))
+    mutating func addText(_ text: String, from source: ImportSource) {
+        configurations.append(ExtractedConfiguration(source: source, fileName: nil, text: text))
     }
 
     mutating func addFile(named fileName: String, contents: Data, from source: ImportSource) {
