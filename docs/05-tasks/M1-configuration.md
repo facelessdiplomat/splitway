@@ -5,7 +5,7 @@
 ## Статус
 
 - [x] M1-01 `IPAddress`
-- [ ] M1-02 `IPNetwork` и `IPNetworkSet`
+- [x] M1-02 `IPNetwork` и `IPNetworkSet`
 - [ ] M1-03 `Port` и `DomainName`
 - [ ] M1-04 Ключи WireGuard
 - [ ] M1-05 Value objects интерфейса и пира
