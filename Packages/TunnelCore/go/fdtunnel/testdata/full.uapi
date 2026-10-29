@@ -1,0 +1,10 @@
+private_key=77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a
+listen_port=51820
+replace_peers=true
+public_key=de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f
+preshared_key=5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb
+endpoint=[2001:db8::1]:51820
+persistent_keepalive_interval=25
+replace_allowed_ips=true
+allowed_ip=0.0.0.0/0
+allowed_ip=::/0

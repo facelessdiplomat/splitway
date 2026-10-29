@@ -1,3 +1,4 @@
+import Foundation
 import SharedKernel
 import Testing
 import TunnelConfiguration
@@ -6,29 +7,21 @@ import TunnelEngine
 
 @Suite
 struct UAPIConfigurationEncoderTests {
+    private static let wireGuardAcceptedFixtures = URL(filePath: #filePath)
+        .deletingLastPathComponent()
+        .appending(path: "../../../../../TunnelCore/go/fdtunnel/testdata")
+        .standardized
+
     @Test
-    func encodesEveryFieldOfTheFullFixture() throws {
+    func encodesTheFullFixtureExactlyAsWireGuardAcceptsIt() throws {
         let configuration = try Self.configuration(of: WgQuickFixtures.full)
         let firstPeer = try SampleKeys.firstPeerPublicKey()
         let endpoint = ResolvedEndpoint(address: try IPAddress("2001:db8::1"), port: try NetworkPort(51820))
 
         let uapi = UAPIConfigurationEncoder.encode(configuration, resolvedEndpoints: [firstPeer: endpoint])
 
-        #expect(
-            uapi.text == """
-                private_key=\(try SampleKeys.interfacePrivateKey().hexEncodedText)
-                listen_port=51820
-                replace_peers=true
-                public_key=\(firstPeer.hexEncodedText)
-                preshared_key=\(try SampleKeys.presharedKey().hexEncodedText)
-                endpoint=[2001:db8::1]:51820
-                persistent_keepalive_interval=25
-                replace_allowed_ips=true
-                allowed_ip=0.0.0.0/0
-                allowed_ip=::/0
-
-                """
-        )
+        let acceptedFixture = Self.wireGuardAcceptedFixtures.appending(path: "full.uapi")
+        #expect(uapi.text == (try String(contentsOf: acceptedFixture, encoding: .utf8)))
     }
 
     @Test
