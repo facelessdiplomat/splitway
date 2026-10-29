@@ -4,7 +4,7 @@
 
 ## Статус
 
-- [ ] M2-01 Кодирование UAPI и разбор статистики
+- [x] M2-01 Кодирование UAPI и разбор статистики
 - [ ] M2-02 Мост Go: API режима fd
 - [ ] M2-03 `fdtunnel`: wireguard-go поверх utun
 - [ ] M2-04 Swift-адаптер `TunnelCoreAdapter` (режим fd)
@@ -25,8 +25,8 @@
 ### M2-01. Кодирование UAPI и разбор статистики
 `shared` · M · зависит от: M1-06
 
-**Сделать:** в `TunnelEngine` Core: `UAPIConfigurationEncoder` (`TunnelConfiguration` + разрезолвленные endpoint → текст UAPI: `private_key` в hex, `listen_port`, `replace_peers=true`, `public_key`, `preshared_key`, `endpoint`, `persistent_keepalive_interval`, `replace_allowed_ips=true`, `allowed_ip`); `UAPIRuntimeStatisticsParser` → `RuntimeStatistics` (на каждого пира: `rx_bytes`, `tx_bytes`, `last_handshake_time_sec/nsec`). Порты `WireGuardDeviceEngine` (режим fd) и `UserspaceNetworkEngine` (режим netstack, реализуется в M4).
-**Тесты сначала:** snapshot UAPI для фикстур конфигов; разбор ответа `get=1` реального wireguard-go (фикстура); отсутствие рукопожатия (`0`) → `nil`.
+**Сделать:** в `TunnelEngine` Core: `UAPIConfigurationEncoder` (`TunnelConfiguration` + `ResolvedEndpoint` по публичным ключам пиров → `UAPIConfiguration`, текст которого не виден в `description`, `debugDescription` и `Mirror`): `private_key` в hex, `listen_port`, `replace_peers=true`, `public_key`, `preshared_key`, `endpoint` только для разрезолвленных пиров, `persistent_keepalive_interval`, `replace_allowed_ips=true`, `allowed_ip` без битов хоста. `UAPIRuntimeStatisticsParser` → `RuntimeStatistics` (на каждого пира `rx_bytes`, `tx_bytes`, `last_handshake_time_sec/nsec`; суммы и последнее рукопожатие); `errno` ≠ 0 → `UAPIResponseError.deviceError`. Порты `WireGuardDeviceEngine` и `RunningWireGuardDevice` (режим fd). Порт `UserspaceNetworkEngine` (режим netstack) объявляется в M4-06 вместе с реализацией, чтобы не угадывать его API заранее.
+**Тесты сначала:** snapshot UAPI для фикстур `full` и `multiplePeers`; endpoint без резолвинга не пишется; `allowed_ip` без битов хоста; текст UAPI не виден ни в одном текстовом представлении; разбор ответа `get=1` в формате wireguard-go с двумя пирами; отсутствие рукопожатия (`0`) → `nil`; `errno`; повреждённые ответы.
 **Готово, когда:** UAPI принимается настоящим wireguard-go в Go-тесте M2-03.
 
 ### M2-02. Мост Go: API режима fd
