@@ -7,6 +7,7 @@ excluded:
   - Packages/TunnelCore/build
   - Packages/TunnelCore/Artifacts
 disabled_rules:
+  - opening_brace
   - trailing_comma
   - todo
 opt_in_rules:
