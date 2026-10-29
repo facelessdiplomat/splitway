@@ -16,6 +16,10 @@ extension IPNetwork {
         IPNetwork(address: .ipv6(0xFC00 << 112), trustedPrefixLength: 7),
     ]
 
+    public static let reservedNetworks = [
+        IPNetwork(address: .ipv4(0xF000_0000), trustedPrefixLength: 4)
+    ]
+
     public static let multicastNetworks = [
         IPNetwork(address: .ipv4(0xE000_0000), trustedPrefixLength: 4),
         IPNetwork(address: .ipv6(0xFF00 << 112), trustedPrefixLength: 8),
