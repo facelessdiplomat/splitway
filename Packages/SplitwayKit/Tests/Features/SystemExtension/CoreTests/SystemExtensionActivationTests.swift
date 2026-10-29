@@ -2,7 +2,7 @@ import SystemExtension
 import Testing
 
 @Suite
-struct EnsureSystemExtensionActivatedUseCaseTests {
+struct SystemExtensionActivationTests {
     @Test(arguments: [
         (
             [SystemExtensionActivationEvent.needsUserApproval, .completed],
