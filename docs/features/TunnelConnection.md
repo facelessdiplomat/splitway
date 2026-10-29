@@ -4,7 +4,7 @@
 |---|---|
 | Статус | в работе: домен и слот готовы, проверка подключения на устройстве — M2-14 |
 | Платформы | shared |
-| Задачи | M2-09, M2-10, M3-02 (состояние слота для списка, подписчики статусов) |
+| Задачи | M2-09, M2-10, M3-02 (состояние слота для списка, подписчики статусов), M3-03 (сообщения слоту) |
 | Таргеты | `TunnelConnection`, `TunnelConnectionInfrastructure`, `TunnelConnectionTestSupport` |
 
 ## Назначение
@@ -20,7 +20,7 @@
 
 | Тип | Что | Зачем |
 |---|---|---|
-| Фичи проекта | `TunnelLibrary`, `TunnelEngine`, `ProviderMessaging`, `SharedKernel` | туннели, статистика, контракт с расширением, часы |
+| Фичи проекта | `TunnelLibrary`, `TunnelEngine`, `ProviderMessaging`, `SharedKernel`; в адаптерах — `ProviderMessagingInfrastructure` | туннели, статистика, контракт с расширением, часы; сессия сообщений |
 | Системные фреймворки | NetworkExtension, Synchronization | `NETunnelProviderManager`; `Mutex` номеров намерений |
 | Сторонние библиотеки | нет | |
 
@@ -33,7 +33,7 @@
   - записать слот;
   - запустить.
 - **Состояние.** `ObserveConnectionStateUseCase` выдаёт `SlotState`: какой туннель записан в слот и в каком он состоянии. `connectionState(of:)` возвращает это состояние только для туннеля слота, для остальных — `disconnected`. `ConnectionStateMachine` превращает `SystemConnectionStatus` в `ConnectionState`. Неожиданное завершение сессии становится `failed(reason)` с причиной из `lastDisconnectFailure()`, которую запрашивают, только когда сессия закончилась. Отказ держится до следующей попытки, а ненастроенный слот показывается как `disconnected`.
-- **Статистика.** `FetchRuntimeStatisticsUseCase` спрашивает расширение через `ProviderMessenger` и объясняет недоступность (`RuntimeStatisticsError`).
+- **Статистика.** `FetchRuntimeStatisticsUseCase` спрашивает расширение через `ProviderMessenger` и объясняет недоступность (`RuntimeStatisticsError`). В приложении это `PacketTunnelSlotMessenger`: он находит сохранённый слот по `providerBundleIdentifier`, запоминает сессию сообщений и забывает её после любой ошибки, чтобы следующий запрос нашёл слот заново.
 - **Слот.** `PacketTunnelSlotController` (actor):
   - находит или создаёт `NETunnelProviderManager` по `providerBundleIdentifier`;
   - записывает `TunnelProviderConfiguration`, `serverAddress` (endpoint первого пира или имя туннеля) и имя «Splitway» (D-17);
@@ -44,11 +44,11 @@
   - сохранённую конфигурацию загружает при первом обращении. Параллельные запросы во время этой загрузки загружают её сами, а не получают пустой слот; запоминается первый полученный ответ.
 - **Ошибки.** `VPNStatusMapping` и `VPNErrorMapping` — чистые функции. `configurationReadWriteFailed` при сохранении считается отказом пользователя. `ConnectionFailure(stopReason:)` объясняет причину отключения, которую прислало расширение.
 - **Проба активности.** `ConnectionActivityProbe` реализует `TunnelActivityProbe` для `TunnelLibrary`: удаление активного туннеля сначала его останавливает.
-- **Сборка.** `TunnelConnectionAssembly` создаёт контроллер слота и координатор и выдаёт сценарии и пробу активности composition root.
+- **Сборка.** `TunnelConnectionAssembly` создаёт контроллер слота, координатор и отправителя сообщений и выдаёт сценарии и пробу активности composition root.
 
 ## Публичный API
 
-`ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`; адаптеры `PacketTunnelSlotController`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
+`ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`; адаптеры `PacketTunnelSlotController`, `PacketTunnelSlotMessenger`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
 
 ## Решения
 
@@ -65,6 +65,7 @@
 | Ожидание отключения ограничено 10 с | Без ограничения | Потерянное уведомление не должно навсегда заблокировать переключение туннеля | Если 10 с окажется мало |
 | `isolated deinit` у контроллера слота | `@unchecked Sendable` для токена наблюдателя | Токен `NotificationCenter` не `Sendable`; изолированный `deinit` (SE-0371) снимает наблюдение без обхода проверок | Нет |
 | Параллельная первая загрузка конфигурации: побеждает первый ответ | Ожидание общей задачи загрузки | `NETunnelProviderManager` не `Sendable` и не может быть результатом `Task`; лишний запрос `loadAllFromPreferences` случается только при запуске | Нет |
+| Отправитель сообщений загружает слот сам, отдельно от контроллера | Брать сессию у `PacketTunnelSlotController` | Сессию можно передать в `TunnelProviderSessionMessenger` только через `sending`, а сессия из состояния контроллера к нему привязана. Своя загрузка даёт несвязанное значение | Если Apple пометит сессию как `Sendable` |
 
 ## Отступления от правил разработки
 
@@ -94,3 +95,4 @@
 | 2026-10-29 | Домен и сценарии подключения | M2-09 |
 | 2026-10-29 | Системный слот пакетного туннеля | M2-10 |
 | 2026-10-29 | `SlotState`, отдельный поток статусов на подписчика, сборка фичи | M3-02 |
+| 2026-10-29 | `PacketTunnelSlotMessenger` для статистики | M3-03 |

@@ -107,8 +107,7 @@ public actor PacketTunnelSlotController: SystemTunnelController {
         if !hasLoadedManager {
             hasLoadedManager = true
             manager = savedManagers.first { savedManager in
-                (savedManager.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier
-                    == providerBundleIdentifier
+                savedManager.providerBundleIdentifier == providerBundleIdentifier
             }
         }
         return manager

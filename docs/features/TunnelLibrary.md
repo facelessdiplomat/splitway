@@ -4,12 +4,12 @@
 |---|---|
 | Статус | в работе: Core, хранилища и экран списка готовы; запуск на macOS и прогон Keychain там ждут M0-04, передача секрета в системное расширение — M2-12 |
 | Платформы | shared |
-| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02 |
+| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03 |
 | Таргеты | `TunnelLibrary`, `TunnelLibraryInfrastructure`, `TunnelLibraryPresentation`, `TunnelLibraryTestSupport` |
 
 ## Назначение
 
-Библиотека туннелей пользователя: сущность `Tunnel` и правила имён; сценарии создания, импорта, изменения, переименования, удаления, дублирования, сортировки и экспорта. Метаданные и секреты хранятся раздельно и согласованно. Слой `Presentation` показывает список туннелей с состоянием подключения и корневую навигацию приложения.
+Библиотека туннелей пользователя: сущность `Tunnel` и правила имён; сценарии создания, импорта, изменения, переименования, удаления, дублирования, сортировки и экспорта. Метаданные и секреты хранятся раздельно и согласованно. Слой `Presentation` показывает список туннелей с состоянием подключения, детали туннеля со статистикой и корневую навигацию приложения.
 
 ## Зависимости
 
@@ -64,13 +64,21 @@ flowchart LR
 - `TunnelLibraryRootView` — `NavigationSplitView`: список в боковой колонке, детали туннеля справа. На iPhone SwiftUI сворачивает его в стек. Корень загружает библиотеку и наблюдает за слотом, пока виден.
 - Способы добавления туннеля (`TunnelAdditionMethod`) и их обработчик передаёт composition root через `TunnelAdditionOptions`. Меню «+» и кнопки пустого состояния показывают только переданные способы.
 
+**Детали туннеля.**
+
+- Экран показывает переключатель, статус, время подключения (таймер SwiftUI от `connectedSince`), режим маршрутизации и раздел на каждого пира: публичный ключ, endpoint, последнее рукопожатие, принято и отправлено.
+- `TunnelDetailModel` строит `PeerStatisticsRow` для пиров конфигурации и сопоставляет с ними статистику по публичному ключу. Давность рукопожатия `HandshakeRecency` считается по `WallClock`: целые секунды, рукопожатие «из будущего» даёт ноль, отсутствие — «ещё не было».
+- `trackStatistics(isTunnelRunning:)` опрашивает расширение на каждый тик `StatisticsTicker` (`RepeatingTicker`, раз в секунду), пока экран виден. Экран перезапускает опрос, когда меняется `reportsStatistics` статуса строки: у неработающего туннеля опроса нет, а статистика стирается.
+- Ответ, пришедший после остановки опроса, отбрасывается. Ошибка опроса стирает статистику и показывает «Статистика сейчас недоступна».
+- Нечитаемая запись открывает те же детали без пиров.
+
 ## Публичный API
 
 - **Модель:** `Tunnel`, `TunnelIdentifier`, `TunnelName`, `TunnelNameError`, `TunnelRecord`, `UniqueTunnelNameResolver`, `ExportedConfigurationFile`.
 - **Порты:** `TunnelRecordRepository`, `TunnelSecretStore`, `TunnelActivityProbe`, `ArchiveWriter` и их ошибки `TunnelStorageError`, `TunnelActivityError`, `ArchiveWritingError`.
 - **Сценарии:** `LoadTunnelsUseCase` (`TunnelLibrarySnapshot`, `TunnelLibraryEntry`), `CreateTunnelUseCase`, `ImportTunnelsUseCase` (`ImportCandidate`, `ImportReport`, `ImportFailure`), `UpdateTunnelUseCase`, `RenameTunnelUseCase`, `DeleteTunnelUseCase`, `DuplicateTunnelUseCase`, `ReorderTunnelsUseCase`, `ExportTunnelsUseCase`, ошибка `TunnelLibraryError`.
 - **Адаптеры:** `FileTunnelRecordRepository`, `JSONDocumentMigrator`, `JSONDocumentMigrationError`, `KeychainTunnelSecretStore`, `ZIPArchiveWriter`, сборка `TunnelLibraryAssembly`.
-- **Экран:** `TunnelListModel`, `TunnelRow`, `TunnelRowStatus`, `TunnelDeletionRequest`, `TunnelListAlert`, `TunnelLibraryActions`, `TunnelConnectionActions`, `TunnelAdditionMethod`, `TunnelAdditionOptions`, `TunnelLibraryRootView`.
+- **Экран:** `TunnelListModel`, `TunnelRow`, `TunnelRowStatus`, `TunnelDeletionRequest`, `TunnelListAlert`, `TunnelLibraryActions`, `TunnelConnectionActions`, `TunnelAdditionMethod`, `TunnelAdditionOptions`, `TunnelLibraryRootView`; детали — `TunnelDetailModel`, `PeerStatisticsRow`, `PeerActivity`, `HandshakeRecency`, `TunnelStatisticsPolling`, `StatisticsTicker`, `RepeatingTicker`.
 
 ## Решения
 
@@ -97,7 +105,9 @@ flowchart LR
 | Интеграционные тесты Keychain — в таргете `iOSIntegrationTests` с хост-приложением | Тесты в SPM | Data protection keychain требует entitlements, `swift test` их не даёт | Нет |
 | Один `NavigationSplitView` на всех устройствах | `NavigationStack` на iPhone и `NavigationSplitView` на iPad и Mac, как в плане M3-02 | В компактной ширине SwiftUI сам сворачивает его в стек; второй вариант навигации дублировал бы код и ломался бы в Slide Over | Если появятся экраны, которым нужен свой стек на iPhone |
 | Способы добавления туннеля передаёт composition root | Кнопки импорта прямо в фиче | Импорт и редактор — другие фичи (`TunnelImport`, `TunnelEditor`), а набор способов зависит от платформы (QR только на iOS). Пока способов нет, кнопок нет, а не пустых действий | Нет |
-| Детали туннеля до M3-03 строятся из строки списка | Заглушка «скоро» | Экран полезен уже сейчас: переключатель, статус, режим. `TunnelDetailModel` со статистикой заменит его в M3-03 | M3-03 |
+| Модель деталей отдаёт давность рукопожатия значением, а текст строит Foundation | Готовая строка «2 мин назад» в модели | Тест проверяет расчёт по `FixedWallClock` без зависимости от языка; формат длительности (`Duration.UnitsFormatStyle`) локализует система | Нет |
+| Опрос по тикам `StatisticsTicker`, а не `Task.sleep` в модели | `Clock` в модели | Тест управляет тиками вручную и проверяет остановку опроса без ожиданий; `RepeatingTicker` — единственное место со `sleep` | Нет |
+| Публичный ключ — строкой `IdentifierRow` в одну строку с уменьшением шрифта | Перенос по строкам | При переносе система вставляла дефис, которого в ключе нет | Нет |
 | Текст ошибки подключения пока общий | Текст для каждой `ConnectionFailure` сразу | Сообщения с советами — отдельная задача M3-09 с собственными тестами | M3-09 |
 
 ## Отступления от правил разработки
@@ -111,7 +121,8 @@ flowchart LR
 - Запись `tunnels.json` из нескольких процессов не координируется. Пишет только приложение; расширение и интенты читают, а атомарное переименование защищает читателей.
 - Системное расширение macOS работает от root и не видит Keychain пользователя. Копию секрета ему передаёт M2-12.
 - Экран списка проверен в симуляторах iPhone и iPad: светлая и тёмная тема, русский язык, псевдолокализация, удаление, дублирование, перестановка, ошибка подключения. Приложение macOS собирается, но без подписи с ограниченными entitlements не запускается (M0-04).
-- В симуляторе NetworkExtension не работает (`IPC failed`), поэтому подключение там всегда заканчивается сообщением об ошибке. Смена статуса на экране проверена тестами модели, на устройстве — в M2-14.
+- В симуляторе NetworkExtension не работает (`IPC failed`), поэтому подключение там всегда заканчивается сообщением об ошибке. Смена статуса и опрос статистики проверены тестами моделей, живая статистика на устройстве — в M2-14.
+- `RepeatingTicker` не покрыт тестами: он только повторяет `Task.sleep`, а тесты без ожиданий по правилам.
 
 ## Тесты
 
@@ -123,11 +134,12 @@ flowchart LR
   - мигратор;
   - ZIP-экспорт с именами в UTF-8 и правами `0600`.
 - 7 интеграционных тестов Keychain в `iOSIntegrationTests` на симуляторе iPhone: запись, перезапись, удаление, чтение отсутствующего, атрибуты доступности и синхронизации.
-- 17 тестов в `TunnelLibraryPresentationTests`:
-  - модель списка: строки и состояние слота, нечитаемые записи на своих местах, пустое состояние только после загрузки;
+- 29 тестов в `TunnelLibraryPresentationTests`:
+  - модель списка: строки и состояние слота, нечитаемые записи на своих местах, пустое состояние только после загрузки, конфигурация только читаемого туннеля;
   - подтверждение удаления, в том числе для подключённого туннеля, отмена, привязка к строке;
   - перестановка через `ReorderTunnelsUseCase`, дублирование, переключение подключения, ошибка подключения;
-  - статусы строк: каждое `ConnectionState`, тон и активность.
+  - статусы строк: каждое `ConnectionState`, тон, активность, наличие статистики, время подключения;
+  - модель деталей: пиры до статистики, давность рукопожатия по `FixedWallClock`, рукопожатие «из будущего», трафик, причина недоступности, опрос до ухода с экрана, нет опроса у отключённого туннеля, поздний ответ.
 
 Запуск: `swift test --package-path Packages/SplitwayKit --filter TunnelLibrary`. Интеграционные тесты запускает `Scripts/check.sh`.
 
@@ -141,3 +153,4 @@ flowchart LR
 | 2026-10-29 | `KeychainTunnelSecretStore`, интеграционные тесты на симуляторе | M1-14 |
 | 2026-10-29 | `ZIPArchiveWriter` | M1-15 |
 | 2026-10-29 | Экран списка, корневая навигация, сборка фичи; записи снимка в сохранённом порядке | M3-02 |
+| 2026-10-29 | Детали туннеля и опрос статистики | M3-03 |
