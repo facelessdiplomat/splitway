@@ -7,7 +7,7 @@
 - [x] M1-01 `IPAddress`
 - [x] M1-02 `IPNetwork` и `IPNetworkSet`
 - [x] M1-03 `NetworkPort` и `DomainName`
-- [ ] M1-04 Ключи WireGuard
+- [x] M1-04 Ключи WireGuard
 - [ ] M1-05 Value objects интерфейса и пира
 - [ ] M1-06 Агрегат `TunnelConfiguration`
 - [ ] M1-07 Парсер wg-quick
@@ -52,9 +52,9 @@
 ### M1-04. Ключи WireGuard
 `shared` · M · зависит от: M0-05
 
-**Сделать:** `WireGuardKey` (32 байта, base64 и hex), `PrivateKey` (вычисление `PublicKey` через CryptoKit Curve25519), `PublicKey`, `PresharedKey`, `KeyPairGenerator`. У `PrivateKey` нет `description` и `debugDescription`, раскрывающих значение.
-**Тесты сначала:** векторы RFC 7748; пары ключей, сгенерированные утилитой `wg` (фикстуры); невалидный base64, неверная длина; `String(describing: privateKey)` не содержит ключ.
-**Готово, когда:** публичный ключ совпадает с `wg pubkey` на всех фикстурах.
+**Сделать:** `WireGuardKey` (32 байта, base64 и hex), `PrivateKey` (вычисление `PublicKey` через CryptoKit Curve25519), `PublicKey`, `PresharedKey`, генерация фабриками `PrivateKey.generate()` и `PresharedKey.generate()`. У `PrivateKey` и `PresharedKey` нет `description`, `debugDescription` и зеркала, раскрывающих значение; секрет доступен только через явные `base64EncodedText` и `hexEncodedText`.
+**Тесты сначала:** векторы RFC 7748; неканоничный и невалидный base64, неверная длина, невалидный hex; ни одно текстовое представление (`description`, `debugDescription`, интерполяция, `dump`) не содержит ключ.
+**Готово, когда:** публичные ключи совпадают с векторами RFC 7748 (те же значения выдаёт `wg pubkey`).
 
 ### M1-05. Value objects интерфейса и пира
 `shared` · M · зависит от: M1-02, M1-03

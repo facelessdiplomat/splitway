@@ -129,7 +129,9 @@ let sharedKernelTargets: [Target] = [
     ),
 ]
 
-let features: [FeatureModule] = []
+let features: [FeatureModule] = [
+    FeatureModule("TunnelConfiguration")
+]
 
 let package = Package(
     name: "SplitwayKit",
