@@ -1,5 +1,8 @@
 import DiagnosticsInfrastructure
 import DiagnosticsPresentation
+import Settings
+import SettingsInfrastructure
+import SettingsPresentation
 import TunnelConnectionInfrastructure
 import TunnelEditorPresentation
 import TunnelImportInfrastructure
@@ -17,6 +20,7 @@ struct AppComposition {
     let tunnelEditor: TunnelEditorFlow
     let tunnelExport: TunnelExportModel
     let logViewer: LogViewerPresenter
+    let settings: SettingsPresenter
 
     init(configuration: AppConfiguration) {
         let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
@@ -33,6 +37,8 @@ struct AppComposition {
             subsystem: configuration.logSubsystem
         )
         logViewer = Self.logViewer(diagnostics: diagnostics)
+        settings = Self.settings(
+            version: AppVersion(marketingVersion: configuration.version, build: configuration.build))
         diagnostics.recorder(for: .application, category: "App").record(
             .info, "Splitway \(configuration.version) started")
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
@@ -66,6 +72,13 @@ struct AppComposition {
                     exportLog: diagnostics.exportLog
                 )
             )
+        )
+    }
+
+    private static func settings(version: AppVersion) -> SettingsPresenter {
+        SettingsPresenter(
+            version: version,
+            notices: ThirdPartyNoticesModel(loadNotices: SettingsAssembly().loadThirdPartyNotices)
         )
     }
 

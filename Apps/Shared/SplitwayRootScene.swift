@@ -1,4 +1,5 @@
 import DiagnosticsPresentation
+import SettingsPresentation
 import SwiftUI
 import TunnelEditorPresentation
 import TunnelImportInfrastructure
@@ -17,15 +18,18 @@ struct SplitwayRootScene: Scene {
                     composition.add(method)
                 },
                 export: composition.tunnelExport,
-                navigation: TunnelLibraryNavigation { tunnel in
-                    composition.tunnelEditor.edit(tunnel)
-                } showLog: {
-                    composition.logViewer.show()
-                }
+                navigation: TunnelLibraryNavigation(
+                    editTunnel: { tunnel in composition.tunnelEditor.edit(tunnel) },
+                    showLog: { composition.logViewer.show() },
+                    showSettings: showSettings
+                )
             )
             .tunnelImport(composition.tunnelImport)
             .tunnelEditor(composition.tunnelEditor)
             .logViewer(composition.logViewer)
+            #if os(iOS)
+                .settingsSheet(composition.settings)
+            #endif
             .dropDestination(for: DroppedImportFile.self) { files, _ in
                 Task.immediate { await composition.tunnelImport.importDropped(files.map(\.payload)) }
                 return !files.isEmpty
@@ -34,5 +38,13 @@ struct SplitwayRootScene: Scene {
                 Task.immediate { await composition.tunnelImport.importFiles([url]) }
             }
         }
+    }
+
+    private var showSettings: (@MainActor @Sendable () -> Void)? {
+        #if os(iOS)
+            return { composition.settings.show() }
+        #else
+            return nil
+        #endif
     }
 }

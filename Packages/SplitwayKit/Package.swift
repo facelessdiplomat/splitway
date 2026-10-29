@@ -41,6 +41,7 @@ struct FeatureModule {
     let testDependencies: [Target.Dependency]
     let infrastructureTestDependencies: [Target.Dependency]
     let presentationTestDependencies: [Target.Dependency]
+    let infrastructureResources: [Resource]?
     let layersWithoutTests: [FeatureLayer]
     let providesTestSupport: Bool
 
@@ -53,6 +54,7 @@ struct FeatureModule {
         testDependencies: [Target.Dependency] = [],
         infrastructureTestDependencies: [Target.Dependency] = [],
         presentationTestDependencies: [Target.Dependency] = [],
+        infrastructureResources: [Resource]? = nil,
         layersWithoutTests: [FeatureLayer] = [],
         providesTestSupport: Bool = false
     ) {
@@ -64,6 +66,7 @@ struct FeatureModule {
         self.testDependencies = testDependencies
         self.infrastructureTestDependencies = infrastructureTestDependencies
         self.presentationTestDependencies = presentationTestDependencies
+        self.infrastructureResources = infrastructureResources
         self.layersWithoutTests = layersWithoutTests
         self.providesTestSupport = providesTestSupport
     }
@@ -107,7 +110,7 @@ struct FeatureModule {
             name: targetName,
             dependencies: dependencies(for: layer),
             path: "Sources/Features/\(name)/\(layer.directoryName)",
-            resources: layer.resources,
+            resources: layer == .infrastructure ? infrastructureResources : layer.resources,
             swiftSettings: strictSwiftSettings
         )
         guard !layersWithoutTests.contains(layer) else { return [target] }
@@ -204,6 +207,13 @@ let features: [FeatureModule] = [
         providesTestSupport: true
     ),
     FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
+    FeatureModule(
+        "Settings",
+        layers: [.core, .infrastructure, .presentation],
+        presentationDependencies: ["DesignSystemPresentation"],
+        infrastructureResources: [.process("Resources")],
+        providesTestSupport: true
+    ),
     FeatureModule(
         "TunnelEngine",
         coreDependencies: ["TunnelConfiguration"],

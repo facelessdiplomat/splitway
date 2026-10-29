@@ -441,6 +441,16 @@
         }
       }
     },
+    "Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки"
+          }
+        }
+      }
+    },
     "Some tunnels weren’t exported" : {
       "localizations" : {
         "ru" : {

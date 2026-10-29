@@ -1,3 +1,4 @@
+import SettingsPresentation
 import SwiftUI
 
 @main
@@ -6,5 +7,8 @@ struct SplitwayMacApp: App {
 
     var body: some Scene {
         SplitwayRootScene(composition: composition)
+        Settings {
+            SettingsScreen(presenter: composition.settings)
+        }
     }
 }
