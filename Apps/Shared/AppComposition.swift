@@ -1,14 +1,22 @@
 import DiagnosticsInfrastructure
 import DiagnosticsPresentation
+import OnboardingInfrastructure
+import OnboardingPresentation
 import Settings
 import SettingsInfrastructure
 import SettingsPresentation
+import SystemExtension
+import SystemExtensionPresentation
 import TunnelConnectionInfrastructure
 import TunnelEditorPresentation
 import TunnelImportInfrastructure
 import TunnelImportPresentation
 import TunnelLibraryInfrastructure
 import TunnelLibraryPresentation
+
+#if os(macOS)
+    import SystemExtensionInfrastructure
+#endif
 
 @MainActor
 struct AppComposition {
@@ -27,6 +35,7 @@ struct AppComposition {
     let tunnelExport: TunnelExportModel
     let logViewer: LogViewerPresenter
     let settings: SettingsPresenter
+    let onboarding: OnboardingModel
 
     init(configuration: AppConfiguration) {
         let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
@@ -43,6 +52,7 @@ struct AppComposition {
             subsystem: configuration.logSubsystem
         )
         logViewer = Self.logViewer(diagnostics: diagnostics)
+        onboarding = Self.onboarding(configuration: configuration)
         settings = Self.settings(
             version: AppVersion(marketingVersion: configuration.version, build: configuration.build))
         diagnostics.recorder(for: .application, category: "App").record(
@@ -79,6 +89,26 @@ struct AppComposition {
                 )
             )
         )
+    }
+
+    private static func onboarding(configuration: AppConfiguration) -> OnboardingModel {
+        OnboardingModel(
+            record: UserDefaultsOnboardingRecord(),
+            systemExtension: systemExtensionWizard(configuration: configuration)
+        )
+    }
+
+    private static func systemExtensionWizard(configuration: AppConfiguration) -> SystemExtensionWizardModel? {
+        #if os(macOS)
+            SystemExtensionWizardModel(
+                activate: EnsureSystemExtensionActivatedUseCase(
+                    activator: OSSystemExtensionActivator(
+                        extensionIdentifier: configuration.tunnelProviderBundleIdentifier)
+                )
+            )
+        #else
+            nil
+        #endif
     }
 
     private static func settings(version: AppVersion) -> SettingsPresenter {

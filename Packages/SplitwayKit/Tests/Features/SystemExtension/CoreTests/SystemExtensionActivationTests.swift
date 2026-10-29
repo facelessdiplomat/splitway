@@ -1,4 +1,5 @@
 import SystemExtension
+import SystemExtensionTestSupport
 import Testing
 
 @Suite
@@ -19,7 +20,7 @@ struct SystemExtensionActivationTests {
         events: [SystemExtensionActivationEvent],
         states: [SystemExtensionState]
     ) async {
-        let useCase = EnsureSystemExtensionActivatedUseCase(activator: ScriptedSystemExtensionActivator(events: events))
+        let useCase = EnsureSystemExtensionActivatedUseCase(activator: ScriptedSystemExtensionActivator(runs: [events]))
 
         var observed: [SystemExtensionState] = []
         for await state in useCase.execute() {
@@ -27,18 +28,5 @@ struct SystemExtensionActivationTests {
         }
 
         #expect(observed == states)
-    }
-}
-
-struct ScriptedSystemExtensionActivator: SystemExtensionActivator {
-    let events: [SystemExtensionActivationEvent]
-
-    func requestActivation() -> AsyncStream<SystemExtensionActivationEvent> {
-        AsyncStream { continuation in
-            for event in events {
-                continuation.yield(event)
-            }
-            continuation.finish()
-        }
     }
 }
