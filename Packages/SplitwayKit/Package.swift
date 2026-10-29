@@ -35,6 +35,7 @@ struct FeatureModule {
     let infrastructureDependencies: [Target.Dependency]
     let presentationDependencies: [Target.Dependency]
     let testDependencies: [Target.Dependency]
+    let infrastructureTestDependencies: [Target.Dependency]
     let providesTestSupport: Bool
 
     init(
@@ -44,6 +45,7 @@ struct FeatureModule {
         infrastructureDependencies: [Target.Dependency] = [],
         presentationDependencies: [Target.Dependency] = [],
         testDependencies: [Target.Dependency] = [],
+        infrastructureTestDependencies: [Target.Dependency] = [],
         providesTestSupport: Bool = false
     ) {
         self.name = name
@@ -52,6 +54,7 @@ struct FeatureModule {
         self.infrastructureDependencies = infrastructureDependencies
         self.presentationDependencies = presentationDependencies
         self.testDependencies = testDependencies
+        self.infrastructureTestDependencies = infrastructureTestDependencies
         self.providesTestSupport = providesTestSupport
     }
 
@@ -88,6 +91,7 @@ struct FeatureModule {
             [.target(name: targetName), "SharedKernelTestSupport"]
             + (providesTestSupport ? [.target(name: testSupportName)] : [])
             + testDependencies
+            + (layer == .infrastructure ? infrastructureTestDependencies : [])
         return [
             .target(
                 name: targetName,
@@ -133,6 +137,8 @@ let sharedKernelTargets: [Target] = [
     ),
 ]
 
+let zipFoundation: Target.Dependency = .product(name: "ZIPFoundation", package: "ZIPFoundation")
+
 let features: [FeatureModule] = [
     FeatureModule("TunnelConfiguration", providesTestSupport: true),
     FeatureModule("AppRouting"),
@@ -140,8 +146,16 @@ let features: [FeatureModule] = [
         "TunnelLibrary",
         layers: [.core, .infrastructure],
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
+        infrastructureDependencies: [zipFoundation],
         testDependencies: ["TunnelConfigurationTestSupport"],
+        infrastructureTestDependencies: [zipFoundation],
         providesTestSupport: true
+    ),
+    FeatureModule(
+        "TunnelImport",
+        layers: [.core, .infrastructure],
+        infrastructureDependencies: [zipFoundation],
+        infrastructureTestDependencies: [zipFoundation]
     ),
 ]
 
@@ -149,5 +163,6 @@ let package = Package(
     name: "SplitwayKit",
     platforms: [.iOS(.v26), .macOS(.v26)],
     products: [.library(name: "SharedKernel", targets: ["SharedKernel"])] + features.flatMap(\.products),
+    dependencies: [.package(url: "https://github.com/weichsel/ZIPFoundation.git", exact: "0.9.20")],
     targets: sharedKernelTargets + features.flatMap(\.targets)
 )
