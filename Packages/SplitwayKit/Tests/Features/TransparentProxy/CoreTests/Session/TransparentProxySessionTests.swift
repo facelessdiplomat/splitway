@@ -21,7 +21,6 @@ struct TransparentProxySessionTests {
         #expect(environment.engine.startedInterfaces.count == 1)
         #expect(plan.includedNetworks.contains(FlowRoutingFixtures.tunnelAddress))
         #expect(plan.excludedNetworks.contains(TransparentProxyTestEnvironment.endpointAddress))
-        #expect(await environment.registry.currentNetwork != nil)
     }
 
     @Test
@@ -238,6 +237,5 @@ struct TransparentProxySessionTests {
 
         await flow.state.wait { snapshot in !snapshot.readClosings.isEmpty }
         #expect(environment.engine.network.state.update { snapshot in snapshot.isStopped })
-        #expect(await environment.registry.currentNetwork == nil)
     }
 }

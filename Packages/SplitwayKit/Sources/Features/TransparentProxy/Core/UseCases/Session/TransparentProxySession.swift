@@ -35,7 +35,7 @@ public final class TransparentProxySession: Sendable {
         }
         observation?.cancel()
         guard let runtime = router.deactivate() else { return }
-        await starter.stop(runtime)
+        starter.stop(runtime)
     }
 
     private func observePathChanges(of runtime: TransparentProxyRuntime) {

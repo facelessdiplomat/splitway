@@ -25,8 +25,7 @@ struct TransparentProxyComposition: Sendable {
         session = TransparentProxySession(
             starter: TransparentProxyStarter(
                 engine: TunnelCoreUserspaceNetworkEngine(),
-                endpointResolution: ResolveTunnelEndpointsUseCase(resolver: SystemEndpointResolver()),
-                registry: TunnelRuntimeRegistry()
+                endpointResolution: ResolveTunnelEndpointsUseCase(resolver: SystemEndpointResolver())
             ),
             router: ProxiedFlowRouter(
                 sourceResolver: SourceApplicationResolver(reader: SecurityCodeIdentityReader()),
