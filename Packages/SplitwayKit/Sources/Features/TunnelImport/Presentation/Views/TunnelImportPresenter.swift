@@ -3,7 +3,7 @@ import TunnelConfigurationPresentation
 import UniformTypeIdentifiers
 
 struct TunnelImportPresenter: ViewModifier {
-    private static let importableTypes: [UTType] = [.wireGuardConfiguration, .zip, .plainText]
+    private static let importableTypes = ImportableFileTypes.types()
 
     @Bindable var model: TunnelImportModel
 
