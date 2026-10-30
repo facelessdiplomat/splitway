@@ -21,6 +21,16 @@
         }
       }
     },
+    "Apps through the tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения через туннель"
+          }
+        }
+      }
+    },
     "Before you connect" : {
       "localizations" : {
         "ru" : {

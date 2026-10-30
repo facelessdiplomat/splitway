@@ -1,3 +1,4 @@
+import AppRouting
 import Testing
 import TunnelConfiguration
 import TunnelConfigurationTestSupport
@@ -37,9 +38,9 @@ struct TunnelListTestEnvironment {
     }
 
     @discardableResult
-    func storeTunnel(named name: String) async throws -> Tunnel {
+    func storeTunnel(named name: String, routingPolicy: RoutingPolicy = .default) async throws -> Tunnel {
         let configuration = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.minimal).configuration)
         return try await CreateTunnelUseCase(records: records, secrets: secrets)
-            .execute(name: TunnelName(name), configuration: configuration)
+            .execute(name: TunnelName(name), configuration: configuration, routingPolicy: routingPolicy)
     }
 }

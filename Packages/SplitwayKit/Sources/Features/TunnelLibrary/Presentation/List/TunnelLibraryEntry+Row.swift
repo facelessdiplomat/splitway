@@ -9,10 +9,17 @@ extension TunnelLibraryEntry {
                 id: tunnel.id,
                 name: tunnel.name.description,
                 status: status(of: tunnel.id, in: slot, activating: pendingActivation),
-                routingMode: tunnel.routingPolicy.mode.kind
+                routingMode: tunnel.routingPolicy.mode.kind,
+                routedApplicationNames: tunnel.routingPolicy.mode.routedApplicationNames
             )
         case .unreadable(let record):
-            TunnelRow(id: record.id, name: record.name.description, status: .unavailable, routingMode: nil)
+            TunnelRow(
+                id: record.id,
+                name: record.name.description,
+                status: .unavailable,
+                routingMode: nil,
+                routedApplicationNames: []
+            )
         }
     }
 
