@@ -18,8 +18,8 @@ iOS и iPadOS используют одно приложение (универс
 | Entitlement | `iOSApp` | `PacketTunnelExtension` | `ControlsExtension` |
 |---|---|---|---|
 | `com.apple.developer.networking.networkextension` = `packet-tunnel-provider` | да | да | — |
-| App Groups `group.com.company.splitway` | да | да | да |
-| Keychain Sharing `<TeamID>.com.company.splitway.shared` | да | да | — |
+| App Groups `group.com.facelessdiplomat.splitway` | да | да | да |
+| Keychain Sharing `8625S77CSU.com.facelessdiplomat.splitway.shared` | да | да | — |
 | `com.apple.developer.networking.wifi-info` (v1.x, автоподключение по SSID) | да | — | — |
 
 Network Extension доступен и индивидуальному аккаунту: ограничение 5.4 касается только публикации в App Store.

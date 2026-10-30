@@ -22,7 +22,7 @@ Splitway.app/
     ├── MacOS/Splitway
     ├── Frameworks/Sparkle.framework
     └── Library/SystemExtensions/
-        └── com.company.splitway.network-extension.systemextension
+        └── com.facelessdiplomat.splitway.network-extension.systemextension
 ```
 
 `Info.plist` системного расширения:
@@ -40,8 +40,8 @@ NetworkExtension
 |---|---|---|
 | `com.apple.developer.system-extension.install` | да | — |
 | `com.apple.developer.networking.networkextension` | `packet-tunnel-provider-systemextension`, `app-proxy-provider-systemextension`, `dns-proxy-systemextension` | то же |
-| `com.apple.security.application-groups` | `<TeamID>.com.company.splitway` | то же |
-| `keychain-access-groups` | `<TeamID>.com.company.splitway.shared` | то же |
+| `com.apple.security.application-groups` | `8625S77CSU.com.facelessdiplomat.splitway` | то же |
+| `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
 | `com.apple.security.app-sandbox` | нет (Developer ID) | да, сетевые расширения обязаны быть в песочнице |
 
 Provisioning-профили — Developer ID с возможностями Network Extensions и System Extension. Для отладки нужны Development-профили и одноразовая команда `systemextensionsctl developer on` (по необходимости).

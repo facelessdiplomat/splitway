@@ -18,7 +18,7 @@
 | D-10 | Приватные API macOS | **Запрещены.** Если SP-2 подтвердит, что WebKit не атрибутируется приложению, Safari и WKWebView-приложения помечаются как неподдерживаемые | Приватные API ради Safari | [03](03-platform-macos.md), [06](06-development-rules.md) |
 | D-11 | Системный per-app VPN на macOS | **Не используем**, даже если он работает без MDM: поведение не документировано. Спайк SP-1 отменён | Перейти на per-app VPN; два пути с запасным прокси | [02](02-architecture.md) ADR-01, M0 |
 | D-12 | Вид приложения на macOS | **Окно + строка меню.** Иконка в Dock видна, пока открыто окно | Только строка меню; только окно | [03](03-platform-macos.md), M6-01, M6-02 |
-| D-13 | Название и bundle ID | **Splitway.** Префикс bundle ID владелец укажет до задачи M0-04 | — | [01](01-product.md), M0-01 |
+| D-13 | Название и bundle ID | **Splitway.** Префикс bundle ID — **`com.facelessdiplomat`**, команда разработчика — `8625S77CSU` (указаны владельцем 2026-10-30, идентификаторы — в разделе ниже) | — | [01](01-product.md), M0-01, M0-04 |
 | D-14 | Лицензия | **Закрытый код.** Атрибуция зависимостей (MIT, Apache-2.0) обязательна в приложении | MIT; GPL-3.0 | M0-02, M3-13 |
 | D-15 | Стартовый каталог сервисов | **15 сервисов:** Telegram, WhatsApp, Signal, Instagram, Facebook, Threads, YouTube, X, Discord, ChatGPT, Claude, Spotify, Netflix, LinkedIn, GitHub | 5–7 сервисов; 30+ | [04](04-platform-ios-ipados.md), M5-01 |
 | D-16 | Иконки сервисов | **Нейтральные:** монограмма или SF Symbol в цвете сервиса, без логотипов | Логотипы брендов | M5-01 |
@@ -51,10 +51,24 @@
 
 | ID | Что решить | Крайний срок |
 |---|---|---|
-| D-13 | Префикс bundle ID (обратный домен) | до задачи M0-04 |
 | D-03 | Переход на аккаунт организации ради App Store | до задачи M7-11 |
 | D-28 | Хостинг DMG и appcast для macOS | до задачи M7-08 |
 
+## Идентификаторы (D-13)
+
+| Что | Идентификатор |
+|---|---|
+| Команда (Team ID) | `8625S77CSU` |
+| Приложение iOS, iPadOS и macOS | `com.facelessdiplomat.splitway` |
+| Пакетный туннель iOS | `com.facelessdiplomat.splitway.packet-tunnel` |
+| Системное расширение macOS | `com.facelessdiplomat.splitway.network-extension` |
+| Controls (M6-04) | `com.facelessdiplomat.splitway.controls` |
+| App Group iOS и iPadOS | `group.com.facelessdiplomat.splitway` |
+| App Group macOS | `8625S77CSU.com.facelessdiplomat.splitway` |
+| Keychain group | `8625S77CSU.com.facelessdiplomat.splitway.shared` |
+
+Все идентификаторы выводятся в `project.yml` из `SPLITWAY_BUNDLE_ID_PREFIX` и `DEVELOPMENT_TEAM`.
+
 ## Замечание к D-23
 
-У локального репозитория без удалённой копии есть риск потери истории вместе с диском. Достаточно Time Machine или приватного удалённого репозитория без CI, чтобы закрыть этот риск, не меняя принятое решение.
+У локального репозитория без удалённой копии есть риск потери истории вместе с диском. Достаточно Time Machine или приватного удалённого репозитория без CI, чтобы закрыть этот риск, не меняя принятое решение. С 2026-10-30 у репозитория есть приватная удалённая копия (`origin`), и каждая слитая задача отправляется туда.
