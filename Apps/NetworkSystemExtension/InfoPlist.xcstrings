@@ -1,0 +1,23 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSSystemExtensionUsageDescription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Splitway uses this network extension to run your WireGuard tunnels and to route the apps you choose through them."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway использует это сетевое расширение, чтобы подключать туннели WireGuard и направлять через них выбранные приложения."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
