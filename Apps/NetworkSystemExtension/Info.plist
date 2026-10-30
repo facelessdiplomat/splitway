@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>SplitwayAppGroupIdentifier</key>
+	<string>$(TeamIdentifierPrefix)$(SPLITWAY_BUNDLE_ID_PREFIX).splitway</string>
+	<key>SplitwayClientBundleIdentifier</key>
+	<string>$(SPLITWAY_BUNDLE_ID_PREFIX).splitway</string>
+	<key>SplitwayTeamIdentifier</key>
+	<string>$(DEVELOPMENT_TEAM)</string>
 	<key>NSSystemExtensionUsageDescription</key>
 	<string>Splitway uses this network extension to run your WireGuard tunnels and to route the apps you choose through them.</string>
 	<key>NetworkExtension</key>

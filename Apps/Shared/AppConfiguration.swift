@@ -3,6 +3,7 @@ import Foundation
 struct AppConfiguration {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
     private static let tunnelProviderInfoKey = "SplitwayTunnelProviderBundleIdentifier"
+    private static let extensionMachServiceInfoKey = "SplitwayExtensionMachServiceName"
     private static let versionInfoKey = "CFBundleShortVersionString"
     private static let buildInfoKey = "CFBundleVersion"
     private static let storageDirectoryName = "Splitway"
@@ -14,6 +15,7 @@ struct AppConfiguration {
     let storageDirectory: URL
     let logDirectory: URL
     let tunnelProviderBundleIdentifier: String
+    let extensionMachServiceName: String
     let logSubsystem: String
     let version: String
     let build: String
@@ -33,6 +35,8 @@ struct AppConfiguration {
         }
         let tunnelProvider = bundle.object(forInfoDictionaryKey: Self.tunnelProviderInfoKey) as? String
         tunnelProviderBundleIdentifier = tunnelProvider ?? ""
+        let extensionMachService = bundle.object(forInfoDictionaryKey: Self.extensionMachServiceInfoKey) as? String
+        extensionMachServiceName = extensionMachService ?? ""
         logSubsystem = bundle.bundleIdentifier ?? Self.fallbackSubsystem
         version = bundle.object(forInfoDictionaryKey: Self.versionInfoKey) as? String ?? ""
         build = bundle.object(forInfoDictionaryKey: Self.buildInfoKey) as? String ?? ""

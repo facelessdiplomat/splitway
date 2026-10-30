@@ -5,7 +5,13 @@ import PacketTunnel
 import PacketTunnelInfrastructure
 import ProviderMessaging
 import TunnelCoreAdapter
-import TunnelLibraryInfrastructure
+import TunnelLibrary
+
+#if os(macOS)
+    import SecretDeliveryInfrastructure
+#else
+    import TunnelLibraryInfrastructure
+#endif
 
 struct PacketTunnelComposition: Sendable {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
@@ -35,8 +41,16 @@ struct PacketTunnelComposition: Sendable {
             endpointResolver: SystemEndpointResolver(),
             pathMonitor: NetworkPathObserver()
         )
-        loadActiveTunnel = LoadActiveTunnelUseCase(secrets: KeychainTunnelSecretStore())
+        loadActiveTunnel = LoadActiveTunnelUseCase(secrets: Self.secretStore)
         messageDispatcher = ProviderMessageDispatcher(handler: PacketTunnelMessageHandler(session: session))
+    }
+
+    private static var secretStore: any TunnelSecretStore {
+        #if os(macOS)
+            SystemKeychainSecretStore()
+        #else
+            KeychainTunnelSecretStore()
+        #endif
     }
 
     private static func logDirectory(in bundle: Bundle) -> URL {

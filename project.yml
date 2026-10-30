@@ -89,6 +89,7 @@ targets:
     platform: iOS
     sources:
       - path: Apps/PacketTunnelExtension
+      - path: Apps/SharedTunnelProvider
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.packet-tunnel
@@ -186,12 +187,17 @@ targets:
         product: SystemExtensionPresentation
       - package: SplitwayKit
         product: SystemExtensionInfrastructure
+      - package: SplitwayKit
+        product: SecretDelivery
+      - package: SplitwayKit
+        product: SecretDeliveryInfrastructure
     scheme: {}
   NetworkSystemExtension:
     type: system-extension
     platform: macOS
     sources:
       - path: Apps/NetworkSystemExtension
+      - path: Apps/SharedTunnelProvider
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension
@@ -202,6 +208,23 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         INFOPLIST_KEY_CFBundleDisplayName: Splitway Network Extension
+    dependencies:
+      - package: SplitwayKit
+        product: PacketTunnel
+      - package: SplitwayKit
+        product: PacketTunnelInfrastructure
+      - package: SplitwayKit
+        product: ProviderMessaging
+      - package: SplitwayKit
+        product: Diagnostics
+      - package: SplitwayKit
+        product: DiagnosticsInfrastructure
+      - package: SplitwayKit
+        product: SecretDelivery
+      - package: SplitwayKit
+        product: SecretDeliveryInfrastructure
+      - package: TunnelCore
+        product: TunnelCoreAdapter
 schemes:
   iOSUITests:
     build:

@@ -42,19 +42,20 @@ struct AppComposition {
     let reportCollector: MetricKitReportCollector
 
     init(configuration: AppConfiguration) {
-        let library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory)
-        let connection = TunnelConnectionAssembly(
-            providerBundleIdentifier: configuration.tunnelProviderBundleIdentifier
+        let diagnostics = DiagnosticsAssembly(
+            logDirectory: configuration.logDirectory,
+            subsystem: configuration.logSubsystem
         )
+        let services = AppTunnelServices(
+            configuration: configuration,
+            log: diagnostics.recorder(for: .application, category: "Secrets")
+        )
+        let (library, connection) = (services.library, services.connection)
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
         let tunnelList = Self.tunnelList(library: library, connection: connection)
         self.tunnelList = tunnelList
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
         tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels)
-        let diagnostics = DiagnosticsAssembly(
-            logDirectory: configuration.logDirectory,
-            subsystem: configuration.logSubsystem
-        )
         logViewer = Self.logViewer(diagnostics: diagnostics, configuration: configuration)
         reportCollector = diagnostics.reportCollector
         reportCollector.start()

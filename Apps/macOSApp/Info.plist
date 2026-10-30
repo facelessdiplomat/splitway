@@ -36,6 +36,8 @@
 	</array>
 	<key>SplitwayAppGroupIdentifier</key>
 	<string>$(TeamIdentifierPrefix)$(SPLITWAY_BUNDLE_ID_PREFIX).splitway</string>
+	<key>SplitwayExtensionMachServiceName</key>
+	<string>$(TeamIdentifierPrefix)$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension</string>
 	<key>SplitwayTunnelProviderBundleIdentifier</key>
 	<string>$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension</string>
 	<key>UTImportedTypeDeclarations</key>
