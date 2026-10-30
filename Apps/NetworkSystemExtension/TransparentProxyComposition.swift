@@ -30,6 +30,7 @@ struct TransparentProxyComposition: Sendable {
             ),
             router: ProxiedFlowRouter(
                 sourceResolver: SourceApplicationResolver(reader: SecurityCodeIdentityReader()),
+                attribution: SuspiciousAttributionMonitor(log: SuspiciousAttributionLogRecorder(log: log)),
                 environment: RelayEnvironment(
                     targetQueue: DispatchQueue(
                         label: "Splitway.ProxyRelays", qos: .userInitiated, attributes: .concurrent),

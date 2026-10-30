@@ -19,16 +19,19 @@ public final class ProxiedFlowRouter: Sendable {
     }
 
     private let sourceResolver: SourceApplicationResolver
+    private let attribution: SuspiciousAttributionMonitor
     private let environment: RelayEnvironment
     private let policy: RelayPolicy
     private let state = Mutex(State())
 
     public init(
         sourceResolver: SourceApplicationResolver,
+        attribution: SuspiciousAttributionMonitor,
         environment: RelayEnvironment,
         policy: RelayPolicy = .standard
     ) {
         self.sourceResolver = sourceResolver
+        self.attribution = attribution
         self.environment = environment
         self.policy = policy
     }
@@ -105,8 +108,10 @@ public final class ProxiedFlowRouter: Sendable {
         transport: FlowTransport,
         in runtime: TransparentProxyRuntime
     ) -> FlowRouteDecision {
+        let source = sourceResolver.sourceApplication(of: request.auditToken)
+        attribution.inspect(source)
         let flow = FlowDescriptor(
-            source: sourceResolver.sourceApplication(of: request.auditToken),
+            source: source,
             destination: .address(request.remoteEndpoint.address),
             port: request.remoteEndpoint.port.value,
             transport: transport

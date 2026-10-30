@@ -68,6 +68,23 @@ struct TransparentProxySessionTests {
     }
 
     @Test
+    func recordsAStreamAttributedToAnotherNetworkExtension() async throws {
+        let environment = TransparentProxyTestEnvironment()
+        _ = try await environment.session.start(
+            TransparentProxyTestEnvironment.tunnel(routing: TransparentProxyTestEnvironment.selectedBrowser())
+        )
+
+        let isHandled = environment.session.handleStream(
+            ScriptedStreamFlow(),
+            request: try TransparentProxyTestEnvironment.request(
+                from: TransparentProxyTestEnvironment.otherProxyProcess)
+        )
+
+        #expect(!isHandled)
+        #expect(environment.attributionLog.networkExtensionPaths == [TransparentProxyTestEnvironment.otherProxyPath])
+    }
+
+    @Test
     func sendsDatagramsOfASelectedApplicationThroughTheTunnel() async throws {
         let environment = TransparentProxyTestEnvironment()
         _ = try await environment.session.start(
