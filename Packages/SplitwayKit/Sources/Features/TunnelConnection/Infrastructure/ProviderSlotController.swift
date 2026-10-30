@@ -5,13 +5,13 @@ import SharedKernel
 import TunnelConnection
 import TunnelLibrary
 
-public actor PacketTunnelSlotController: SystemTunnelController {
-    private static let slotName = "Splitway"
-    private static let disconnectionTimeout = Duration.seconds(10)
+public actor ProviderSlotController<Kind: ProviderSlotKind>: SystemTunnelController {
+    private static var slotName: String { "Splitway" }
+    private static var disconnectionTimeout: Duration { .seconds(10) }
 
     private let providerBundleIdentifier: String
     private let clock: any WallClock
-    private var manager: NETunnelProviderManager?
+    private var manager: NEVPNManager?
     private var hasLoadedManager = false
     private var statusObserver: (any NSObjectProtocol)?
     private var statusSubscribers: [AsyncStream<SystemConnectionStatus>.Continuation] = []
@@ -70,7 +70,7 @@ public actor PacketTunnelSlotController: SystemTunnelController {
         } catch {
             throw .systemConfigurationUnavailable
         }
-        let slot = await loadedManager() ?? NETunnelProviderManager()
+        let slot = await loadedManager() ?? Kind.newSlot()
         slot.protocolConfiguration = tunnelProtocol
         slot.localizedDescription = Self.slotName
         slot.isEnabled = true
@@ -101,9 +101,9 @@ public actor PacketTunnelSlotController: SystemTunnelController {
         await waitUntilDisconnected()
     }
 
-    private func loadedManager() async -> NETunnelProviderManager? {
+    private func loadedManager() async -> NEVPNManager? {
         guard !hasLoadedManager else { return manager }
-        let savedManagers = (try? await NETunnelProviderManager.loadAllFromPreferences()) ?? []
+        let savedManagers = await Kind.savedSlots()
         if !hasLoadedManager {
             hasLoadedManager = true
             manager = savedManagers.first { savedManager in
