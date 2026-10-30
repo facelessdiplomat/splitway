@@ -1,3 +1,4 @@
+import ApplicationCatalogPresentation
 import Diagnostics
 import DiagnosticsInfrastructure
 import DiagnosticsPresentation
@@ -16,6 +17,7 @@ import TunnelLibraryInfrastructure
 import TunnelLibraryPresentation
 
 #if os(macOS)
+    import ApplicationCatalogInfrastructure
     import SystemExtensionInfrastructure
 #endif
 
@@ -177,11 +179,26 @@ struct AppComposition {
                 activityProbe: connection.activityProbe,
                 activateTunnel: connection.activateTunnel,
                 deactivateTunnel: connection.deactivateTunnel
-            )
+            ),
+            applicationPicker: applicationPicker
         ) { text in
             clipboard.copy(text)
         } didSave: { _ in
             await tunnelList.load()
         }
+    }
+
+    private static var applicationPicker: ApplicationPickerActions? {
+        #if os(macOS)
+            let catalog = ApplicationCatalogAssembly()
+            return ApplicationPickerActions(
+                loadApplications: catalog.loadInstalledApplications,
+                resolveIdentity: catalog.resolveApplicationIdentity,
+                fileReader: catalog.fileReader,
+                iconLoader: catalog.iconLoader
+            )
+        #else
+            return nil
+        #endif
     }
 }
