@@ -6,9 +6,9 @@
 	<true/>
 	<key>com.apple.developer.networking.networkextension</key>
 	<array>
-		<string>packet-tunnel-provider-systemextension</string>
-		<string>app-proxy-provider-systemextension</string>
-		<string>dns-proxy-systemextension</string>
+		<string>packet-tunnel-provider$(SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX)</string>
+		<string>app-proxy-provider$(SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX)</string>
+		<string>dns-proxy$(SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX)</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
