@@ -4,7 +4,7 @@
 |---|---|
 | Статус | в работе: режимы fd и netstack готовы; проверка на устройствах — M2-08, M2-14 |
 | Платформы | shared |
-| Задачи | M2-01, M2-02, M2-03, M2-04, M2-13, M4-06 |
+| Задачи | M2-01, M2-02, M2-03, M2-04, M2-13, M4-06, M4-10 (`TunnelEngineTestSupport`) |
 | Таргеты | `TunnelEngine` (SplitwayKit); `TunnelCoreAdapter`, `TunnelCoreFramework` (TunnelCore); Go-пакеты `bridge`, `fdtunnel`, `logbridge`; режим netstack — в [UserspaceNetwork](UserspaceNetwork.md) |
 
 ## Назначение
@@ -91,6 +91,7 @@ flowchart LR
 
 ## Тесты
 
+- `TunnelEngineTestSupport` даёт фейки режима netstack `InMemoryUserspaceNetwork` и `InMemoryUserspaceConnection`: они записывают запись, кредит и закрытия и отдают данные получателю по команде теста. Ими проверяются насосы `TransparentProxy`.
 - 10 тестов в `TunnelEngineTests`: снимок UAPI для фикстур, пропуск неразрезолвленных endpoint, `allowed_ip` без битов хоста, скрытие текста UAPI, разбор статистики, `errno`, повреждённые ответы.
 - 15 Go-тестов режима fd (тесты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md)):
   - рукопожатие и доставка пакета между двумя wireguard-go на `tuntest`;
@@ -113,3 +114,4 @@ flowchart LR
 | 2026-10-29 | Маскирование логов движка | M2-13 |
 | 2026-10-30 | `fdtunnel.Start` поднимает и устройство `usernet` на netstack | M4-05 |
 | 2026-10-30 | Общая таблица хэндлов для режимов fd и netstack, `recover` в экспортных функциях | M4-06 |
+| 2026-10-30 | Фейки режима netstack в `TunnelEngineTestSupport` | M4-10 |
