@@ -5,6 +5,7 @@
         private let scanner: FileSystemApplicationScanner
         private let signatures = SecurityCodeSignatureReader()
         public let iconLoader: WorkspaceIconLoader
+        public let fileReader = FileSystemApplicationFileReader()
 
         public init() {
             scanner = FileSystemApplicationScanner()

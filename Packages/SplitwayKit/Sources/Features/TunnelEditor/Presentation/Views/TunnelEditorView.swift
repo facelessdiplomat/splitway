@@ -14,7 +14,11 @@ struct TunnelEditorView: View {
             switch model.mode {
             case .form:
                 InterfaceSection(model: model, copyToClipboard: copyToClipboard)
-                RoutingSection(model: model.routing, excludesPrivateNetworks: excludesPrivateNetworks)
+                RoutingSection(
+                    model: model.routing,
+                    excludesPrivateNetworks: excludesPrivateNetworks,
+                    chooseApplications: chooseApplications
+                )
                 ForEach(model.draft.peers) { peer in
                     PeerSection(model: model, peer: peer)
                 }
@@ -31,7 +35,11 @@ struct TunnelEditorView: View {
                 }
             case .text:
                 TunnelTextSection(model: model)
-                RoutingSection(model: model.routing, excludesPrivateNetworks: nil)
+                RoutingSection(
+                    model: model.routing,
+                    excludesPrivateNetworks: nil,
+                    chooseApplications: chooseApplications
+                )
             }
         }
         .formStyle(.grouped)
@@ -41,6 +49,12 @@ struct TunnelEditorView: View {
         }
         .modifier(TunnelRestartConfirmation(model: model))
         .modifier(TunnelEditorFailureAlert(model: model))
+        .modifier(ApplicationPickerSheet(model: model))
+    }
+
+    private var chooseApplications: (@MainActor () -> Void)? {
+        guard model.canChooseApplications else { return nil }
+        return { model.chooseApplications() }
     }
 
     private var excludesPrivateNetworks: Binding<Bool>? {

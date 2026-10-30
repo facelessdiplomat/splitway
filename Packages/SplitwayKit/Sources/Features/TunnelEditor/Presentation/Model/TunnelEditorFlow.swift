@@ -1,5 +1,6 @@
 import AppRouting
 import AppRoutingPresentation
+import ApplicationCatalogPresentation
 import Foundation
 import Observation
 import TunnelLibrary
@@ -12,16 +13,19 @@ public final class TunnelEditorFlow {
     let copyToClipboard: @MainActor (String) -> Void
     private let routingPlatform: RoutingPlatform
     private let actions: TunnelEditorActions
+    private let applicationPicker: ApplicationPickerActions?
     private let didSave: @MainActor (Tunnel) async -> Void
 
     public init(
         routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
+        applicationPicker: ApplicationPickerActions? = nil,
         copyToClipboard: @escaping @MainActor (String) -> Void,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         self.routingPlatform = routingPlatform
         self.actions = actions
+        self.applicationPicker = applicationPicker
         self.copyToClipboard = copyToClipboard
         self.didSave = didSave
     }
@@ -30,7 +34,8 @@ public final class TunnelEditorFlow {
         editor = TunnelEditorModel(
             newTunnelNamed: Self.newTunnelName,
             routingPlatform: routingPlatform,
-            actions: actions
+            actions: actions,
+            applicationPicker: applicationPicker
         ) { [weak self] tunnel in
             await self?.finish(saving: tunnel)
         }
@@ -40,7 +45,8 @@ public final class TunnelEditorFlow {
         editor = TunnelEditorModel(
             editing: tunnel,
             routingPlatform: routingPlatform,
-            actions: actions
+            actions: actions,
+            applicationPicker: applicationPicker
         ) { [weak self] tunnel in
             await self?.finish(saving: tunnel)
         }

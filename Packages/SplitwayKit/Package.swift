@@ -34,42 +34,16 @@ enum FeatureLayer {
 
 struct FeatureModule {
     let name: String
-    let layers: [FeatureLayer]
-    let coreDependencies: [Target.Dependency]
-    let infrastructureDependencies: [Target.Dependency]
-    let presentationDependencies: [Target.Dependency]
-    let testDependencies: [Target.Dependency]
-    let infrastructureTestDependencies: [Target.Dependency]
-    let presentationTestDependencies: [Target.Dependency]
-    let infrastructureResources: [Resource]?
-    let layersWithoutTests: [FeatureLayer]
-    let providesTestSupport: Bool
-
-    init(
-        _ name: String,
-        layers: [FeatureLayer] = [.core],
-        coreDependencies: [Target.Dependency] = [],
-        infrastructureDependencies: [Target.Dependency] = [],
-        presentationDependencies: [Target.Dependency] = [],
-        testDependencies: [Target.Dependency] = [],
-        infrastructureTestDependencies: [Target.Dependency] = [],
-        presentationTestDependencies: [Target.Dependency] = [],
-        infrastructureResources: [Resource]? = nil,
-        layersWithoutTests: [FeatureLayer] = [],
-        providesTestSupport: Bool = false
-    ) {
-        self.name = name
-        self.layers = layers
-        self.coreDependencies = coreDependencies
-        self.infrastructureDependencies = infrastructureDependencies
-        self.presentationDependencies = presentationDependencies
-        self.testDependencies = testDependencies
-        self.infrastructureTestDependencies = infrastructureTestDependencies
-        self.presentationTestDependencies = presentationTestDependencies
-        self.infrastructureResources = infrastructureResources
-        self.layersWithoutTests = layersWithoutTests
-        self.providesTestSupport = providesTestSupport
-    }
+    var layers: [FeatureLayer] = [.core]
+    var coreDependencies: [Target.Dependency] = []
+    var infrastructureDependencies: [Target.Dependency] = []
+    var presentationDependencies: [Target.Dependency] = []
+    var testDependencies: [Target.Dependency] = []
+    var infrastructureTestDependencies: [Target.Dependency] = []
+    var presentationTestDependencies: [Target.Dependency] = []
+    var infrastructureResources: [Resource]?
+    var layersWithoutTests: [FeatureLayer] = []
+    var providesTestSupport = false
 
     var targets: [Target] {
         layers.flatMap(targets(for:)) + testSupportTargets
@@ -162,19 +136,19 @@ let zipFoundation: Target.Dependency = .product(name: "ZIPFoundation", package: 
 
 let features: [FeatureModule] = [
     FeatureModule(
-        "TunnelConfiguration",
+        name: "TunnelConfiguration",
         layers: [.core, .presentation],
         presentationDependencies: ["DesignSystemPresentation"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "AppRouting",
+        name: "AppRouting",
         layers: [.core, .presentation],
         presentationDependencies: ["DesignSystemPresentation"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "TunnelLibrary",
+        name: "TunnelLibrary",
         layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelConfiguration", "AppRouting"],
         infrastructureDependencies: [zipFoundation],
@@ -188,7 +162,7 @@ let features: [FeatureModule] = [
         providesTestSupport: true
     ),
     FeatureModule(
-        "TunnelImport",
+        name: "TunnelImport",
         layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
         infrastructureDependencies: [zipFoundation],
@@ -197,81 +171,85 @@ let features: [FeatureModule] = [
         infrastructureTestDependencies: [zipFoundation, "TunnelLibraryInfrastructure"]
     ),
     FeatureModule(
-        "TunnelEditor",
+        name: "TunnelEditor",
         layers: [.core, .presentation],
         coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
         presentationDependencies: [
-            "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation", "DesignSystemPresentation",
+            "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation",
+            "ApplicationCatalogPresentation", "DesignSystemPresentation",
         ],
         testDependencies: ["TunnelConfigurationTestSupport"],
-        presentationTestDependencies: ["TunnelLibraryTestSupport", "TunnelConnectionTestSupport"]
+        presentationTestDependencies: [
+            "TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "ApplicationCatalogTestSupport",
+        ]
     ),
     FeatureModule(
-        "Diagnostics",
+        name: "Diagnostics",
         layers: [.core, .infrastructure, .presentation],
         infrastructureDependencies: [zipFoundation],
         presentationDependencies: ["DesignSystemPresentation"],
         infrastructureTestDependencies: [zipFoundation],
         providesTestSupport: true
     ),
-    FeatureModule("DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
+    FeatureModule(name: "DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
     FeatureModule(
-        "ApplicationCatalog",
-        layers: [.core, .infrastructure],
+        name: "ApplicationCatalog",
+        layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["AppRouting"],
+        presentationDependencies: ["DesignSystemPresentation"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "Settings",
+        name: "Settings",
         layers: [.core, .infrastructure, .presentation],
         presentationDependencies: ["DesignSystemPresentation"],
         infrastructureResources: [.process("Resources")],
         providesTestSupport: true
     ),
     FeatureModule(
-        "TunnelEngine",
+        name: "TunnelEngine",
         coreDependencies: ["TunnelConfiguration"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "ProviderMessaging",
+        name: "ProviderMessaging",
         layers: [.core, .infrastructure],
         coreDependencies: ["TunnelEngine", "AppRouting", "TunnelLibrary"],
         testDependencies: ["TunnelConfigurationTestSupport"]
     ),
     FeatureModule(
-        "PacketTunnel",
+        name: "PacketTunnel",
         layers: [.core, .infrastructure],
         coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging"],
         testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"]
     ),
     FeatureModule(
-        "TransparentProxy",
+        name: "TransparentProxy",
         layers: [.core, .infrastructure],
         coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine", "PacketTunnel"],
         testDependencies: ["TunnelConfigurationTestSupport", "AppRoutingTestSupport", "TunnelEngineTestSupport"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "DNSProxy",
+        name: "DNSProxy",
         coreDependencies: ["AppRouting", "TunnelConfiguration"],
         testDependencies: ["AppRoutingTestSupport", "TunnelConfigurationTestSupport"]
     ),
     FeatureModule(
-        "SecretDelivery",
+        name: "SecretDelivery",
         coreDependencies: ["TunnelLibrary"],
         testDependencies: ["TunnelLibraryTestSupport", "TunnelConfigurationTestSupport"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "SystemExtension",
+        name: "SystemExtension",
         layers: [.core, .infrastructure, .presentation],
         presentationDependencies: ["DesignSystemPresentation"],
         providesTestSupport: true
     ),
     FeatureModule(
-        "Onboarding",
+        name: "Onboarding",
         layers: [.core, .infrastructure, .presentation],
         presentationDependencies: ["SystemExtension", "SystemExtensionPresentation", "DesignSystemPresentation"],
         presentationTestDependencies: ["SystemExtensionTestSupport"],
@@ -279,7 +257,7 @@ let features: [FeatureModule] = [
         providesTestSupport: true
     ),
     FeatureModule(
-        "TunnelConnection",
+        name: "TunnelConnection",
         layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
         infrastructureDependencies: ["ProviderMessagingInfrastructure"],

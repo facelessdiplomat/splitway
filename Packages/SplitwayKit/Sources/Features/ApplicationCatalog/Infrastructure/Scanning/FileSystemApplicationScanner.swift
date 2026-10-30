@@ -37,7 +37,7 @@
             var seenPaths: Set<String> = []
             var applications: [InstalledApplication] = []
             for bundle in candidateBundles() {
-                let path = bundle.resolvingSymlinksInPath().path(percentEncoded: false)
+                let path = bundle.canonicalFilePath
                 guard seenPaths.insert(path).inserted, let application = cachedApplication(at: path) else { continue }
                 applications.append(application)
             }

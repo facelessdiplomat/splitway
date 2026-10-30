@@ -50,7 +50,8 @@
         }
 
         func path(_ relativePath: String) -> String {
-            root.appending(path: relativePath).resolvingSymlinksInPath().path(percentEncoded: false)
+            let resolved = root.appending(path: relativePath).resolvingSymlinksInPath().path(percentEncoded: false)
+            return resolved.hasSuffix("/") ? String(resolved.dropLast()) : resolved
         }
     }
 #endif

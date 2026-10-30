@@ -43,6 +43,15 @@ struct TunnelDetailView: View {
                     }
                 }
             }
+            if !row.routedApplicationNames.isEmpty {
+                Section {
+                    ForEach(Array(row.routedApplicationNames.enumerated()), id: \.offset) { _, name in
+                        Text(verbatim: name)
+                    }
+                } header: {
+                    Text("Apps through the tunnel", bundle: .module)
+                }
+            }
             ForEach(peers) { peer in
                 PeerStatisticsSection(peer: peer)
             }

@@ -1,3 +1,4 @@
+import ApplicationCatalogPresentation
 import Foundation
 import Testing
 import TunnelConfiguration
@@ -40,6 +41,17 @@ final class TunnelEditorTestEnvironment {
 
     func editor(for tunnel: Tunnel) -> TunnelEditorModel {
         TunnelEditorModel(editing: tunnel, routingPlatform: .iOS, actions: actions) { [weak self] tunnel in
+            self?.savedTunnels.append(tunnel)
+        }
+    }
+
+    func editor(for tunnel: Tunnel, choosingApplicationsWith picker: ApplicationPickerActions) -> TunnelEditorModel {
+        TunnelEditorModel(
+            editing: tunnel,
+            routingPlatform: .macOS,
+            actions: actions,
+            applicationPicker: picker
+        ) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
     }

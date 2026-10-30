@@ -71,4 +71,33 @@ struct RoutingSectionModelTests {
 
         #expect(model.offersUnavailableTunnelChoice == showsChoice)
     }
+
+    @Test
+    func replacesTheSelectedApplications() throws {
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
+        model.selectMode(.selectedApplications)
+        let selection = try Self.safariSelection()
+
+        model.setApplications(selection)
+
+        #expect(model.policy.mode == .selectedApplications(selection))
+        #expect(model.applicationSelection == selection)
+    }
+
+    @Test
+    func usesApplicationsChosenEarlierWhenTheirModeIsSelected() throws {
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
+        let selection = try Self.safariSelection()
+        model.setApplications(selection)
+
+        model.selectMode(.selectedApplications)
+
+        #expect(model.policy.mode == .selectedApplications(selection))
+    }
+
+    private static func safariSelection() throws -> ApplicationSelection {
+        ApplicationSelection([
+            try ApplicationIdentity(kind: .application, displayName: "Safari", path: "/Applications/Safari.app")
+        ])
+    }
 }

@@ -2,26 +2,26 @@
 
 | | |
 |---|---|
-| Статус | в работе: Core, сканирование, подписи и иконки готовы; экран выбора — M4-04 |
+| Статус | в работе: Core, сканирование, подписи, иконки и экран выбора готовы; пометка «не поддерживается» — после SP-2 |
 | Платформы | macOS |
-| Задачи | M4-02, M4-03 |
-| Таргеты | `ApplicationCatalog`, `ApplicationCatalogInfrastructure`, `ApplicationCatalogTestSupport` |
+| Задачи | M4-02, M4-03, M4-04 |
+| Таргеты | `ApplicationCatalog`, `ApplicationCatalogInfrastructure`, `ApplicationCatalogPresentation`, `ApplicationCatalogTestSupport` |
 
 ## Назначение
 
-Каталог приложений и CLI-утилит Mac для режима «Только выбранные приложения». Фича ищет и фильтрует установленные приложения и собирает для выбранного приложения `ApplicationIdentity`: signing identifier главного бандла и его хелперов, Team ID, путь и версию. По этой идентичности `AppRouting` узнаёт процессы выбранного приложения.
+Каталог приложений и CLI-утилит Mac для режима «Только выбранные приложения». Фича ищет и фильтрует установленные приложения и собирает для выбранного приложения `ApplicationIdentity`: signing identifier главного бандла и его хелперов, Team ID, путь и версию. По этой идентичности `AppRouting` узнаёт процессы выбранного приложения. Слой `Presentation` даёт лист выбора приложений, который открывает редактор туннеля.
 
 ## Зависимости
 
 | Тип | Что | Зачем |
 |---|---|---|
-| Фичи проекта | `SharedKernel`, `AppRouting` | `ApplicationIdentity`, `ApplicationKind`, `ApplicationSelection` |
-| Системные фреймворки | Foundation; в `Infrastructure` (только macOS) — Security, AppKit, Synchronization | поиск и сортировка строк; подписи кода; запущенные приложения и иконки; кэш |
+| Фичи проекта | `SharedKernel`, `AppRouting`; в `Presentation` — `DesignSystemPresentation` | `ApplicationIdentity`, `ApplicationKind`, `ApplicationSelection`; общие компоненты |
+| Системные фреймворки | Foundation; в `Infrastructure` (только macOS) — Security, AppKit, Synchronization; в `Presentation` — SwiftUI, Observation, ImageIO, UniformTypeIdentifiers | поиск и сортировка строк; подписи кода; запущенные приложения и иконки; кэш; лист выбора, разбор PNG иконки, типы файлов |
 | Сторонние библиотеки | нет | |
 
 ## Принцип работы
 
-- `InstalledApplication` — то, что нашёл сканер: вид (приложение или CLI-утилита), имя, bundle ID, путь и версия. Подписи сканер не читает: на типичном Mac сотни приложений, а подпись нужна только выбранным.
+- `InstalledApplication` — то, что нашёл сканер: вид (приложение или CLI-утилита), имя, bundle ID, путь и версия. Подписи сканер не читает: на типичном Mac сотни приложений, а подпись нужна только выбранным. `InstalledApplication(representing:)` описывает выбранное приложение, которого нет среди найденных: оно на отключённом диске или добавлено вручную.
 - `ApplicationCatalogQuery` фильтрует и сортирует список:
   - поиск по имени без учёта регистра и диакритики (`localizedStandardContains`), пробелы по краям запроса не важны;
   - фильтр `ApplicationCatalogFilter`: все, выбранные, только CLI-утилиты;
@@ -30,11 +30,14 @@
   - signing identifier главного бандла и вложенного кода той же команды (хелперы Chrome и Electron);
   - вложенный код другой команды пропускается: `ApplicationMatcher` всё равно требует Team ID выбранного приложения;
   - неподписанное приложение получает идентичность без identifiers и узнаётся по пути.
+- `ApplicationRemarkPolicy` даёт пометки `ApplicationRemark` для строки списка:
+  - `appleApplication` — приложение Apple (bundle ID `com.apple.` или системная папка). Часть его трафика может идти через системные службы, а не через процесс приложения. CLI-утилиты Apple (`/usr/bin/curl`) пометки не получают: сеть они открывают сами;
+  - `matchedByPath` — выбранное приложение не Apple и без Team ID (ad-hoc или без подписи). Его identifier не подтверждён подписью, поэтому `SourceApplicationResolver` (`TransparentProxy`) его не передаёт, и приложение узнаётся по пути. Пометка появляется после выбора: подпись читается только тогда.
 - Сценарии:
   - `LoadInstalledApplicationsUseCase` отдаёт найденное по имени;
   - `ResolveApplicationIdentityUseCase` читает подписи через `CodeSignatureReader` и собирает идентичность; если подпись прочитать нельзя, остаётся сопоставление по пути;
   - `RefreshSelectedApplicationsUseCase` пересобирает идентичность выбранного приложения, когда сменилась версия его бандла (`ApplicationIdentity.bundleVersion`). Приложения без изменений и пропавшие остаются как были.
-- Порты: `ApplicationBundleScanner` (найти приложения), `CodeSignatureReader` (подписи бандла и вложенного кода), `ApplicationIconLoader` (иконка по пути, для экрана выбора).
+- Порты: `ApplicationBundleScanner` (найти приложения), `CodeSignatureReader` (подписи бандла и вложенного кода), `ApplicationIconLoader` (иконка по пути, для экрана выбора), `ApplicationFileReader` (перетащенный бандл или выбранный исполняемый файл).
 
 **Адаптеры macOS** (`ApplicationCatalogInfrastructure`):
 
@@ -43,19 +46,30 @@
   - среди запущенных обычных приложений (`NSWorkspace.runningApplications`), чтобы найти приложение в любом месте.
 
   Повторы убираются по реальному пути: `/Applications/Safari.app` — ссылка в криптекс. Имя — локализованное имя Finder без `.app`, bundle ID и версия — из `Info.plist`. Результат кэшируется по пути и дате изменения `Info.plist`, а сканирование идёт на своей очереди.
+- Все пути адаптеры приводят к одному виду `URL.canonicalFilePath`: ссылки раскрыты, `/` на конце нет. `contentsOfDirectory` отдаёт бандлы как папки (`/Applications/Telegram.app/`), и без этого правило пути `ApplicationMatcher` не покрыло бы исполняемый файл внутри бандла, а перетащенное приложение не совпало бы с найденным.
+- `FileSystemApplicationFileReader` читает перетащенный бандл `.app` так же, как сканер, а обычный исполняемый файл — как CLI-утилиту по его реальному пути (ссылка `/usr/local/bin/tool` раскрывается). Папки, документы и несуществующие пути — `nil`. Чтение идёт на своей очереди.
 - `SecurityCodeSignatureReader` читает signing identifier и Team ID через `SecStaticCodeCreateWithPath` и `SecCodeCopySigningInformation` — у самого бандла и у вложенного кода, который нашёл `NestedCodeEnumerator`. Тоже на своей очереди.
 - `NestedCodeEnumerator` ищет вложенные `.app`, `.xpc`, `.appex` и исполняемые файлы папок `Helpers` в `Contents/Frameworks`, `Contents/XPCServices`, `Contents/Helpers`, `Contents/Library/LoginItems`, `Contents/PlugIns`. `Contents/Resources` не просматривается: там лежат образцы, а не код приложения. У Electron-приложений так находятся `Helper.app`, `Helper (Renderer).app` и `Helper (GPU).app` с общим identifier хелпера и той же командой (проверено на установленном Electron-приложении).
 - `WorkspaceIconLoader` рисует иконку `NSWorkspace.icon(forFile:)` в PNG 64 × 64 точки на своей очереди и кэширует её по пути.
-- `ApplicationCatalogAssembly` собирает сценарии и загрузчик иконок для composition root.
+- `ApplicationCatalogAssembly` собирает сценарии, загрузчик иконок и чтение файлов для composition root.
+
+**Лист выбора** (`ApplicationCatalogPresentation`):
+
+- `ApplicationPickerModel` (`@MainActor`, `@Observable`) получает текущий выбор и `ApplicationPickerActions` (сценарии загрузки и сборки идентичности, чтение файлов, иконки). После `load()` строки `ApplicationPickerRow` — найденные приложения и выбранные, которых нет среди найденных, через `ApplicationCatalogQuery` с поиском и фильтром листа. У строки есть отметка, признак «идёт чтение подписи» и пометки.
+- `setSelected(_:path:)` при выборе читает подпись, собирает идентичность и добавляет её в выбор. Снятие отметки во время чтения отменяет выбор: прочитанная позже идентичность не добавится. Каждый новый выбор модель сразу отдаёт наружу (`didChangeSelection`); редактор кладёт его в секцию «Маршрутизация».
+- `addApplication(at:)` и `addApplications(at:)` добавляют перетащенный бандл или файл из «Добавить утилиту…»: файл попадает в список и выбирается. Уже найденное приложение не повторяется. Если файл не приложение и не исполняемый, модель запоминает его имя для предупреждения.
+- `ApplicationPickerView` — лист: фильтр «Все / Выбранные / Утилиты», поиск, список с иконками (`ApplicationIconView` грузит их лениво через `ApplicationIconLoader`), «Добавить утилиту…» (`fileImporter` для бандлов и исполняемых файлов), перетаскивание файлов на список, «Готово». Пометки показаны под именем приложения.
 
 ## Публичный API
 
-`InstalledApplication`, `CodeSignature`, `BundleCodeSignatures`, `ApplicationCatalogQuery`, `ApplicationCatalogFilter`, `ApplicationIdentityBuilder`; порты `ApplicationBundleScanner`, `CodeSignatureReader`, `CodeSignatureReadingError`, `ApplicationIconLoader`; сценарии `LoadInstalledApplicationsUseCase`, `ResolveApplicationIdentityUseCase`, `RefreshSelectedApplicationsUseCase`; адаптеры macOS `FileSystemApplicationScanner`, `SecurityCodeSignatureReader`, `NestedCodeEnumerator`, `WorkspaceIconLoader`, `ApplicationCatalogAssembly`.
+`InstalledApplication`, `CodeSignature`, `BundleCodeSignatures`, `ApplicationCatalogQuery`, `ApplicationCatalogFilter`, `ApplicationIdentityBuilder`, `ApplicationRemark`, `ApplicationRemarkPolicy`; порты `ApplicationBundleScanner`, `CodeSignatureReader`, `CodeSignatureReadingError`, `ApplicationIconLoader`, `ApplicationFileReader`; сценарии `LoadInstalledApplicationsUseCase`, `ResolveApplicationIdentityUseCase`, `RefreshSelectedApplicationsUseCase`; адаптеры macOS `FileSystemApplicationScanner`, `FileSystemApplicationFileReader`, `SecurityCodeSignatureReader`, `NestedCodeEnumerator`, `WorkspaceIconLoader`, `ApplicationCatalogAssembly`; лист — `ApplicationPickerModel`, `ApplicationPickerActions`, `ApplicationPickerRow`, `ApplicationPickerView`.
 
 ## Решения
 
 - Подписи читаются при выборе, а не при сканировании: сканирование остаётся быстрым, а выбор — один бандл.
 - Версия бандла хранится в `ApplicationIdentity` (`bundleVersion`) необязательным полем: старые сохранённые политики читаются без изменения версии схемы.
+- Путь без `/` на конце обеспечивают и адаптеры (`canonicalFilePath`), и сама `ApplicationIdentity` (фича `AppRouting`): так одинаковы и новые данные, и уже сохранённые.
+- Лист не дублирует отмену: выбор сразу попадает в секцию редактора, а сохраняется или отменяется вместе с редактором.
 
 ## Спорные решения
 
@@ -64,8 +78,10 @@
 | Вложенный код другой команды не входит в идентичность | Хранить пары «identifier → Team ID» для каждого вложенного бандла | `ApplicationMatcher` требует Team ID выбранного приложения, и такие identifiers всё равно не совпали бы | Если встретятся приложения с хелперами другой команды |
 | Нечитаемая подпись — выбор по пути, а не отказ | Не давать выбрать приложение | Пользователь всё равно может выбрать приложение; путь надёжен, пока приложение не переместили | Нет |
 | Пропавшее приложение остаётся в выборе | Удалять из выбора | Приложение может быть на отключённом диске или переустанавливаться | Если пользователи начнут путаться в старых записях |
-| Без Spotlight (`NSMetadataQuery`) | Искать бандлы через Spotlight | Стандартные папки и запущенные приложения покрывают почти всё, остальное пользователь перетащит сам (M4-04); запрос Spotlight требует цикла событий и асинхронной сборки результатов | Если пользователи не найдут свои приложения |
+| Без Spotlight (`NSMetadataQuery`) | Искать бандлы через Spotlight | Стандартные папки и запущенные приложения покрывают почти всё, остальное пользователь перетащит сам; запрос Spotlight требует цикла событий и асинхронной сборки результатов | Если пользователи не найдут свои приложения |
 | Сканирование на один уровень вглубь | Полный обход папок | Папки производителей содержат бандлы на первом уровне, а полный обход дорог | Если встретятся приложения глубже |
+| Пометка «Приложение Apple» — по bundle ID и системной папке | Читать подписи всех приложений при сканировании | Сканирование остаётся быстрым. Пометка — подсказка, а сопоставление всё равно проверяет настоящую подпись процесса | Если пометка начнёт ошибаться |
+| Пометки «не поддерживается» пока нет | Пометить Safari и приложения с `WKWebView` заранее | Нужны данные спайка SP-2 об атрибуции потоков WebKit (решение D-10) | По итогам SP-2 |
 
 ## Отступления от правил разработки
 
@@ -73,23 +89,28 @@
 
 ## Ограничения и известные проблемы
 
-- Экран выбора — M4-04.
-- Адаптеры собираются только для macOS (`#if os(macOS)`): на iOS выбор приложений не поддерживается.
+- Пометка «не поддерживается» для Safari и приложений с `WKWebView` появится по итогам SP-2.
+- Адаптеры собираются только для macOS (`#if os(macOS)`): на iOS выбор приложений не поддерживается. Лист собирается на всех платформах, но открывает его только редактор macOS.
+- UI-тесты листа на macOS появятся вместе с тестовой ВМ macOS (M0-12): `Scripts/check.sh --ui` гоняет UI-тесты на симуляторах iPhone и iPad.
 
 ## Тесты
 
-10 тестов в `ApplicationCatalogTests`:
+16 тестов в `ApplicationCatalogTests`:
 
 - поиск без учёта регистра и диакритики, фильтры выбранных и CLI-утилит, сортировка как в Finder;
 - идентичность браузера с хелперами той же команды и без кода другой команды; неподписанное приложение, которое `ApplicationMatcher` узнаёт по пути;
-- сценарии: список по имени, идентичность из подписей, запасной путь при нечитаемой подписи, пересборка после обновления, без изменений для прежней версии и пропавшего приложения.
+- сценарии: список по имени, идентичность из подписей, запасной путь при нечитаемой подписи, пересборка после обновления, без изменений для прежней версии и пропавшего приложения;
+- пометки: приложение Apple до чтения подписи, без пометки для CLI-утилиты Apple и приложения с Team ID, «узнаётся по пути» для приложения без Team ID, ожидание подписи у приложения другого разработчика; описание выбранного приложения, которого нет среди найденных.
 
-5 тестов в `ApplicationCatalogInfrastructureTests` (только macOS):
+8 тестов в `ApplicationCatalogInfrastructureTests` (только macOS):
 
 - подписи Safari (`com.apple.Safari`), Terminal (`com.apple.Terminal`) и `/usr/bin/curl` (`com.apple.curl`) — без Team ID, как у кода Apple; несуществующий бандл;
 - вложенный код бандла-фикстуры: хелпер внутри фреймворка, служба XPC, исполняемый файл `Helpers`, а приложение в `Resources` пропускается;
-- сканирование фикстуры: приложения на первом уровне и на один уровень глубже, без повторов через ссылку, имена, bundle ID и версии;
-- прогретое сканирование этого Mac быстрее 2 секунд. Здесь около 95 бандлов, и на каждый уходит один запрос метаданных `Info.plist`, так что 200+ приложений тоже укладываются.
+- сканирование фикстуры: приложения на первом уровне и на один уровень глубже, без повторов через ссылку, имена, bundle ID и версии, пути без `/` на конце;
+- прогретое сканирование этого Mac быстрее 2 секунд. Здесь около 95 бандлов, и на каждый уходит один запрос метаданных `Info.plist`, так что 200+ приложений тоже укладываются;
+- чтение файла: перетащенный бандл с `/` на конце, исполняемый файл по ссылке как CLI-утилита по реальному пути, отказ для папки, документа и несуществующего пути.
+
+10 тестов в `ApplicationCatalogPresentationTests`: список по имени, отметки уже выбранных, выбор с идентичностью из подписей, снятие отметки, выбранное приложение, которого больше нет, добавление CLI-утилиты файлом, повторно добавленное приложение без дубля, отказ для файла не-приложения, пометки, поиск.
 
 Запуск: `swift test --package-path Packages/SplitwayKit --filter ApplicationCatalog`.
 
@@ -99,3 +120,4 @@
 |---|---|---|
 | 2026-10-30 | Каталог приложений: поиск, фильтры, сборка идентичности, обновление выбранных | M4-02 |
 | 2026-10-30 | Сканирование приложений, подписи и вложенный код, иконки | M4-03 |
+| 2026-10-30 | Лист выбора приложений, пометки, добавление файлом, пути без `/` на конце | M4-04 |
