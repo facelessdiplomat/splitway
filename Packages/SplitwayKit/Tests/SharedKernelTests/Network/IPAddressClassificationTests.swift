@@ -23,6 +23,11 @@ struct IPAddressClassificationTests {
         #expect(try IPAddress(text).isMulticast)
     }
 
+    @Test(arguments: ["0.0.0.0", "::"])
+    func recognizesUnspecifiedAddresses(_ text: String) throws {
+        #expect(try IPAddress(text).isUnspecified)
+    }
+
     @Test(arguments: ["8.8.8.8", "172.32.0.1", "192.169.0.1", "2001:4860:4860::8888", "fec0::1"])
     func leavesPublicAddressesUnclassified(_ text: String) throws {
         let address = try IPAddress(text)
@@ -31,6 +36,7 @@ struct IPAddressClassificationTests {
         #expect(!address.isLinkLocal)
         #expect(!address.isPrivate)
         #expect(!address.isMulticast)
+        #expect(!address.isUnspecified)
     }
 
     @Test

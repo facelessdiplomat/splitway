@@ -15,6 +15,10 @@ extension IPAddress {
         belongs(toAnyOf: IPNetwork.multicastNetworks)
     }
 
+    public var isUnspecified: Bool {
+        value == 0
+    }
+
     private func belongs(toAnyOf networks: [IPNetwork]) -> Bool {
         networks.contains { network in network.contains(self) }
     }
