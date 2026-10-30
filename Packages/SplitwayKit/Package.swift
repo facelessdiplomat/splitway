@@ -231,7 +231,8 @@ let features: [FeatureModule] = [
     FeatureModule(
         "TunnelEngine",
         coreDependencies: ["TunnelConfiguration"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        providesTestSupport: true
     ),
     FeatureModule(
         "ProviderMessaging",
@@ -248,8 +249,8 @@ let features: [FeatureModule] = [
     FeatureModule(
         "TransparentProxy",
         layers: [.core, .infrastructure],
-        coreDependencies: ["TunnelConfiguration", "AppRouting", "PacketTunnel"],
-        testDependencies: ["TunnelConfigurationTestSupport", "AppRoutingTestSupport"],
+        coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine", "PacketTunnel"],
+        testDependencies: ["TunnelConfigurationTestSupport", "AppRoutingTestSupport", "TunnelEngineTestSupport"],
         providesTestSupport: true
     ),
     FeatureModule(
