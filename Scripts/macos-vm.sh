@@ -22,7 +22,7 @@ usage() {
     printf '  create                download the macOS 26 image and create the VM\n' >&2
     printf '  start [--headless]    start the VM with the build folder shared read-only\n' >&2
     printf '  device-id             print the Provisioning UDID to register in the developer account\n' >&2
-    printf '  install               build the signed Mac app and install it in the VM\n' >&2
+    printf '  install [checkout]    build the signed Mac app of a checkout and install it in the VM\n' >&2
     printf '  launch [arguments]    open the installed app in the VM\n' >&2
     printf '  exec <command>        run a command in the VM\n' >&2
     printf '  save-clean-state      stop the VM and keep its disk as the clean state\n' >&2
@@ -84,13 +84,18 @@ print_device_identifier() {
 }
 
 install_application() {
-    Scripts/generate-project.sh >/dev/null
-    xcodebuild build -project Splitway.xcodeproj -scheme macOSApp -configuration Debug \
-        -destination 'platform=macOS,arch=arm64' -derivedDataPath "$derived_data_directory" \
-        -allowProvisioningUpdates -quiet
+    local checkout
+    checkout="$(cd "${1:-$repository_root}" && pwd)"
+    (
+        cd "$checkout"
+        Scripts/generate-project.sh >/dev/null
+        xcodebuild build -project Splitway.xcodeproj -scheme macOSApp -configuration Debug \
+            -destination 'platform=macOS,arch=arm64' -derivedDataPath "$derived_data_directory" \
+            -allowProvisioningUpdates -quiet CURRENT_PROJECT_VERSION="$(date +%s)"
+    )
     rm -rf "$shared_directory/Splitway.app"
     mkdir -p "$shared_directory"
-    ditto "$derived_data_directory/Build/Products/Debug/Splitway.app" "$shared_directory/Splitway.app"
+    ditto "$checkout/$derived_data_directory/Build/Products/Debug/Splitway.app" "$shared_directory/Splitway.app"
     guest_exec pkill -x Splitway || true
     guest_exec rm -rf /Applications/Splitway.app
     guest_exec ditto "$shared_directory_in_guest/Splitway.app" /Applications/Splitway.app
@@ -135,7 +140,7 @@ case "$command" in
 create) create_virtual_machine ;;
 start) start_virtual_machine "$@" ;;
 device-id) print_device_identifier ;;
-install) install_application ;;
+install) install_application "$@" ;;
 launch) launch_application "$@" ;;
 exec) guest_exec "$@" ;;
 save-clean-state) save_clean_state ;;
