@@ -15,8 +15,12 @@ public struct DNSQueryRedirection: Sendable, Hashable {
         resolver != nil
     }
 
+    public static func isQuery(to endpoint: FlowEndpoint) -> Bool {
+        endpoint.port.value == dnsPort
+    }
+
     public func target(for endpoint: FlowEndpoint) -> FlowEndpoint {
-        guard let resolver, endpoint.port.value == Self.dnsPort else { return endpoint }
+        guard let resolver, Self.isQuery(to: endpoint) else { return endpoint }
         return FlowEndpoint(address: resolver, port: endpoint.port)
     }
 }

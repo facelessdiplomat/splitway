@@ -83,8 +83,15 @@ public final class ProxiedFlowRouter: Sendable {
         case .direct:
             return false
         case .block:
-            flow.closeRead(with: .refused)
-            flow.closeWrite(with: .refused)
+            guard DNSQueryRedirection.isQuery(to: request.remoteEndpoint) else {
+                flow.closeRead(with: .refused)
+                flow.closeWrite(with: .refused)
+                return true
+            }
+            track(
+                DNSRefusalRelay(flow: flow, policy: policy.udp, environment: environment),
+                generation: active.generation
+            )
             return true
         case .tunnel:
             let relay = UDPFlowRelay(
