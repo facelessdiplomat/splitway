@@ -26,7 +26,7 @@
             else { return [] }
             var paths: [String] = []
             for case let item as URL in enumerator where isNestedCode(item) {
-                paths.append(item.resolvingSymlinksInPath().path(percentEncoded: false))
+                paths.append(item.canonicalFilePath)
             }
             return paths
         }
