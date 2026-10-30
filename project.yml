@@ -1,6 +1,6 @@
 name: Splitway
 options:
-  bundleIdPrefix: com.company
+  bundleIdPrefix: com.facelessdiplomat
   deploymentTarget:
     iOS: "26.0"
     macOS: "26.0"
@@ -8,13 +8,13 @@ options:
   groupSortPosition: top
 settings:
   base:
-    SPLITWAY_BUNDLE_ID_PREFIX: com.company
+    SPLITWAY_BUNDLE_ID_PREFIX: com.facelessdiplomat
     MARKETING_VERSION: 0.1.0
     CURRENT_PROJECT_VERSION: 1
     SWIFT_VERSION: "6.0"
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
     "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: 8625S77CSU
     CODE_SIGN_STYLE: Automatic
     GENERATE_INFOPLIST_FILE: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
