@@ -42,6 +42,10 @@ public actor SlotSelectingTunnelController: SystemTunnelController {
         return updates
     }
 
+    public func routesThroughTransparentProxy() async -> Bool {
+        await selected() == .transparentProxy
+    }
+
     public func lastDisconnectFailure() async -> ConnectionFailure? {
         await controller(of: selected()).lastDisconnectFailure()
     }

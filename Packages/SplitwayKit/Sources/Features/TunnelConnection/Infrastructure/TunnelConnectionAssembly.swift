@@ -1,9 +1,10 @@
+import ProviderMessaging
 import TunnelConnection
 
 public struct TunnelConnectionAssembly: Sendable {
     private let controller: any SystemTunnelController
     private let coordinator: ConnectionCoordinator
-    private let messenger: PacketTunnelSlotMessenger
+    private let messenger: any ProviderMessenger
 
     public init(
         providerBundleIdentifier: String,
@@ -11,23 +12,10 @@ public struct TunnelConnectionAssembly: Sendable {
             controller
         }
     ) {
-        controller = wrap(Self.systemSlots(providerBundleIdentifier: providerBundleIdentifier))
+        let slots = Self.systemSlots(providerBundleIdentifier: providerBundleIdentifier)
+        controller = wrap(slots.controller)
         coordinator = ConnectionCoordinator(controller: controller)
-        messenger = PacketTunnelSlotMessenger(providerBundleIdentifier: providerBundleIdentifier)
-    }
-
-    private static func systemSlots(providerBundleIdentifier: String) -> any SystemTunnelController {
-        let packetTunnel = ProviderSlotController<PacketTunnelSlot>(providerBundleIdentifier: providerBundleIdentifier)
-        #if os(macOS)
-            return SlotSelectingTunnelController(
-                packetTunnel: packetTunnel,
-                transparentProxy: ProviderSlotController<TransparentProxySlot>(
-                    providerBundleIdentifier: providerBundleIdentifier
-                )
-            )
-        #else
-            return packetTunnel
-        #endif
+        messenger = slots.messenger
     }
 
     public var activateTunnel: ActivateTunnelUseCase {
@@ -36,6 +24,10 @@ public struct TunnelConnectionAssembly: Sendable {
 
     public var deactivateTunnel: DeactivateTunnelUseCase {
         DeactivateTunnelUseCase(coordinator: coordinator)
+    }
+
+    public var applyRoutingPolicy: ApplyRoutingPolicyUseCase {
+        ApplyRoutingPolicyUseCase(messenger: messenger)
     }
 
     public var observeConnection: ObserveConnectionStateUseCase {
@@ -48,5 +40,31 @@ public struct TunnelConnectionAssembly: Sendable {
 
     public var activityProbe: ConnectionActivityProbe {
         ConnectionActivityProbe(controller: controller, coordinator: coordinator)
+    }
+
+    private static func systemSlots(
+        providerBundleIdentifier: String
+    ) -> (controller: any SystemTunnelController, messenger: any ProviderMessenger) {
+        let packetTunnel = ProviderSlotController<PacketTunnelSlot>(providerBundleIdentifier: providerBundleIdentifier)
+        let packetTunnelMessenger = ProviderSlotMessenger<PacketTunnelSlot>(
+            providerBundleIdentifier: providerBundleIdentifier)
+        #if os(macOS)
+            let slots = SlotSelectingTunnelController(
+                packetTunnel: packetTunnel,
+                transparentProxy: ProviderSlotController<TransparentProxySlot>(
+                    providerBundleIdentifier: providerBundleIdentifier
+                )
+            )
+            let messenger = SlotSelectingMessenger(
+                selection: slots,
+                packetTunnel: packetTunnelMessenger,
+                transparentProxy: ProviderSlotMessenger<TransparentProxySlot>(
+                    providerBundleIdentifier: providerBundleIdentifier
+                )
+            )
+            return (slots, messenger)
+        #else
+            return (packetTunnel, packetTunnelMessenger)
+        #endif
     }
 }

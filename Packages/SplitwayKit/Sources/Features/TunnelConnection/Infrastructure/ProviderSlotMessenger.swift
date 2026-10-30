@@ -2,7 +2,7 @@ import NetworkExtension
 import ProviderMessaging
 import ProviderMessagingInfrastructure
 
-public actor PacketTunnelSlotMessenger: ProviderMessenger {
+public actor ProviderSlotMessenger<Kind: ProviderSlotKind>: ProviderMessenger {
     private let providerBundleIdentifier: String
     private var sessionMessenger: TunnelProviderSessionMessenger?
 
@@ -25,7 +25,7 @@ public actor PacketTunnelSlotMessenger: ProviderMessenger {
             return sessionMessenger
         }
         let providerBundleIdentifier = providerBundleIdentifier
-        let savedManagers = (try? await NETunnelProviderManager.loadAllFromPreferences()) ?? []
+        let savedManagers = await Kind.savedSlots()
         let slot = savedManagers.first { manager in manager.providerBundleIdentifier == providerBundleIdentifier }
         guard let session = slot?.connection as? NETunnelProviderSession else { return nil }
         let messenger = TunnelProviderSessionMessenger(session: session)
