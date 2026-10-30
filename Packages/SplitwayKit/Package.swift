@@ -173,7 +173,7 @@ let features: [FeatureModule] = [
     FeatureModule(
         name: "TunnelEditor",
         layers: [.core, .presentation],
-        coreDependencies: ["TunnelConfiguration", "TunnelLibrary"],
+        coreDependencies: ["AppRouting", "TunnelConfiguration", "TunnelLibrary"],
         presentationDependencies: [
             "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation",
             "ApplicationCatalogPresentation", "DesignSystemPresentation",

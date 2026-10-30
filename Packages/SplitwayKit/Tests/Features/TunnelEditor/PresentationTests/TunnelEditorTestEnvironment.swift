@@ -1,5 +1,7 @@
+import AppRouting
 import ApplicationCatalogPresentation
 import Foundation
+import ProviderMessaging
 import Testing
 import TunnelConfiguration
 import TunnelConfigurationTestSupport
@@ -15,10 +17,15 @@ final class TunnelEditorTestEnvironment {
     let records = InMemoryTunnelRecordRepository()
     let secrets = InMemoryTunnelSecretStore()
     let controller: FakeSystemTunnelController
+    let messenger: RecordingProviderMessenger
     private(set) var savedTunnels: [Tunnel] = []
 
-    init(controller: FakeSystemTunnelController = FakeSystemTunnelController()) {
+    init(
+        controller: FakeSystemTunnelController = FakeSystemTunnelController(),
+        providerOutcome: Result<ProviderResponse, ProviderMessagingError> = .success(.routingPolicyApplied)
+    ) {
         self.controller = controller
+        messenger = RecordingProviderMessenger(outcome: providerOutcome)
     }
 
     var actions: TunnelEditorActions {
@@ -29,7 +36,8 @@ final class TunnelEditorTestEnvironment {
             renameTunnel: RenameTunnelUseCase(records: records),
             activityProbe: ConnectionActivityProbe(controller: controller, coordinator: coordinator),
             activateTunnel: ActivateTunnelUseCase(coordinator: coordinator),
-            deactivateTunnel: DeactivateTunnelUseCase(coordinator: coordinator)
+            deactivateTunnel: DeactivateTunnelUseCase(coordinator: coordinator),
+            applyRoutingPolicy: ApplyRoutingPolicyUseCase(messenger: messenger)
         )
     }
 
@@ -41,6 +49,12 @@ final class TunnelEditorTestEnvironment {
 
     func editor(for tunnel: Tunnel) -> TunnelEditorModel {
         TunnelEditorModel(editing: tunnel, routingPlatform: .iOS, actions: actions) { [weak self] tunnel in
+            self?.savedTunnels.append(tunnel)
+        }
+    }
+
+    func macOSEditor(for tunnel: Tunnel) -> TunnelEditorModel {
+        TunnelEditorModel(editing: tunnel, routingPlatform: .macOS, actions: actions) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
     }
@@ -60,6 +74,12 @@ final class TunnelEditorTestEnvironment {
         let configuration = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.minimal).configuration)
         return try await CreateTunnelUseCase(records: records, secrets: secrets)
             .execute(name: TunnelName(name), configuration: configuration)
+    }
+
+    func storeTunnel(named name: String, routedBy policy: RoutingPolicy) async throws -> Tunnel {
+        let configuration = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.minimal).configuration)
+        return try await CreateTunnelUseCase(records: records, secrets: secrets)
+            .execute(name: TunnelName(name), configuration: configuration, routingPolicy: policy)
     }
 
     func storedNames() async throws -> [String] {
