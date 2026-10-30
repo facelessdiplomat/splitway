@@ -28,7 +28,7 @@
 - `CanonicalDecimalText` — единое строгое правило для чисел из конфигураций: только цифры, без знака, пробелов и ведущих нулей; `integerValue` принимает до 9 цифр.
 - `WallClock` и `SystemWallClock` — источник времени для сценариев. В `SharedKernelTestSupport` есть `FixedWallClock` и `SeededRandomNumberGenerator` (SplitMix64) для воспроизводимых property-тестов.
 - `AwaitableState` в `SharedKernelTestSupport` — состояние фейка за `Mutex`, которого тест может дождаться (`wait(until:)`): так проверяются асинхронные насосы без задержек и опроса.
-- `Ticker` — поток тиков для периодической работы моделей (опрос статистики, обновление журнала). `RepeatingTicker` даёт первый тик сразу, затем раз в заданный интервал, пока поток не отменят. `ManualTicker` в `SharedKernelTestSupport` даёт тики по команде теста и сообщает, идёт ли подписка.
+- `Ticker` — поток тиков для периодической работы моделей (опрос статистики, обновление журнала). `RepeatingTicker` даёт первый тик сразу, затем раз в заданный интервал, пока поток не отменят. `ManualTicker` в `SharedKernelTestSupport` даёт тики по команде теста и сообщает, идёт ли подписка, а `ManualWallClock` там же — часы, которые тест передвигает сам.
 
 ## Публичный API
 
@@ -88,3 +88,4 @@
 | 2026-10-29 | `Ticker`, `RepeatingTicker`, `ManualTicker` из `TunnelLibraryPresentation` | M3-12 |
 | 2026-10-30 | `IPAddress.networkOrderBytes`, `AwaitableState` | M4-10 |
 | 2026-10-30 | `IPAddress.isUnspecified` | M4-11 |
+| 2026-10-31 | `ManualWallClock` в `SharedKernelTestSupport` | M4-15 |
