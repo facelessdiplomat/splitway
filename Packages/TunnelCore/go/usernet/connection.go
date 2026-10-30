@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net"
-	"sync"
 	"sync/atomic"
 )
 
@@ -14,7 +13,7 @@ type Receiver interface {
 }
 
 type ReceiveOptions struct {
-	ReadByteCount int
+	ReadBuffer    []byte
 	InitialCredit int
 }
 
@@ -24,25 +23,29 @@ type halfClosable interface {
 }
 
 type Connection struct {
-	stream    net.Conn
-	window    *creditWindow
-	registry  *connectionRegistry
-	isClosed  atomic.Bool
-	startOnce sync.Once
+	stream      net.Conn
+	window      *creditWindow
+	registry    *connectionRegistry
+	isClosed    atomic.Bool
+	isReceiving atomic.Bool
 }
 
 func newConnection(stream net.Conn, registry *connectionRegistry) *Connection {
 	return &Connection{stream: stream, window: newCreditWindow(), registry: registry}
 }
 
-func (connection *Connection) StartReceiving(receiver Receiver, options ReceiveOptions) {
-	connection.startOnce.Do(func() {
-		connection.window.grant(options.InitialCredit)
-		buffer := make([]byte, options.ReadByteCount)
-		if !connection.registry.startReceiver(func() { connection.receive(receiver, buffer) }) {
-			receiver.Finish(nil)
-		}
-	})
+func (connection *Connection) StartReceiving(receiver Receiver, options ReceiveOptions) error {
+	if len(options.ReadBuffer) == 0 {
+		return ErrEmptyReadBuffer
+	}
+	if !connection.isReceiving.CompareAndSwap(false, true) {
+		return ErrAlreadyReceiving
+	}
+	connection.window.grant(options.InitialCredit)
+	if !connection.registry.startReceiver(func() { connection.receive(receiver, options.ReadBuffer) }) {
+		receiver.Finish(nil)
+	}
+	return nil
 }
 
 func (connection *Connection) Write(data []byte) (int, error) {

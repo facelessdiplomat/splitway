@@ -22,6 +22,11 @@ const (
 	statusConfigurationRejected      tunnelStatus = C.TCStatusConfigurationRejected
 	statusDeviceUnavailable          tunnelStatus = C.TCStatusDeviceUnavailable
 	statusInternalFailure            tunnelStatus = C.TCStatusInternalFailure
+	statusConnectionFailed           tunnelStatus = C.TCStatusConnectionFailed
+	statusTimedOut                   tunnelStatus = C.TCStatusTimedOut
+	statusLookupFailed               tunnelStatus = C.TCStatusLookupFailed
+	statusNetworkStopped             tunnelStatus = C.TCStatusNetworkStopped
+	statusConnectionClosed           tunnelStatus = C.TCStatusConnectionClosed
 )
 
 func statusOf(err error) tunnelStatus {

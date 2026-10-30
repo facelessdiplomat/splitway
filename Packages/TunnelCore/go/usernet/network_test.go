@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"go.uber.org/goleak"
+	"splitway/tunnelcore/internal/testpeer"
 )
 
 const (
@@ -19,15 +20,13 @@ const (
 	generousCredit        = 1 << 20
 )
 
-var streamOptions = ReceiveOptions{ReadByteCount: streamReadByteCount, InitialCredit: generousCredit}
-
 func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
 
 func TestCarriesTCPThroughTheTunnelBothWays(t *testing.T) {
 	pair := startTestPair(t)
-	connection, receiver := dialReceiving(t, pair.client, echoPort, streamOptions)
+	connection, receiver := dialReceiving(t, pair.client, testpeer.EchoPort, streamReadByteCount, generousCredit)
 
 	if _, err := connection.Write([]byte("hello through the tunnel")); err != nil {
 		t.Fatal(err)
@@ -40,7 +39,7 @@ func TestCarriesTCPThroughTheTunnelBothWays(t *testing.T) {
 
 func TestDeliversTheEchoAndTheEndOfStreamAfterHalfClose(t *testing.T) {
 	pair := startTestPair(t)
-	connection, receiver := dialReceiving(t, pair.client, echoPort, streamOptions)
+	connection, receiver := dialReceiving(t, pair.client, testpeer.EchoPort, streamReadByteCount, generousCredit)
 	payload := bytes.Repeat([]byte("splitway"), 4096)
 
 	if _, err := connection.Write(payload); err != nil {
@@ -60,12 +59,12 @@ func TestDeliversTheEchoAndTheEndOfStreamAfterHalfClose(t *testing.T) {
 
 func TestCarriesUDPDatagramsThroughTheTunnelBothWays(t *testing.T) {
 	pair := startTestPair(t)
-	connection, err := pair.client.DialUDP(netip.AddrPortFrom(serverAddress, echoPort))
+	connection, err := pair.client.DialUDP(netip.AddrPortFrom(testpeer.ServerAddress, testpeer.EchoPort))
 	if err != nil {
 		t.Fatal(err)
 	}
 	receiver := newRecordingReceiver(connection, true)
-	connection.StartReceiving(receiver, ReceiveOptions{ReadByteCount: datagramReadByteCount, InitialCredit: generousCredit})
+	startReceiving(t, connection, receiver, datagramReadByteCount, generousCredit)
 
 	if _, err := connection.Write([]byte("datagram")); err != nil {
 		t.Fatal(err)
@@ -81,12 +80,12 @@ func TestResolvesNamesThroughTheTunnelDNS(t *testing.T) {
 	lookupContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)
 	defer cancel()
 
-	addresses, err := pair.client.LookupHost(lookupContext, tunnelHostname)
+	addresses, err := pair.client.LookupHost(lookupContext, testpeer.Hostname+".")
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(addresses, []netip.Addr{serverAddress}) {
+	if !slices.Equal(addresses, []netip.Addr{testpeer.ServerAddress}) {
 		t.Fatalf("resolved %v", addresses)
 	}
 }
@@ -96,9 +95,9 @@ func TestGivesUpDialingWhenTheTimeoutExpires(t *testing.T) {
 	dialContext, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 
-	_, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(netip.MustParseAddr("10.0.0.3"), echoPort))
+	_, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(netip.MustParseAddr("10.0.0.3"), testpeer.EchoPort))
 
-	if !isExpectedDialFailure(err) || !errors.Is(err, context.DeadlineExceeded) {
+	if !errors.Is(err, ErrDialFailed) || !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("expected the dial to time out, got %v", err)
 	}
 }
@@ -108,16 +107,16 @@ func TestReportsARefusedConnection(t *testing.T) {
 	dialContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)
 	defer cancel()
 
-	_, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(serverAddress, closedPort))
+	_, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(testpeer.ServerAddress, testpeer.ClosedPort))
 
-	if !isExpectedDialFailure(err) {
+	if !errors.Is(err, ErrDialFailed) {
 		t.Fatalf("expected a refused connection, got %v", err)
 	}
 }
 
 func TestClosingDuringAWriteStopsTheWriteAndTheReceiver(t *testing.T) {
 	pair := startTestPair(t)
-	connection, receiver := dialReceiving(t, pair.client, echoPort, ReceiveOptions{ReadByteCount: 1024, InitialCredit: 1})
+	connection, receiver := dialReceiving(t, pair.client, testpeer.EchoPort, 1024, 1)
 	writeFinished := make(chan error, 1)
 
 	go func() {
@@ -147,7 +146,7 @@ func TestClosingDuringAWriteStopsTheWriteAndTheReceiver(t *testing.T) {
 
 func TestResumesReceivingWhenCreditIsGranted(t *testing.T) {
 	pair := startTestPair(t)
-	connection, receiver := dialReceiving(t, pair.client, echoPort, ReceiveOptions{ReadByteCount: 4, InitialCredit: 4})
+	connection, receiver := dialReceiving(t, pair.client, testpeer.EchoPort, 4, 4)
 
 	if _, err := connection.Write([]byte("abcdefgh")); err != nil {
 		t.Fatal(err)
@@ -182,11 +181,37 @@ func TestCarriesAThousandParallelConnections(t *testing.T) {
 	}
 }
 
+func TestRefusesToReceiveIntoAnEmptyBuffer(t *testing.T) {
+	pair := startTestPair(t)
+	connection, err := pair.client.DialUDP(netip.AddrPortFrom(testpeer.ServerAddress, testpeer.EchoPort))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer connection.Close()
+
+	err = connection.StartReceiving(newRecordingReceiver(connection, true), ReceiveOptions{InitialCredit: generousCredit})
+
+	if !errors.Is(err, ErrEmptyReadBuffer) {
+		t.Fatalf("expected an empty buffer to be refused, got %v", err)
+	}
+}
+
+func TestRefusesToReceiveTwice(t *testing.T) {
+	pair := startTestPair(t)
+	connection, receiver := dialReceiving(t, pair.client, testpeer.EchoPort, streamReadByteCount, generousCredit)
+
+	err := connection.StartReceiving(receiver, ReceiveOptions{ReadBuffer: make([]byte, 1), InitialCredit: 1})
+
+	if !errors.Is(err, ErrAlreadyReceiving) {
+		t.Fatalf("expected a second start to be refused, got %v", err)
+	}
+}
+
 func TestStopClosesEveryConnectionAndRefusesNewOnes(t *testing.T) {
 	pair := startTestPair(t)
 	receivers := make([]*recordingReceiver, 0, 3)
 	for range 3 {
-		_, receiver := dialReceiving(t, pair.client, echoPort, streamOptions)
+		_, receiver := dialReceiving(t, pair.client, testpeer.EchoPort, streamReadByteCount, generousCredit)
 		receivers = append(receivers, receiver)
 	}
 
@@ -197,7 +222,7 @@ func TestStopClosesEveryConnectionAndRefusesNewOnes(t *testing.T) {
 			t.Fatalf("expected stop to finish receiving quietly, got %v", err)
 		}
 	}
-	_, err := pair.client.DialTCP(context.Background(), netip.AddrPortFrom(serverAddress, echoPort))
+	_, err := pair.client.DialTCP(context.Background(), netip.AddrPortFrom(testpeer.ServerAddress, testpeer.EchoPort))
 	if !errors.Is(err, ErrNetworkStopped) {
 		t.Fatalf("expected a stopped network, got %v", err)
 	}
@@ -207,7 +232,7 @@ func BenchmarkUploadThroughTheTunnel(b *testing.B) {
 	pair := startTestPair(b)
 	dialContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)
 	defer cancel()
-	connection, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(serverAddress, discardPort))
+	connection, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(testpeer.ServerAddress, testpeer.DiscardPort))
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -222,30 +247,41 @@ func BenchmarkUploadThroughTheTunnel(b *testing.B) {
 	}
 }
 
-func dialReceiving(t testing.TB, network *Network, port uint16, options ReceiveOptions) (*Connection, *recordingReceiver) {
+func dialReceiving(t testing.TB, network *Network, port uint16, readByteCount, credit int) (*Connection, *recordingReceiver) {
 	t.Helper()
 	dialContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)
 	defer cancel()
-	connection, err := network.DialTCP(dialContext, netip.AddrPortFrom(serverAddress, port))
+	connection, err := network.DialTCP(dialContext, netip.AddrPortFrom(testpeer.ServerAddress, port))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { connection.Close() })
-	receiver := newRecordingReceiver(connection, options.InitialCredit == generousCredit)
-	connection.StartReceiving(receiver, options)
+	receiver := newRecordingReceiver(connection, credit == generousCredit)
+	startReceiving(t, connection, receiver, readByteCount, credit)
 	return connection, receiver
+}
+
+func startReceiving(t testing.TB, connection *Connection, receiver Receiver, readByteCount, credit int) {
+	t.Helper()
+	options := ReceiveOptions{ReadBuffer: make([]byte, readByteCount), InitialCredit: credit}
+	if err := connection.StartReceiving(receiver, options); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func roundTrip(network *Network, message []byte) error {
 	roundTripContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)
 	defer cancel()
-	connection, err := network.DialTCP(roundTripContext, netip.AddrPortFrom(serverAddress, echoPort))
+	connection, err := network.DialTCP(roundTripContext, netip.AddrPortFrom(testpeer.ServerAddress, testpeer.EchoPort))
 	if err != nil {
 		return err
 	}
 	defer connection.Close()
 	receiver := newRecordingReceiver(connection, true)
-	connection.StartReceiving(receiver, streamOptions)
+	options := ReceiveOptions{ReadBuffer: make([]byte, streamReadByteCount), InitialCredit: generousCredit}
+	if err := connection.StartReceiving(receiver, options); err != nil {
+		return err
+	}
 	if _, err := connection.Write(message); err != nil {
 		return err
 	}

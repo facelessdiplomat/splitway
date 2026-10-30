@@ -9,7 +9,7 @@
 - [x] M4-03 Сканирование и подписи (Infrastructure)
 - [ ] M4-04 Экран выбора приложений
 - [ ] M4-05 `usernet`: WireGuard поверх gVisor netstack — пакет и тесты готовы, сравнение бенчмарка с SP-3 — после спайка
-- [ ] M4-06 Мост и адаптер `UserspaceNetworkEngine`
+- [x] M4-06 Мост и адаптер `UserspaceNetworkEngine`
 - [x] M4-07 Политики ретрансляции (Core)
 - [x] M4-08 План сетевых правил прокси (Core)
 - [ ] M4-09 Определение приложения-источника — резолвер, кэш и адаптер Security готовы, поведение для WebKit и `nsurlsessiond` — после SP-2
@@ -75,6 +75,7 @@
 
 **Сделать:** C API `tc_usernet_*`, `tc_connection_*` (см. архитектуру, раздел 9); Swift `TunnelCoreUserspaceNetwork` (реализация порта из M2-01), типы хэндлов соединений, пул буферов. Для тестов — функция `tc_test_start_loopback_peer`, собираемая только с build tag `testpeer`: поднимает в процессе второй WireGuard-пир с echo-сервером.
 **Тесты сначала:** Swift-интеграционные тесты через loopback-пира: TCP echo, UDP echo, закрытие, ошибка подключения к закрытому порту.
+**Сделано иначе:** loopback-пир — отдельная утилита `testpeer`, которую тесты Swift запускают процессом; функции в ядре с тегом `testpeer` нет (причина — в [UserspaceNetwork](../features/UserspaceNetwork.md), «Спорные решения»).
 **Готово, когда:** Swift-тесты проходят в `Scripts/check.sh` на macOS (без системного расширения).
 
 ## TransparentProxy

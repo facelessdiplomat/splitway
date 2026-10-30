@@ -66,7 +66,7 @@ func TestRejectedConfigurationReturnsNoHandle(t *testing.T) {
 }
 
 func TestUnavailableTunnelInterfaceIsReported(t *testing.T) {
-	_, status := startTunnel(func(logger *device.Logger) (*fdtunnel.Tunnel, error) {
+	_, status := startTunnel(func(logger *device.Logger) (runningDevice, error) {
 		return fdtunnel.StartOnFileDescriptor(-1, "private_key="+interfacePrivateKeyHex+"\n", logger)
 	})
 
@@ -114,8 +114,8 @@ func startChannelTunnel(t *testing.T) int32 {
 	return handle
 }
 
-func onChannelDevice(configuration string) tunnelStarter {
-	return func(logger *device.Logger) (*fdtunnel.Tunnel, error) {
+func onChannelDevice(configuration string) deviceStarter {
+	return func(logger *device.Logger) (runningDevice, error) {
 		return fdtunnel.Start(tuntest.NewChannelTUN().TUN(), configuration, logger)
 	}
 }

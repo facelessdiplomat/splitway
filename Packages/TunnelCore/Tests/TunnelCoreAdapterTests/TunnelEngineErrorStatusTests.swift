@@ -13,6 +13,11 @@ struct TunnelEngineErrorStatusTests {
         (TCStatus.configurationRejected, TunnelEngineError.configurationRejected),
         (TCStatus.deviceUnavailable, TunnelEngineError.socketsUnavailable),
         (TCStatus.internalFailure, TunnelEngineError.internalFailure),
+        (TCStatus.connectionFailed, TunnelEngineError.internalFailure),
+        (TCStatus.timedOut, TunnelEngineError.internalFailure),
+        (TCStatus.lookupFailed, TunnelEngineError.internalFailure),
+        (TCStatus.networkStopped, TunnelEngineError.deviceNotRunning),
+        (TCStatus.connectionClosed, TunnelEngineError.internalFailure),
     ])
     func mapsEveryFailureStatusToADomainError(status: TCStatus, error: TunnelEngineError) {
         #expect(TunnelEngineError(status: status) == error)
