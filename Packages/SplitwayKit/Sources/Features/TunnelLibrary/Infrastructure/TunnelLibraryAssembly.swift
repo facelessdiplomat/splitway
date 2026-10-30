@@ -3,11 +3,11 @@ import TunnelLibrary
 
 public struct TunnelLibraryAssembly: Sendable {
     public let records: FileTunnelRecordRepository
-    public let secrets: KeychainTunnelSecretStore
+    public let secrets: any TunnelSecretStore
 
-    public init(storageDirectory: URL, keychainAccessGroup: String? = nil) {
+    public init(storageDirectory: URL, secrets: any TunnelSecretStore = KeychainTunnelSecretStore()) {
         records = FileTunnelRecordRepository(directory: storageDirectory)
-        secrets = KeychainTunnelSecretStore(accessGroup: keychainAccessGroup)
+        self.secrets = secrets
     }
 
     public var loadTunnels: LoadTunnelsUseCase {
