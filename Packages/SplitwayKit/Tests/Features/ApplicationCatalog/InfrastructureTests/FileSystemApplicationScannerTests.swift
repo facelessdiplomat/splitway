@@ -33,6 +33,32 @@
         }
 
         @Test
+        func findsAnApplicationThatAHiddenLinkPointsTo() async throws {
+            let elsewhere = ApplicationBundleFixture()
+            defer { elsewhere.remove() }
+            let browser = try elsewhere.makeApplication(
+                "Browser.app", bundleIdentifier: "com.example.browser", version: "26.0")
+            try fixture.makeSymbolicLink("Browser.app", to: browser)
+            try fixture.hideItem("Browser.app")
+            let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)
+
+            let applications = await scanner.installedApplications()
+
+            #expect(applications.map(\.name) == ["Browser"])
+            #expect(applications.first?.path == elsewhere.path("Browser.app"))
+        }
+
+        @Test
+        func skipsApplicationsWhoseNamesStartWithADot() async throws {
+            try fixture.makeApplication(".Draft.app", bundleIdentifier: "com.example.draft", version: "1.0")
+            let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)
+
+            let applications = await scanner.installedApplications()
+
+            #expect(applications.isEmpty)
+        }
+
+        @Test
         func scansThisMacWithAWarmCacheWithinTheBudget() async {
             let scanner = FileSystemApplicationScanner()
             let firstScan = await scanner.installedApplications()
