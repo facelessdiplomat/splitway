@@ -15,6 +15,7 @@ run_log="$repository_root/build/macos-vm/run.log"
 derived_data_directory="build/DerivedData-signed"
 guest_agent_attempts=90
 guest_agent_retry_seconds=2
+shutdown_attempts=60
 disk_files=(disk.img nvram.bin)
 
 usage() {
@@ -74,9 +75,14 @@ start_virtual_machine() {
 }
 
 stop_virtual_machine() {
-    if is_running; then
-        tart stop "$virtual_machine_name"
-    fi
+    is_running || return 0
+    guest_exec sudo -n /sbin/shutdown -h now >/dev/null 2>&1 || true
+    local attempt
+    for ((attempt = 1; attempt <= shutdown_attempts; attempt++)); do
+        is_running || return 0
+        sleep "$guest_agent_retry_seconds"
+    done
+    tart stop "$virtual_machine_name"
 }
 
 print_device_identifier() {
