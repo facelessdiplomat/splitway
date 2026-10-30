@@ -18,7 +18,9 @@ Mac-версию с системным расширением проверяем
 5. `Scripts/macos-vm.sh install` — сборка разработки с новым номером сборки, установка в `/Applications` ВМ.
 6. `Scripts/macos-vm.sh launch -Splitway.hasCompletedOnboarding YES` — приложение без онбординга сразу запрашивает активацию расширения.
 7. Владелец в окне ВМ одобряет расширение (System Settings → General → Login Items & Extensions → Network Extensions), затем подключает любой туннель: «Before you connect» → Continue → «Splitway Would Like to Add VPN Configurations» → Allow. Пароль пользователя ВМ — `admin`, как во всех образах Cirrus Labs. Для туннеля подходит конфиг со случайными ключами и адресом из TEST-NET: подключение упадёт, а одобрение останется.
-8. `Scripts/macos-vm.sh save-clean-state` — выключить ВМ изнутри и сохранить диск с одобрениями.
+8. `Scripts/macos-vm.sh exec sudo -n /usr/sbin/networksetup -setMTU Ethernet 1280` — MTU 1280 для сети ВМ. Если хост выходит в интернет через свой VPN с меньшим MTU, пакеты ВМ в 1500 байт пропадают по пути: TCP соединяется, а TLS зависает.
+9. Разрешить гостевому агенту управлять System Events: `Scripts/macos-vm.sh exec osascript -e 'tell application "System Events" to count processes'` вызывает запрос «tart-guest-agent wants access to control System Events», владелец нажимает Allow. После этого `osascript` через `exec` нажимает кнопки и переключатели в ВМ без владельца.
+10. `Scripts/macos-vm.sh save-clean-state` — выключить ВМ изнутри и сохранить диск с одобрениями.
 
 ## Проверка
 
@@ -33,6 +35,8 @@ Scripts/macos-vm.sh exec systemextensionsctl list
 - Новая сборка расширения встаёт без вопросов: `sysextd` пишет «replacing extension … with inherited user approval».
 - `install <рабочая копия>` собирает приложение из другой рабочей копии, например ветки спайка.
 - Журнал ВМ читается через `exec`, например `Scripts/macos-vm.sh exec log show --last 5m --predicate 'process == "sysextd"'`.
+- `Scripts/macos-vm.sh screenshot <файл>` сохраняет снимок экрана ВМ: так видно окна приложения и системные запросы.
+- Тестовый конфиг попадает в ВМ потоком, минуя репозиторий: `tart exec -i splitway-macos26 /bin/sh -c 'umask 077; cat > "$HOME/Desktop/cz-prg.conf"' < "$SPLITWAY_TEST_TUNNEL_CONFIG"`. После проверки ВМ возвращается к чистому состоянию: удалённый файл остался бы в свободных блоках диска, а чистое состояние ключа не видело.
 - После перезагрузки ВМ macOS сама открывает приложение без аргументов. Чтобы передать аргументы, приложение сначала закрывают: `Scripts/macos-vm.sh exec pkill -x Splitway`.
 
 ## Как это устроено

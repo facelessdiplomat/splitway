@@ -12,6 +12,7 @@ clean_state_directory="$HOME/.tart/clean-states/$virtual_machine_name"
 shared_directory="$repository_root/build/macos-vm/shared"
 shared_directory_in_guest="/Volumes/My Shared Files/splitway"
 run_log="$repository_root/build/macos-vm/run.log"
+guest_screenshot="/tmp/splitway-screen.png"
 derived_data_directory="build/DerivedData-signed"
 guest_agent_attempts=90
 guest_agent_retry_seconds=2
@@ -26,6 +27,7 @@ usage() {
     printf '  install [checkout]    build the signed Mac app of a checkout and install it in the VM\n' >&2
     printf '  launch [arguments]    open the installed app in the VM\n' >&2
     printf '  exec <command>        run a command in the VM\n' >&2
+    printf '  screenshot <file>     save a PNG of the VM screen\n' >&2
     printf '  save-clean-state      stop the VM and keep its disk as the clean state\n' >&2
     printf '  restore-clean-state   stop the VM and return its disk to the clean state\n' >&2
     printf '  stop                  stop the VM\n' >&2
@@ -110,6 +112,14 @@ install_application() {
     guest_exec ditto "$shared_directory_in_guest/$install_directory/Splitway.app" /Applications/Splitway.app
 }
 
+save_screenshot() {
+    if [[ $# -lt 1 ]]; then
+        usage
+    fi
+    guest_exec /usr/sbin/screencapture -x -t png "$guest_screenshot"
+    guest_exec /bin/cat "$guest_screenshot" >"$1"
+}
+
 launch_application() {
     guest_exec open -a /Applications/Splitway.app --args "$@"
 }
@@ -152,6 +162,7 @@ device-id) print_device_identifier ;;
 install) install_application "$@" ;;
 launch) launch_application "$@" ;;
 exec) guest_exec "$@" ;;
+screenshot) save_screenshot "$@" ;;
 save-clean-state) save_clean_state ;;
 restore-clean-state) restore_clean_state ;;
 stop) stop_virtual_machine ;;
