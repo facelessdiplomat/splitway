@@ -140,6 +140,7 @@ targets:
     sources:
       - path: Apps/macOSApp
       - path: Apps/Shared
+      - path: Apps/SecretsSpike
     settings:
       base:
         PRODUCT_NAME: Splitway
@@ -192,6 +193,7 @@ targets:
     platform: macOS
     sources:
       - path: Apps/NetworkSystemExtension
+      - path: Apps/SecretsSpike
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension
@@ -202,6 +204,9 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         INFOPLIST_KEY_CFBundleDisplayName: Splitway Network Extension
+    dependencies:
+      - package: SplitwayKit
+        product: SecretDelivery
 schemes:
   iOSUITests:
     build:

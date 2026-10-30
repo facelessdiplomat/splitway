@@ -5,4 +5,7 @@ autoreleasepool {
     NEProvider.startSystemExtensionMode()
 }
 
+let secretsSpikeListener = SecretsSpikeListener(bundle: .main)
+secretsSpikeListener?.start()
+
 dispatchMain()
