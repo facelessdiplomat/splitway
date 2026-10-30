@@ -28,6 +28,7 @@ usage() {
     printf '  launch [arguments]    open the installed app in the VM\n' >&2
     printf '  exec <command>        run a command in the VM\n' >&2
     printf '  screenshot <file>     save a PNG of the VM screen\n' >&2
+    printf '  leak-test <scenario>  install RoutingProbe in the VM and run Scripts/leak-test-macos.sh there\n' >&2
     printf '  save-clean-state      stop the VM and keep its disk as the clean state\n' >&2
     printf '  restore-clean-state   stop the VM and return its disk to the clean state\n' >&2
     printf '  stop                  stop the VM\n' >&2
@@ -124,6 +125,22 @@ launch_application() {
     guest_exec open -a /Applications/Splitway.app --args "$@"
 }
 
+run_leak_test() {
+    if [[ $# -lt 1 ]]; then
+        usage
+    fi
+    "$repository_root/Scripts/build-routing-probe.sh" >/dev/null
+    local folder
+    folder="routing-probe-$(date +%s)"
+    rm -rf "$shared_directory"/routing-probe-*
+    mkdir -p "$shared_directory/$folder"
+    ditto "$repository_root/build/RoutingProbe/RoutingProbe.app" "$shared_directory/$folder/RoutingProbe.app"
+    cp "$repository_root/Scripts/leak-test-macos.sh" "$shared_directory/$folder/leak-test-macos.sh"
+    guest_exec rm -rf /Applications/RoutingProbe.app
+    guest_exec ditto "$shared_directory_in_guest/$folder/RoutingProbe.app" /Applications/RoutingProbe.app
+    guest_exec /bin/bash "$shared_directory_in_guest/$folder/leak-test-macos.sh" "$@"
+}
+
 save_clean_state() {
     stop_virtual_machine
     mkdir -p "$clean_state_directory"
@@ -163,6 +180,7 @@ install) install_application "$@" ;;
 launch) launch_application "$@" ;;
 exec) guest_exec "$@" ;;
 screenshot) save_screenshot "$@" ;;
+leak-test) run_leak_test "$@" ;;
 save-clean-state) save_clean_state ;;
 restore-clean-state) restore_clean_state ;;
 stop) stop_virtual_machine ;;
