@@ -70,9 +70,11 @@ enum SecretsSpikeRunner {
         let reference = storeInUserKeychain(secret)
         do {
             let managers = try await NETunnelProviderManager.loadAllFromPreferences()
+            let identifier = extensionIdentifier
             let manager =
-                managers.first { manager in manager.localizedDescription == SecretsSpikeNames.tunnelDescription }
-                ?? NETunnelProviderManager()
+                managers.first { manager in
+                    (manager.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == identifier
+                } ?? NETunnelProviderManager()
             let configuration = NETunnelProviderProtocol()
             configuration.providerBundleIdentifier = extensionIdentifier
             configuration.serverAddress = SecretsSpikeNames.tunnelDescription
