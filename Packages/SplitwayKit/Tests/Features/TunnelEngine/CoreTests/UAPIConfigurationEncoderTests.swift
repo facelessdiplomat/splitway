@@ -85,6 +85,25 @@ struct UAPIConfigurationEncoderTests {
         }
     }
 
+    @Test
+    func updatesOnlyTheEndpointsOfResolvedPeersAndKeepsTheirSessions() throws {
+        let configuration = try Self.configuration(of: WgQuickFixtures.multiplePeers)
+        let firstPeer = try SampleKeys.firstPeerPublicKey()
+        let endpoint = ResolvedEndpoint(address: try IPAddress("64:ff9b::cb00:7105"), port: try NetworkPort(51820))
+
+        let update = UAPIConfigurationEncoder.endpointUpdate(
+            for: configuration, resolvedEndpoints: [firstPeer: endpoint])
+
+        #expect(update?.text == "public_key=\(firstPeer.hexEncodedText)\nendpoint=[64:ff9b::cb00:7105]:51820\n")
+    }
+
+    @Test
+    func hasNoEndpointUpdateWhenNothingWasResolved() throws {
+        let configuration = try Self.configuration(of: WgQuickFixtures.multiplePeers)
+
+        #expect(UAPIConfigurationEncoder.endpointUpdate(for: configuration, resolvedEndpoints: [:]) == nil)
+    }
+
     private static func configuration(of fixture: String) throws -> TunnelConfiguration {
         try #require(WgQuickConfigurationParser.parse(fixture).configuration)
     }

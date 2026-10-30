@@ -64,7 +64,9 @@ public actor PacketTunnelSession {
         guard path == .available, let configuration, device != nil else { return }
         let endpoints = await reachableEndpoints(of: configuration)
         guard let device else { return }
-        try? device.apply(UAPIConfigurationEncoder.encode(configuration, resolvedEndpoints: endpoints))
+        if let update = UAPIConfigurationEncoder.endpointUpdate(for: configuration, resolvedEndpoints: endpoints) {
+            try? device.apply(update)
+        }
         try? device.bumpSockets()
     }
 

@@ -52,6 +52,24 @@ func TestTwoTunnelsHandshakeAndDeliverAPacket(t *testing.T) {
 	}
 }
 
+func TestEndpointUpdateKeepsTheSessionOfThePeer(t *testing.T) {
+	first := startTestPeer(t, "10.0.0.1")
+	second := startTestPeer(t, "10.0.0.2")
+	first.connect(t, second)
+	second.connect(t, first)
+	deliverPing(t, first, second)
+	handshakeBefore := lastHandshake(t, first.tunnel)
+
+	update := "public_key=" + hex.EncodeToString(second.publicKey[:]) + "\n" + fmt.Sprintf("endpoint=127.0.0.1:%d\n", second.port)
+	if err := first.tunnel.Apply(update); err != nil {
+		t.Fatal(err)
+	}
+
+	if handshakeAfter := lastHandshake(t, first.tunnel); handshakeAfter != handshakeBefore {
+		t.Fatalf("the update reset the peer session: handshake %q became %q", handshakeBefore, handshakeAfter)
+	}
+}
+
 func TestWireGuardAcceptsTheConfigurationEncodedBySplitway(t *testing.T) {
 	fixture, err := os.ReadFile("testdata/full.uapi")
 	if err != nil {
@@ -162,6 +180,32 @@ func (peer *testPeer) connect(t *testing.T, other *testPeer) {
 	if err := peer.tunnel.Apply(configuration); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func deliverPing(t *testing.T, from, to *testPeer) {
+	t.Helper()
+	ping := tuntest.Ping(to.address, from.address)
+	from.channels.Outbound <- ping
+	select {
+	case <-to.channels.Inbound:
+	case <-time.After(packetDeliveryTimeout):
+		t.Fatal("packet was not delivered through the tunnel")
+	}
+}
+
+func lastHandshake(t *testing.T, tunnel *Tunnel) string {
+	t.Helper()
+	configuration, err := tunnel.Configuration()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range strings.Split(configuration, "\n") {
+		if value, found := strings.CutPrefix(line, "last_handshake_time_sec="); found && value != "0" {
+			return value
+		}
+	}
+	t.Fatal("no handshake recorded")
+	return ""
 }
 
 func listenPort(t *testing.T, tunnel *Tunnel) int {
