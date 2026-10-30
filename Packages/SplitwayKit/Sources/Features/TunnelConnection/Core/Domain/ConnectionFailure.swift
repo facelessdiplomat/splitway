@@ -6,6 +6,7 @@ public enum ConnectionFailure: Error, Sendable, Hashable {
     case startRejected
     case configurationUnavailable
     case routingModeUnsupported
+    case extensionUnavailable
     case networkSettingsRejected
     case endpointUnresolvable
     case engineFailed(TunnelEngineError)

@@ -38,6 +38,13 @@ struct ConnectionFailureExplanationTests {
             action: .editTunnel
         ),
         Expectation(
+            failure: .extensionUnavailable,
+            message:
+                "Splitway’s network extension isn’t running. Allow it in System Settings → General → "
+                + "Login Items & Extensions, then try again.",
+            action: .none
+        ),
+        Expectation(
             failure: .networkSettingsRejected,
             message: "The system rejected the tunnel addresses, routes or DNS servers. Check them in the editor.",
             action: .editTunnel
