@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Статус | в работе: расширение iOS собрано, расширение macOS — вместе с M2-12, проверка на устройствах — M2-14 |
+| Статус | в работе: туннель поднимается на iPhone (M2-14) и в системном расширении macOS в тестовой ВМ (M2-12); остальные проверки M2-14 — на устройствах |
 | Платформы | shared |
 | Задачи | M2-05, M2-06, M2-08, M2-13, M4-08 (`IPv6LeakProtection.applying(to:)`) |
-| Таргеты | `PacketTunnel`, `PacketTunnelInfrastructure`; composition root `Apps/PacketTunnelExtension` |
+| Таргеты | `PacketTunnel`, `PacketTunnelInfrastructure`; провайдер и composition root `Apps/SharedTunnelProvider` — общие для расширения iOS (`Apps/PacketTunnelExtension`) и системного расширения macOS (`Apps/NetworkSystemExtension`) |
 
 ## Назначение
 
@@ -50,6 +50,7 @@ sequenceDiagram
 5. **Резолвинг.** `SystemEndpointResolver` вызывает `getaddrinfo` с `AI_DEFAULT` на отдельной очереди GCD, чтобы блокирующий вызов не занимал кооперативный пул. iOS синтезирует NAT64-адрес, IPv4 предпочтительнее.
 6. **Ответы приложению.** `PacketTunnelMessageHandler` отдаёт статистику, `health(isTunnelRunning:)` и принимает только политику «Весь трафик».
 7. **Причина остановки.** Ошибки старта превращаются в `TunnelStopReason(packetTunnelError:)` и уходят в `cancelTunnelWithError`.
+8. **Две платформы.** `PacketTunnelProvider` и `PacketTunnelComposition` лежат в `Apps/SharedTunnelProvider` и собираются в оба расширения. Отличается только хранилище секретов: на iOS — `KeychainTunnelSecretStore` с общей группой Keychain, на macOS — `SystemKeychainSecretStore` (фича `SecretDelivery`): системное расширение работает от root и получает конфигурацию по XPC (решение D-33). Песочнице расширения macOS нужны права `com.apple.security.network.client` и `network.server`, иначе wireguard-go не откроет сокет маршрутизации и UDP-сокет.
 
 ## Публичный API
 
@@ -78,7 +79,7 @@ sequenceDiagram
 
 ## Ограничения и известные проблемы
 
-- Расширение macOS подключается вместе с M2-12: системное расширение работает от root и не видит Keychain пользователя.
+- Журнал системного расширения macOS пишется в контейнер App Group пользователя root, и экран журнала приложения его пока не показывает; системный журнал (`log show`) видит обе стороны.
 - На реальном устройстве проверяются старт, смена Wi-Fi и сотовой сети, NAT64 и журнал в App Group (M2-14).
 - Ошибки повторного резолвинга и `bumpSockets` при смене сети пока не пишутся в журнал.
 
@@ -106,3 +107,4 @@ Composition root по правилам не тестируется.
 | 2026-10-29 | Журнал расширения и движка | M2-13 |
 | 2026-10-30 | При смене сети обновляются только endpoint-ы, сеансы пиров сохраняются | M2-06 |
 | 2026-10-30 | `IPv6LeakProtection.applying(to:)` для плана прозрачного прокси | M4-08 |
+| 2026-10-30 | Общий провайдер для iOS и системного расширения macOS, секреты из System Keychain, права на сеть в песочнице macOS | M2-12 |

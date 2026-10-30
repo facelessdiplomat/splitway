@@ -34,7 +34,12 @@ NetworkExtension
 │   ├── com.apple.networkextension.app-proxy     → $(PRODUCT_MODULE_NAME).TransparentProxyProvider
 │   └── com.apple.networkextension.dns-proxy     → $(PRODUCT_MODULE_NAME).DNSProxyProvider
 └── NEMachServiceName → 8625S77CSU.com.facelessdiplomat.splitway.network-extension
+NSSystemExtensionUsageDescription → описание для одобрения (без него sysextd не пропускает сетевое расширение)
+SplitwayTeamIdentifier, SplitwayClientBundleIdentifier → требование к клиенту XPC доставки секретов
+SplitwayAppGroupIdentifier → App Group для журнала
 ```
+
+Приложение находит Mach-сервис расширения по ключу `SplitwayExtensionMachServiceName` своего `Info.plist`.
 
 | Entitlement | Приложение | Расширение |
 |---|---|---|
@@ -43,6 +48,7 @@ NetworkExtension
 | `com.apple.security.application-groups` | `8625S77CSU.com.facelessdiplomat.splitway` | то же |
 | `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
 | `com.apple.security.app-sandbox` | нет (Developer ID) | да, сетевые расширения обязаны быть в песочнице |
+| `com.apple.security.network.client`, `com.apple.security.network.server` | — | да: без них песочница не даёт wireguard-go открыть сокет маршрутизации и UDP-сокет (`operation not permitted`), как и сетевому расширению официального WireGuard |
 
 Provisioning-профили выпуска — Developer ID с возможностями Network Extensions и System Extension. Отладочные сборки подписываются автоматически профилями разработки: Mac зарегистрирован в аккаунте, а профиль разработки разрешает значения Network Extension только без суффикса `-systemextension`. Системное расширение активируется, только когда приложение лежит в `/Applications`.
 

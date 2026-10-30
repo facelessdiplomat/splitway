@@ -52,7 +52,7 @@ flowchart LR
   - Документ более новой версии остаётся на месте, сценарий получает `unsupportedSchemaVersion`.
 - `KeychainTunnelSecretStore` хранит generic password в data protection keychain: service `Splitway tunnel configuration`, account — UUID туннеля, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, без синхронизации. Access group передаёт composition root.
 - `ZIPArchiveWriter` пишет архив: deflate, имена в UTF-8, права `0600`.
-- `TunnelLibraryAssembly` собирает граф фичи для composition root: директория хранения и access group Keychain приходят снаружи, проба активности — из `TunnelConnection`. Хранилища она отдаёт и сборке импорта.
+- `TunnelLibraryAssembly` собирает граф фичи для composition root: директория хранения и хранилище секретов приходят снаружи (по умолчанию `KeychainTunnelSecretStore`; на macOS — зеркало в системное расширение из `SecretDelivery`), проба активности — из `TunnelConnection`. Хранилища она отдаёт и сборке импорта.
 
 **Экран списка.**
 
@@ -183,3 +183,4 @@ flowchart LR
 | 2026-10-29 | Пункт «Настройки» в меню «⋯» на iOS и iPadOS | M3-13 |
 | 2026-10-29 | Строка для VoiceOver и крупного шрифта, команды меню и сочетания клавиш | M3-14 |
 | 2026-10-30 | Раздел «Приложения через туннель» в деталях | M4-04 |
+| 2026-10-30 | Хранилище секретов приходит в сборку снаружи | M2-12 |
