@@ -238,8 +238,11 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         name: "SecretDelivery",
-        coreDependencies: ["TunnelLibrary"],
-        testDependencies: ["TunnelLibraryTestSupport", "TunnelConfigurationTestSupport"],
+        layers: [.core, .infrastructure],
+        coreDependencies: ["TunnelLibrary", "TunnelConnection"],
+        testDependencies: [
+            "TunnelLibraryTestSupport", "TunnelConfigurationTestSupport", "TunnelConnectionTestSupport",
+        ],
         providesTestSupport: true
     ),
     FeatureModule(

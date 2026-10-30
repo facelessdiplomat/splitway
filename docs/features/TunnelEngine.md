@@ -43,7 +43,7 @@ flowchart LR
   - На iOS действует `debug.SetMemoryLimit` (30 МБ) и уменьшенные очереди wireguard-go для `GOOS=ios`.
   - `bridge` хранит устройства обоих режимов в одной таблице хэндлов: Go-указатели в C не попадают. Экспортные функции только преобразуют типы и выполняются внутри `guarded`, поэтому паника превращается в `TCStatusInternalFailure`.
 - **Адаптер.** `TunnelCoreWireGuardDevice` владеет хэндлом и останавливает туннель в `deinit`. Строку `tc_tunnel_get_config` он освобождает через `tc_free`, а коды `TCStatus` переводит в `TunnelEngineError`.
-- **Логи.** `TunnelCoreLogRouting.route(to:)` направляет логи wireguard-go в `LogRecorder`: verbose → `debug`, error → `error`. Маскирование выполняет `LogEntry`.
+- **Логи.** `TunnelCoreLogRouting.route(to:)` направляет логи wireguard-go в `LogRecorder`: verbose → `debug`, error → `error`. Маскирование выполняет `LogEntry`. Если устройство не запустилось, мост пишет причину уровнем error (`tunnel failed to start: …`), а у отклонённой конфигурации — только сам отказ, без подробностей с её значениями.
 
 ### C API (`TunnelCore.h`, `TunnelCoreTypes.h`)
 
@@ -93,11 +93,12 @@ flowchart LR
 
 - `TunnelEngineTestSupport` даёт фейки режима netstack `InMemoryUserspaceNetwork` и `InMemoryUserspaceConnection`: они записывают запись, кредит и закрытия и отдают данные получателю по команде теста. Ими проверяются насосы `TransparentProxy`.
 - 10 тестов в `TunnelEngineTests`: снимок UAPI для фикстур, пропуск неразрезолвленных endpoint, `allowed_ip` без битов хоста, скрытие текста UAPI, разбор статистики, `errno`, повреждённые ответы.
-- 15 Go-тестов режима fd (тесты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md)):
+- 17 Go-тестов режима fd (тесты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md)):
   - рукопожатие и доставка пакета между двумя wireguard-go на `tuntest`;
   - wireguard-go принимает фикстуру Swift;
   - неверная конфигурация, дескриптор не utun, закрытый дескриптор, перепривязка сокетов;
   - жизненный цикл хэндлов, уровни логов;
+  - описание сбоя запуска: причина видна, а значения отклонённой конфигурации — нет;
   - `goleak`.
 - 7 тестов режима fd в `TunnelCoreAdapterTests`: закрытый дескриптор и файл не utun (дескриптор вызывающего остаётся открытым), таблица `TCStatus` → `TunnelEngineError` (с новыми статусами), маскирование строк движка, версия.
 
@@ -115,3 +116,4 @@ flowchart LR
 | 2026-10-30 | `fdtunnel.Start` поднимает и устройство `usernet` на netstack | M4-05 |
 | 2026-10-30 | Общая таблица хэндлов для режимов fd и netstack, `recover` в экспортных функциях | M4-06 |
 | 2026-10-30 | Фейки режима netstack в `TunnelEngineTestSupport` | M4-10 |
+| 2026-10-30 | Причина сбоя запуска в журнале движка (найдено в системном расширении macOS) | M2-12 |

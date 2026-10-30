@@ -23,6 +23,7 @@ func startTunnel(start deviceStarter) (int32, tunnelStatus) {
 func startDevice(start deviceStarter, statusOfFailure func(error) tunnelStatus) (int32, tunnelStatus) {
 	started, err := start(logbridge.DeviceLogger(forwardLog))
 	if err != nil {
+		forwardLog(logbridge.LevelError, startFailureDescription(err))
 		return 0, statusOfFailure(err)
 	}
 	return runningDevices.add(started), statusOK

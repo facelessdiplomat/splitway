@@ -31,6 +31,16 @@
         }
       }
     },
+    "Network extension unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сетевое расширение недоступно"
+          }
+        }
+      }
+    },
     "Network settings rejected" : {
       "localizations" : {
         "ru" : {
@@ -87,6 +97,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Splitway не разрешено добавить конфигурацию VPN. Разрешите это в Настройках и попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "Splitway’s network extension isn’t running. Allow it in System Settings → General → Login Items & Extensions, then try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сетевое расширение Splitway не запущено. Разрешите его в Системных настройках → Основные → Объекты входа и расширения и попробуйте снова."
           }
         }
       }

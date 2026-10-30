@@ -1,12 +1,17 @@
 import TunnelConnection
 
 public struct TunnelConnectionAssembly: Sendable {
-    private let controller: PacketTunnelSlotController
+    private let controller: any SystemTunnelController
     private let coordinator: ConnectionCoordinator
     private let messenger: PacketTunnelSlotMessenger
 
-    public init(providerBundleIdentifier: String) {
-        controller = PacketTunnelSlotController(providerBundleIdentifier: providerBundleIdentifier)
+    public init(
+        providerBundleIdentifier: String,
+        wrappingController wrap: (any SystemTunnelController) -> any SystemTunnelController = { controller in
+            controller
+        }
+    ) {
+        controller = wrap(PacketTunnelSlotController(providerBundleIdentifier: providerBundleIdentifier))
         coordinator = ConnectionCoordinator(controller: controller)
         messenger = PacketTunnelSlotMessenger(providerBundleIdentifier: providerBundleIdentifier)
     }

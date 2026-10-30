@@ -2,51 +2,60 @@
 
 | | |
 |---|---|
-| Статус | в работе: Core готов; вариант B подтверждён спайком SP-5 в тестовой ВМ (D-33); адаптеры XPC (`NEMachServiceName`) и System Keychain — M2-12 |
+| Статус | готово для сборки разработки: доставка по XPC, System Keychain и запуск туннеля из него проверены в тестовой ВМ (M0-12); проверка на Mac владельца и сборка Developer ID — впереди |
 | Платформы | macOS |
-| Задачи | M2-12 |
-| Таргеты | `SecretDelivery`, `SecretDeliveryTestSupport` |
+| Задачи | M2-12, SP-5 |
+| Таргеты | `SecretDelivery`, `SecretDeliveryInfrastructure`, `SecretDeliveryTestSupport` |
 
 ## Назначение
 
-Системное расширение macOS работает от root и не видит Keychain пользователя, где приложение хранит конфигурации туннелей. Фича доставляет расширению копию секрета по варианту B из [03-platform-macos.md](../03-platform-macos.md), раздел 5: приложение передаёт текст конфигурации по XPC, расширение кладёт его в System Keychain. Секрет не лежит ни в одном plist, а расширение может поднять туннель после перезагрузки Mac без приложения.
+Системное расширение macOS работает от root и не видит Keychain пользователя, где приложение хранит конфигурации туннелей. Фича доставляет расширению копию секрета по варианту B из [03-platform-macos.md](../03-platform-macos.md), раздел 5 (решение D-33): приложение передаёт текст конфигурации по XPC, расширение кладёт его в System Keychain. Секрет не лежит ни в одном plist, а расширение может поднять туннель без приложения.
 
 ## Зависимости
 
 | Тип | Что | Зачем |
 |---|---|---|
-| Фичи проекта | `TunnelLibrary` | порт `TunnelSecretStore`, `TunnelIdentifier`, `TunnelStorageError` |
-| Системные фреймворки | Foundation | JSON сообщений |
+| Фичи проекта | `TunnelLibrary`, `TunnelConnection` | порт `TunnelSecretStore`, `TunnelIdentifier`, `TunnelStorageError`; порт `SystemTunnelController` и `ConnectionFailure` |
+| Системные фреймворки | Foundation; в `Infrastructure` (только macOS) — Foundation (NSXPC), Security, Synchronization | JSON сообщений; XPC; System Keychain; один ответ на запрос |
 | Сторонние библиотеки | нет | |
 
 ## Принцип работы
 
-- **Требование к клиенту.** `ClientCodeRequirement(teamIdentifier:bundleIdentifier:)` строит строку для `setCodeSigningRequirement` XPC-слушателя расширения: `anchor apple generic and certificate leaf[subject.OU] = "<Team ID>" and identifier "<bundle ID>"`. Подключиться может только приложение нашей команды. Team ID — ровно 10 заглавных латинских букв или цифр. Bundle ID — сегменты из букв, цифр и дефиса через одну точку. Кавычки, пробелы и пустые сегменты отклоняются, поэтому в язык требований нельзя подставить своё условие.
+- **Требование к клиенту.** `ClientCodeRequirement(teamIdentifier:bundleIdentifier:)` строит строку для `setConnectionCodeSigningRequirement` XPC-слушателя расширения: `anchor apple generic and certificate leaf[subject.OU] = "<Team ID>" and identifier "<bundle ID>"`. Подключиться может только приложение нашей команды. Team ID — ровно 10 заглавных латинских букв или цифр. Bundle ID — сегменты из букв, цифр и дефиса через одну точку. Кавычки, пробелы и пустые сегменты отклоняются, поэтому в язык требований нельзя подставить своё условие.
 - **Сообщения.** `SecretDeliveryMessage`: `.store(tunnel:configurationText:)` и `.remove(tunnel:)`. Ответ `SecretDeliveryReply` — `.done` или `.failed(SecretDeliveryFailure)` (`storageUnavailable`, `malformedMessage`, `unsupportedSchemaVersion`). `description`, `debugDescription` и `Mirror` сообщения не показывают текст конфигурации.
 - **Кодек.** `SecretDeliveryCodec` кодирует сообщения и ответы в JSON-конверт со `schemaVersion` (сейчас 1). Сначала читается версия, и чужая версия — `unsupportedSchemaVersion`. Нехватка полей или не тот вид сообщения — `malformed`.
 - **Приложение.**
-  - `MirroredTunnelSecretStore` реализует `TunnelSecretStore`: читает и пишет свою копию (Keychain пользователя) и после каждой записи или удаления передаёт то же самое в расширение через порт `ExtensionSecretChannel`.
-  - Недоступное расширение (ещё не одобрено, переустанавливается) не ломает сохранение: ошибка уходит в `reportDeliveryFailure`, то есть в журнал.
-  - `DeliverTunnelSecretUseCase` перед активацией туннеля отправляет расширению текущую копию. Если отправить не вышло, активация получает ошибку (`extensionUnreachable`, `secretUnavailable`, `rejected`).
-- **Расширение.** `SecretDeliveryRequestHandler(store:)` разбирает запрос, применяет его к своему `TunnelSecretStore` (в расширении это будет System Keychain) и отвечает. Неразборчивый запрос и чужая версия получают отказ, а не тишину.
+  - `MirroredTunnelSecretStore` реализует `TunnelSecretStore`: читает и пишет свою копию (Keychain пользователя) и после каждой записи или удаления передаёт то же самое в расширение через порт `ExtensionSecretChannel`. Недоступное расширение не ломает сохранение: ошибка уходит в `reportDeliveryFailure`, то есть в журнал.
+  - `SecretDeliveringTunnelController` оборачивает `SystemTunnelController`: перед установкой туннеля в слот `DeliverTunnelSecretUseCase` отправляет расширению текущую копию. Если расширение недоступно — `ConnectionFailure.extensionUnavailable` и слот не меняется; нет своей копии — `configurationUnavailable`; расширение не смогло сохранить — `unknown`. Остальные вызовы проходят насквозь.
+- **Расширение.** `SecretDeliveryRequestHandler(store:)` разбирает запрос, применяет его к своему `TunnelSecretStore` и отвечает. Неразборчивый запрос и чужая версия получают отказ, а не тишину.
+
+**Адаптеры macOS** (`SecretDeliveryInfrastructure`):
+
+- `XPCExtensionSecretChannel` на каждое сообщение открывает `NSXPCConnection` к `NEMachServiceName` расширения, отправляет конверт и ждёт ответ. Ошибка соединения, отказ по требованию к подписи или нечитаемый ответ — `extensionUnreachable`. Ответ и ошибка соединения могут прийти оба, поэтому ожидание завершает только первый (`OneShotContinuation`). Подключение само запускает процесс расширения, если он не работает.
+- `SecretDeliveryListener` слушает Mach-сервис расширения (или анонимную конечную точку в тестах), ставит `setConnectionCodeSigningRequirement` и отдаёт каждому соединению `SecretDeliveryRequestReceiver` поверх `SecretDeliveryRequestHandler`.
+- `SystemKeychainSecretStore` хранит generic password в System Keychain (`kSecUseDataProtectionKeychain = false`): service `Splitway tunnel configuration`, account — UUID туннеля. Вызовы `SecItem` идут на своей очереди: файловый Keychain читается в процессе. Запись: добавить, при дубле обновить, а если обновить нельзя — удалить и создать заново (элемент могло создать расширение с другой подписью).
+
+**Сборка.** Приложение macOS (`AppTunnelServices`) отдаёт библиотеке туннелей `MirroredTunnelSecretStore` над `KeychainTunnelSecretStore`, а подключению — `SecretDeliveringTunnelController` вокруг контроллера слота. Имя Mach-сервиса оно читает из `SplitwayExtensionMachServiceName` своего `Info.plist`. Расширение (`ExtensionSecretDelivery` в `main.swift`) берёт Mach-сервис, Team ID и bundle ID клиента из своего `Info.plist` и запускает слушатель до `dispatchMain()`; провайдер пакетного туннеля читает конфигурацию из того же `SystemKeychainSecretStore`.
 
 ## Публичный API
 
-`ClientCodeRequirement`, `ClientCodeRequirementError`, `SecretDeliveryMessage`, `SecretDeliveryReply`, `SecretDeliveryFailure`, `SecretDeliveryError`, `SecretDeliveryCodec`, `SecretDeliveryCodingError`; порт `ExtensionSecretChannel`; сценарии `MirroredTunnelSecretStore`, `DeliverTunnelSecretUseCase`, `SecretDeliveryRequestHandler`. В `SecretDeliveryTestSupport` — `LoopbackExtensionSecretChannel`: настоящие кодек и обработчик в памяти, с отключаемой доступностью.
+`ClientCodeRequirement`, `ClientCodeRequirementError`, `SecretDeliveryMessage`, `SecretDeliveryReply`, `SecretDeliveryFailure`, `SecretDeliveryError`, `SecretDeliveryCodec`, `SecretDeliveryCodingError`; порт `ExtensionSecretChannel`; сценарии `MirroredTunnelSecretStore`, `DeliverTunnelSecretUseCase`, `SecretDeliveryRequestHandler`, `SecretDeliveringTunnelController`; адаптеры macOS `XPCExtensionSecretChannel`, `SecretDeliveryListener`, `SystemKeychainSecretStore`. В `SecretDeliveryTestSupport` — `LoopbackExtensionSecretChannel`: настоящие кодек и обработчик в памяти, с отключаемой доступностью.
 
 ## Решения
 
-- Своя копия в Keychain пользователя остаётся источником истины. Копия расширения — производная, её обновляют каждое сохранение и каждая активация.
+- Своя копия в Keychain пользователя остаётся источником истины. Копия расширения — производная, её обновляют каждое сохранение и каждая установка туннеля в слот.
 - Сообщения — один `Data`-конверт с версией, а не набор методов `@objc`-протокола XPC. Протокол меняется без смены интерфейса XPC, а старое расширение честно отвечает `unsupportedSchemaVersion`.
 - Ответ проверяет `requireSuccess()` из Core, поэтому XPC-адаптер и петлевой фейк ведут себя одинаково.
+- Доставка встроена в контроллер слота, а не в сценарий активации: `TunnelConnection` ничего не знает о секретах, а на iOS контроллер остаётся прежним.
 
 ## Спорные решения
 
 | Решение | Альтернативы | Почему так | Когда пересмотреть |
 |---|---|---|---|
-| Ошибка доставки при сохранении не ломает сохранение | Откатить сохранение | Расширение может быть ещё не одобрено. Пользователь не должен терять правку, а активация всё равно отправит свежую копию | Нет |
+| Ошибка доставки при сохранении не ломает сохранение | Откатить сохранение | Расширение может быть ещё не одобрено. Пользователь не должен терять правку, а установка в слот всё равно отправит свежую копию | Нет |
 | Требование `anchor apple generic` + Team ID + identifier | Только Team ID; точное `designated requirement` сборки | Подходят и сборки разработки, и Developer ID, а чужая команда и другое приложение нашей команды отклоняются | Если появятся другие клиенты XPC |
-| Вариант B до спайка SP-5 | Ждать SP-5 | Кодек, требование и сценарии не зависят от транспорта. SP-5 подтвердил вариант B: A не работает, C открывает ключ всем пользователям Mac | Нет |
+| Вариант B | `passwordReference`, `providerConfiguration` | SP-5: A не работает (`-25291`), C открывает ключ всем пользователям Mac | Нет |
+| Соединение XPC на каждое сообщение | Одно долгое соединение | Сообщения редки (сохранение, подключение). Долгое соединение пришлось бы пересоздавать после переустановки и перезапуска расширения | Если доставка станет частой |
 
 ## Отступления от правил разработки
 
@@ -54,19 +63,22 @@
 
 ## Ограничения и известные проблемы
 
-- XPC-клиент и слушатель (`NSXPCConnection` по `NEMachServiceName`) и `SystemKeychainSecretStore` появятся в M2-12. Проверяются они только с подписанным системным расширением — в тестовой ВМ (M0-12) и на Mac.
-- ACL элемента System Keychain привязан к требованию подписи расширения, которое его создало. Расширение с другой подписью (разработка → Developer ID) может не прочитать и не перезаписать старый элемент, поэтому хранилище должно уметь удалить такой элемент и создать новый ([SP-5](spikes/SP-5.md)).
+- ACL элемента System Keychain привязан к требованию подписи расширения, которое его создало ([SP-5](spikes/SP-5.md)). Расширение с другой подписью (разработка → Developer ID) может не прочитать старый элемент; хранилище в таком случае пересоздаёт его при следующей доставке. Проверить на сборке Developer ID (M7).
 - Текст конфигурации внутри конверта передаётся открытым: защиту даёт требование к подписи клиента XPC, а не шифрование сообщения.
+- `SystemKeychainSecretStore` не покрыт unit-тестами: ему нужен root и System Keychain. Он проверен в тестовой ВМ: доставка при импорте, запуск туннеля из него через `scutil --nc start` без участия приложения.
 
 ## Тесты
 
-21 тест в `SecretDeliveryTests`:
+25 тестов в `SecretDeliveryTests`:
 
 - требование к клиенту: строка для нашей команды и приложения, отказ для неверного Team ID (длина, регистр, кавычки, пробелы) и bundle ID, который мог бы изменить требование;
 - кодек: сообщения и ответы туда и обратно, чужая версия схемы, неразборчивые данные, текст конфигурации не виден в описаниях;
 - зеркало: запись в обе копии, сохранение без расширения с отчётом об ошибке, удаление из обеих копий, чтение только своей копии, сценарий «изменили туннель → копия в расширении обновлена» через `CreateTunnelUseCase` и `UpdateTunnelUseCase`;
 - доставка перед активацией: текущая копия, недоступное расширение, нет своей копии, расширение не смогло сохранить;
-- обработчик расширения: сохранение, удаление, неразборчивый запрос и чужая версия, сбой хранилища.
+- обработчик расширения: сохранение, удаление, неразборчивый запрос и чужая версия, сбой хранилища;
+- контроллер с доставкой: секрет приходит до установки, недоступное расширение не меняет слот, нет своей копии, остальные вызовы проходят насквозь.
+
+4 теста в `SecretDeliveryInfrastructureTests` (только macOS) — настоящий XPC на анонимной конечной точке: сохранение и удаление в хранилище расширения, отказ хранилища, клиент, не прошедший требование к подписи.
 
 Запуск: `swift test --package-path Packages/SplitwayKit --filter SecretDelivery`.
 
@@ -76,3 +88,4 @@
 |---|---|---|
 | 2026-10-30 | Требование к клиенту XPC, сообщения и кодек, зеркальная копия, доставка перед активацией, обработчик расширения | M2-12 |
 | 2026-10-30 | Вариант B подтверждён спайком SP-5 в тестовой ВМ | SP-5 |
+| 2026-10-30 | XPC-канал и слушатель, System Keychain, доставка перед установкой в слот; туннель поднимается в системном расширении | M2-12 |
