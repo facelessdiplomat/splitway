@@ -45,7 +45,6 @@ struct TransparentProxyTestEnvironment {
     ]
 
     let engine = InMemoryUserspaceNetworkEngine()
-    let registry = TunnelRuntimeRegistry()
     let attributionLog = RecordingSuspiciousAttributionLog()
     let session: TransparentProxySession
 
@@ -55,8 +54,7 @@ struct TransparentProxyTestEnvironment {
                 engine: engine,
                 endpointResolution: ResolveTunnelEndpointsUseCase(
                     resolver: FixedEndpointResolver(address: Self.endpointAddress)
-                ),
-                registry: registry
+                )
             ),
             router: ProxiedFlowRouter(
                 sourceResolver: SourceApplicationResolver(

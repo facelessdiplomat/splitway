@@ -20,8 +20,6 @@
 			<string>$(PRODUCT_MODULE_NAME).PacketTunnelProvider</string>
 			<key>com.apple.networkextension.app-proxy</key>
 			<string>$(PRODUCT_MODULE_NAME).TransparentProxyProvider</string>
-			<key>com.apple.networkextension.dns-proxy</key>
-			<string>$(PRODUCT_MODULE_NAME).DNSProxyProvider</string>
 		</dict>
 	</dict>
 </dict>

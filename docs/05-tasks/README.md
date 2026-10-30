@@ -8,7 +8,7 @@
 | M1 | [M1-configuration.md](M1-configuration.md) | Домен конфигурации, хранение, импорт/экспорт, журнал (без UI) | все |
 | M2 | [M2-engine-full-tunnel.md](M2-engine-full-tunnel.md) | Go-движок, пакетный туннель, подключение, статус, статистика — режим «Весь трафик» работает из кода | все |
 | M3 | [M3-app-ui.md](M3-app-ui.md) | Интерфейс: список, детали, импорт, QR, редактор, экспорт, журнал, онбординг | все |
-| M4 | [M4-macos-per-app.md](M4-macos-per-app.md) | Выбор приложений и DNS-прокси на macOS | macOS |
+| M4 | [M4-macos-per-app.md](M4-macos-per-app.md) | Выбор приложений и DNS через туннель на macOS | macOS |
 | M5 | [M5-ios-service-routing.md](M5-ios-service-routing.md) | Выбор сервисов на iOS/iPadOS | iOS, iPadOS |
 | M6 | [M6-integrations.md](M6-integrations.md) | Строка меню, настройки, Команды, Controls, iPadOS-полировка, автоподключение | все |
 | M7 | [M7-release.md](M7-release.md) | Безопасность, производительность, тесты утечек, выпуск | все |

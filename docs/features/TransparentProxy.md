@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Статус | в работе: сессия прокси готова и проверена в ВМ (M4-11); поведение для WebKit и `nsurlsessiond` — после SP-2, ручная проверка насосов (1 ГБ, 4K-видео) — на Mac |
+| Статус | в работе: сессия прокси и DNS выбранных приложений готовы и проверены в ВМ (M4-11, M4-13); выводы SP-2 и ручная проверка насосов (1 ГБ, 4K-видео) — на Mac |
 | Платформы | macOS |
-| Задачи | M4-07, M4-08, M4-09, M4-10, M4-11 |
+| Задачи | M4-07, M4-08, M4-09, M4-10, M4-11, M4-13 |
 | Таргеты | `TransparentProxy`, `TransparentProxyInfrastructure`, `TransparentProxyTestSupport` |
 
 ## Назначение
@@ -91,7 +91,7 @@
 
 ### Ретрансляция
 
-Насосы работают с портами `ProxiedStreamFlow` и `ProxiedDatagramFlow` (поток системы) и `UserspaceConnection` (соединение `usernet`). Адресата задаёт вызывающий, поэтому те же насосы пригодны для DNS-прокси (M4-13). У каждой ретрансляции своя последовательная очередь поверх общей целевой (`RelayEnvironment.targetQueue`); на ней идут подключение и блокирующая запись в `usernet`.
+Насосы работают с портами `ProxiedStreamFlow` и `ProxiedDatagramFlow` (поток системы) и `UserspaceConnection` (соединение `usernet`). Адресата задаёт вызывающий: так запросы DNS уходят на сервер туннеля (`dnsRedirection`). У каждой ретрансляции своя последовательная очередь поверх общей целевой (`RelayEnvironment.targetQueue`); на ней идут подключение и блокирующая запись в `usernet`.
 
 **`TCPFlowRelay`** (состояние — `TCPRelayProgress` за `Mutex`):
 
@@ -106,10 +106,12 @@
 **`UDPFlowRelay`**:
 
 - каждая датаграмма уходит по ассоциации своего адресата в `UDPAssociationTable`; новая ассоциация — `openUDP` к адресату, которого вернул `destination` (nil — датаграмма отбрасывается). Вытесненная ассоциация закрывается;
-- ответы пишутся в поток от исходного адресата, даже если `destination` отправил датаграмму в другое место (DNS-прокси); кредит возвращается после записи в поток, окно — `windowDatagramCount` (4) датаграммы;
+- ответы пишутся в поток от исходного адресата, даже если `destination` отправил датаграмму в другое место (запрос DNS на сервер туннеля); кредит возвращается после записи в поток, окно — `windowDatagramCount` (4) датаграммы;
 - ошибка записи в ассоциацию удаляет её, следующая датаграмма откроет новую;
 - `closeIfIdle(at:)` закрывает простоявшие ассоциации, а если не осталось ни одной и поток простоял `idleTimeout`, закрывает и поток;
 - пустое чтение (приложение закрыло сокет) или ошибка потока закрывает все ассоциации.
+
+**`DNSRefusalRelay`** отвечает на заблокированный UDP-поток DNS. Каждая датаграмма получает ответ `REFUSED` из `DNSRefusalResponseBuilder` от исходного резолвера, а неразборчивая остаётся без ответа. Поток закрывается при пустом чтении, ошибке, отмене или простое `idleTimeout` из `UDPRelayPolicy`.
 
 Адаптеры macOS (`TransparentProxyInfrastructure`): `AppProxyStreamFlow` и `AppProxyDatagramFlow` оборачивают `NEAppProxyTCPFlow` и `NEAppProxyUDPFlow` (API macOS 15: `open(withLocalFlowEndpoint:)`, `readDatagrams` с `NWEndpoint`). `FlowEndpoint(_ endpoint: NWEndpoint)` и `networkEndpoint` переводят адреса через байты `IPAddress`, имена хостов не поддерживаются. `ProxiedFlowError(appProxyError:)` и `appProxyError` переводят ошибки в `NEAppProxyFlowError` и обратно.
 
@@ -121,17 +123,17 @@
    - отклоняет туннель не в режиме выбора приложений (`routingModeUnsupported`);
    - резолвит все endpoint-ы (`ResolveTunnelEndpointsUseCase`, общий с пакетным туннелем) и строит план;
    - компилирует `RoutingPolicySnapshot` по включаемым сетям плана;
-   - запускает `usernet` с адресами и DNS интерфейса (MTU по умолчанию 1420) и регистрирует его в `TunnelRuntimeRegistry`. Это actor, общий для провайдеров одного процесса: через него `usernet` получит DNS-прокси (M4-13).
+   - запускает `usernet` с адресами и DNS интерфейса (MTU по умолчанию 1420).
 
    Готовый `TransparentProxyRuntime` получает `ProxiedFlowRouter`, а провайдер применяет `TransparentProxyNetworkSettingsMapper.settings(for:)`.
 2. **Потоки.** `handleNewFlow` и `handleNewUDPFlow(_:initialRemoteFlowEndpoint:)` из протокола `NEAppProxyUDPFlowHandling` строят `ProxiedFlowRequest`: audit token, адресат и `remoteHostname`. Поток передаётся в адаптере. Роутер синхронно определяет приложение, проверяет атрибуцию и спрашивает `FlowRoutingDecider` об адресате после `dnsRedirection`: запрос DNS решается как запрос к серверу туннеля, а не к системному резолверу.
    - `.direct` — ответ `false`, поток идёт мимо прокси;
-   - `.block` — поток закрывается с `refused`, ответ `true`;
+   - `.block` — ответ `true`: UDP-запрос DNS получает `REFUSED` (`DNSRefusalRelay`), остальные потоки закрываются с `refused`;
    - `.tunnel` — ответ `true`. Для TCP на целевой очереди имя из `remoteHostname` резолвится через туннель (`HostnameResolutionPolicy`, тайм-аут 5 с), затем стартует `TCPFlowRelay`. Для запроса DNS по TCP соединение сразу идёт на сервер туннеля, без резолвинга имени. Для UDP сразу стартует `UDPFlowRelay`: датаграммы к порту 53 уходят на сервер туннеля, а ответы пишутся в поток от исходного резолвера.
 
    До старта и после остановки роутер отвечает `false`.
 3. **Смена сети.** Когда путь снова доступен, стартер заново резолвит endpoint-ы, применяет только их (`UAPIConfigurationEncoder.endpointUpdate`) и вызывает `bumpSockets`, как пакетный туннель.
-4. **Остановка** (`stopProxy`). Наблюдение за сетью отменяется, роутер отдаёт среду и отменяет все ретрансляции, а `usernet` останавливается и снимается с регистрации.
+4. **Остановка** (`stopProxy`). Наблюдение за сетью отменяется, роутер отдаёт среду и отменяет все ретрансляции, а `usernet` останавливается.
 
 Роутер хранит ретрансляции по `ObjectIdentifier`. Ретрансляция, которая стартовала на очереди уже после остановки или перезапуска, видит другое поколение среды и сразу отменяется.
 
@@ -139,7 +141,7 @@
 
 ## Публичный API
 
-`TransparentProxyNetworkPlan`, `DNSQueryRedirection`, `RelayPolicy`, `TCPRelayPolicy`, `UDPRelayPolicy`, `RelayPolicyError`, `UDPAssociationTable`, `HostnameResolutionPolicy`, `RelayTarget`, `AuditToken`, `AuditTokenError`, `ProcessInstance`, `CodeIdentity`, `SourceApplicationResolver`, `TCPFlowRelay`, `UDPFlowRelay`, `FlowRelay`, `RelayEnvironment`, `FlowEndpoint`, `ProxiedDatagram`, `TransparentProxySession`, `TransparentProxyStarter`, `ProxiedFlowRouter`, `ProxiedFlowRequest`, `TransparentProxyRuntime`, `TransparentProxyError`, `TunnelRuntimeRegistry`, `SuspiciousAttributionMonitor`; порты `CodeIdentityReader`, `CodeIdentityReadingError`, `ProxiedStreamFlow`, `ProxiedDatagramFlow`, `ProxiedFlowError`, `SuspiciousAttributionLog`; адаптеры macOS `SecurityCodeIdentityReader`, `AppProxyStreamFlow`, `AppProxyDatagramFlow`, `TransparentProxyNetworkSettingsMapper`, `ProxiedFlowRequest(_:)` из потоков NetworkExtension. В `TransparentProxyTestSupport` — фейки `InMemoryCodeIdentityReader`, `ScriptedStreamFlow`, `ScriptedDatagramFlow`, `RecordingSuspiciousAttributionLog` и `AuditToken.fixture(processIdentifier:version:)`; в `TunnelEngineTestSupport` — `InMemoryUserspaceNetworkEngine`.
+`TransparentProxyNetworkPlan`, `DNSQueryRedirection`, `DNSRefusalRelay`, `RelayPolicy`, `TCPRelayPolicy`, `UDPRelayPolicy`, `RelayPolicyError`, `UDPAssociationTable`, `HostnameResolutionPolicy`, `RelayTarget`, `AuditToken`, `AuditTokenError`, `ProcessInstance`, `CodeIdentity`, `SourceApplicationResolver`, `TCPFlowRelay`, `UDPFlowRelay`, `FlowRelay`, `RelayEnvironment`, `FlowEndpoint`, `ProxiedDatagram`, `TransparentProxySession`, `TransparentProxyStarter`, `ProxiedFlowRouter`, `ProxiedFlowRequest`, `TransparentProxyRuntime`, `TransparentProxyError`, `SuspiciousAttributionMonitor`; порты `CodeIdentityReader`, `CodeIdentityReadingError`, `ProxiedStreamFlow`, `ProxiedDatagramFlow`, `ProxiedFlowError`, `SuspiciousAttributionLog`; адаптеры macOS `SecurityCodeIdentityReader`, `AppProxyStreamFlow`, `AppProxyDatagramFlow`, `TransparentProxyNetworkSettingsMapper`, `ProxiedFlowRequest(_:)` из потоков NetworkExtension. В `TransparentProxyTestSupport` — фейки `InMemoryCodeIdentityReader`, `ScriptedStreamFlow`, `ScriptedDatagramFlow`, `RecordingSuspiciousAttributionLog` и `AuditToken.fixture(processIdentifier:version:)`; в `TunnelEngineTestSupport` — `InMemoryUserspaceNetworkEngine`.
 
 ## Решения
 
@@ -154,7 +156,8 @@
 - Обратные вызовы туннеля (`receive`, `finish`) обрабатываются синхронно под `Mutex`, без перехода на очередь: после вызова состояние насоса уже обновлено, и запись в поток начинается сразу.
 - Классы потоков NetworkExtension не `Sendable`, поэтому адаптер держит поток за `Mutex`. Это настоящая синхронизация без `@unchecked Sendable`, а вызовы NE не блокируют: они только ставят работу в очередь системы.
 - Решение по потоку синхронное: `handleNewFlow` должен ответить сразу. Резолвинг имени через туннель и подключение идут уже на целевой очереди.
-- `TunnelRuntimeRegistry` — actor: к нему обращаются только старт и остановка, а не горячий путь.
+- Заблокированный UDP-запрос DNS получает `REFUSED`, а не закрытый поток: приложение сразу видит отказ и не ждёт тайм-аута резолвера.
+- Своего реестра `usernet` нет: делить сеть не с кем, DNS-прокси нет (решение D-34).
 - Устаревший `handleNewUDPFlow(_:initialRemoteEndpoint:)` с `NWHostEndpoint` заменён новым из macOS 15. В Swift он объявлен протоколом `NEAppProxyUDPFlowHandling`, а не методом класса, поэтому провайдер реализует протокол, а не переопределяет метод.
 - Подозрительная атрибуция определяется по пути `/Library/SystemExtensions/` и записывается один раз на путь: путей не больше, чем системных расширений в системе.
 - Насос не обращается к потоку изнутри обработчика завершения записи потока: закрытие и прерывание после записи уходят на очередь насоса. Иначе синхронный обработчик NE снова взял бы `Mutex` адаптера и заблокировал поток. Кредит возвращается сразу. Адаптер датаграмм по той же причине повторяет чтение на глобальной очереди.
@@ -174,7 +177,7 @@
 | Простой проверяет общий обход `closeIfIdle(at:)` из сессии | Таймер на каждую ретрансляцию | Один таймер на все потоки дешевле тысяч таймеров, а время приходит параметром и тесты детерминированы | Нет |
 | Конец приёма UDP-ассоциации ничего не делает | Удалять ассоциацию по сигналу `finish` | Ассоциация не отличима от новой с тем же адресатом; сломанную ассоциацию удалит ошибка записи или простой | Если ICMP-ошибки начнут задерживать восстановление |
 | Одно правило на все исходящие потоки, если включаемая сеть начинается с `0.0.0.0` или `::` | Разбить такие сети на сети без нулевого адреса (`1.0.0.0/8`, `2.0.0.0/7` и так далее) | Правило без сетей — документированный способ взять весь трафик, и оно одно. Потоки к адресам вне туннеля провайдер отпускает решением `.direct`, это почти бесплатно. Разбиение дало бы десятки правил и всё равно оставило бы без правила `0.0.0.0/8` | Если потоки невыбранных приложений к локальным IPv6-адресам заметно нагрузят провайдер (профиль M4-16) |
-| DNS-запросы выбранных приложений перенаправляет прозрачный прокси | Только `DNSProxyProvider` (M4-13) | Запросы и так приходят в прокси от имени приложения (SP-2). Без перенаправления они уходили в туннель к системному резолверу, а адрес роутера там не отвечает: выбранные приложения оставались без DNS | Итоги SP-9: если DNS-прокси видит то же самое, остаётся один механизм |
+| DNS-запросы выбранных приложений перенаправляет прозрачный прокси, отдельного DNS-прокси нет (решение D-34) | `NEDNSProxyProvider` вместо перенаправления или вместе с ним | Запросы и так приходят в прокси от имени приложения (SP-2), а DNS-прокси видит то же самое и при падении оставляет систему без DNS (SP-9) | Если понадобятся запросы к link-local резолверу |
 | Имя из `remoteHostname` резолвится через туннель повторно | Всегда подключаться к адресу системы | Если запрос DNS ушёл мимо туннеля (DNS-прокси не включился или не узнал приложение), CDN выдаёт адрес для реального местоположения пользователя. Цена — запрос DNS через туннель при новом подключении | Если задержка подключения в M4-16 окажется заметной: тогда резолвить только при неактивном DNS-прокси |
 
 ## Отступления от правил разработки
@@ -199,7 +202,7 @@
 
 ## Тесты
 
-77 тестов в `TransparentProxyTests`:
+83 теста в `TransparentProxyTests`:
 
 - план сетевых правил (7):
   - `0.0.0.0/0` с исключением локальных сетей: включаются только публичные сети IPv4;
@@ -214,8 +217,9 @@
 - приложение-источник (8): Developer ID с Team ID и путём, код Apple без Team ID, отброшенный identifier ad-hoc кода, одно чтение на процесс, новое чтение для повторного pid, поток без audit token, запомненная неудача, вытеснение самого давнего процесса;
 - `TCPFlowRelay` (14): порядок байтов в обе стороны, кредит только после записи в поток, окно и размер блока, half-close с обеих сторон и закрытие записи потока после ожидающих записей, конец обеих сторон, ошибка туннеля и потока посреди передачи, отказ, тайм-аут и остановленная сеть при подключении, простой, отмена, ни одного вызова потока изнутри его обработчика записи (ошибка записи, закрытие после последней записи);
 - перенаправление DNS (5): на DNS туннеля, на запасной резолвер через туннель без DNS, без изменений, если туннель не несёт резолвер, другие порты не меняются, перенаправление входит в план;
-- сессия (11): запуск `usernet` и правила туннеля; отказ для туннеля «Весь трафик»; поток выбранного приложения — через туннель, невыбранного — системе; датаграммы выбранного — через туннель; поток до старта — системе; остановка закрывает ретрансляции и сеть и снимает регистрацию; поток от другого сетевого расширения записан в журнал; запрос DNS выбранного приложения по UDP и по TCP уходит на DNS туннеля, даже если системный резолвер вне сетей туннеля; запрос DNS невыбранного — системе;
+- сессия (12): запуск `usernet` и правила туннеля; отказ для туннеля «Весь трафик»; поток выбранного приложения — через туннель, невыбранного — системе; датаграммы выбранного — через туннель; поток до старта — системе; остановка закрывает ретрансляции и сеть; поток от другого сетевого расширения записан в журнал; запрос DNS выбранного приложения по UDP и по TCP уходит на DNS туннеля, даже если системный резолвер вне сетей туннеля; запрос DNS невыбранного — системе; заблокированный запрос DNS выбранного приложения получает `REFUSED`;
 - подозрительная атрибуция (3): одна запись на расширение; приложения и CLI-утилиты не записываются; неизвестный источник не записывается;
+- ответ на заблокированный запрос DNS (5): `REFUSED` от исходного резолвера на каждый запрос, неразборчивая датаграмма без ответа, закрытие приложением, отмена, простой;
 - `UDPFlowRelay` (9): датаграммы к своим адресатам и ответы обратно, повторное использование ассоциации, маршрут вызывающего с ответом от исходного адресата, датаграмма без маршрута, вытеснение при заполнении, простой ассоциаций и потока, закрытие потока приложением, кредит после записи ответа, ни одного вызова потока изнутри обработчика неудачной записи ответа.
 
 Насосы проверяются на фейках `ScriptedStreamFlow`, `ScriptedDatagramFlow` и `InMemoryUserspaceNetwork` с `AwaitableState`: тест дожидается нужного состояния, без задержек и опроса. Прогон повторён 55 раз без сбоев. Фейки потоков считают вызовы, пришедшие из их же обработчика завершения записи.
@@ -235,3 +239,4 @@
 | 2026-10-30 | Насосы не обращаются к потоку изнутри его обработчика записи | M4-10 |
 | 2026-10-30 | Сессия прокси, провайдер в системном расширении, правила `NETransparentProxyNetworkSettings`, журнал подозрительной атрибуции | M4-11 |
 | 2026-10-30 | DNS-запросы выбранных приложений идут на DNS туннеля (найдено в SP-2) | M4-11 |
+| 2026-10-30 | Ответ `REFUSED` на заблокированный запрос DNS, без реестра `usernet` (решение D-34) | M4-13 |

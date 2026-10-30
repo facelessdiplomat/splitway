@@ -21,7 +21,6 @@ struct TransparentProxySessionTests {
         #expect(environment.engine.startedInterfaces.count == 1)
         #expect(plan.includedNetworks.contains(FlowRoutingFixtures.tunnelAddress))
         #expect(plan.excludedNetworks.contains(TransparentProxyTestEnvironment.endpointAddress))
-        #expect(await environment.registry.currentNetwork != nil)
     }
 
     @Test
@@ -180,6 +179,36 @@ struct TransparentProxySessionTests {
     }
 
     @Test
+    func answersABlockedDNSQueryOfASelectedApplicationWithARefusal() async throws {
+        let environment = TransparentProxyTestEnvironment()
+        _ = try await environment.session.start(
+            TransparentProxyTestEnvironment.tunnel(
+                routing: TransparentProxyTestEnvironment.selectedBrowser(),
+                configuration: ProxyTestConfigurations.configuration(allowedIPs: "10.0.0.0/8, 2001:db8::/32")
+            )
+        )
+        let flow = ScriptedDatagramFlow()
+        let resolver = FlowEndpoint(address: try IPAddress("2001:db8::53"), port: try NetworkPort(53))
+
+        let isHandled = environment.session.handleDatagrams(
+            flow,
+            request: ProxiedFlowRequest(
+                auditToken: try TransparentProxyTestEnvironment.request(
+                    from: TransparentProxyTestEnvironment.browserProcess
+                ).auditToken,
+                remoteEndpoint: resolver,
+                remoteHostname: nil
+            )
+        )
+        await flow.state.wait { snapshot in snapshot.isOpened }
+        flow.send([ProxiedDatagram(payload: Data(DNSRefusalRelayTests.query), remoteEndpoint: resolver)])
+
+        #expect(isHandled)
+        await flow.state.wait { snapshot in snapshot.writtenDatagrams.count == 1 }
+        #expect(environment.engine.network.state.update { snapshot in snapshot.connections.isEmpty })
+    }
+
+    @Test
     func leavesFlowsToTheSystemBeforeTheStart() throws {
         let environment = TransparentProxyTestEnvironment()
 
@@ -208,6 +237,5 @@ struct TransparentProxySessionTests {
 
         await flow.state.wait { snapshot in !snapshot.readClosings.isEmpty }
         #expect(environment.engine.network.state.update { snapshot in snapshot.isStopped })
-        #expect(await environment.registry.currentNetwork == nil)
     }
 }

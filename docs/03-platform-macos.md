@@ -7,10 +7,10 @@
 | Минимальная ОС | macOS 26 (решение D-04) |
 | Дистрибуция | Developer ID + нотаризация, DMG, обновления через Sparkle (ADR-09) |
 | Приложение | `macOSApp`: окно + `MenuBarExtra` + `Settings` (решение D-12). Без App Sandbox: нужно читать подписи чужих приложений. Hardened Runtime включён |
-| Расширение | `NetworkSystemExtension` — одно системное расширение с тремя провайдерами: `PacketTunnelProvider`, `TransparentProxyProvider`, `DNSProxyProvider` |
+| Расширение | `NetworkSystemExtension` — одно системное расширение с двумя провайдерами: `PacketTunnelProvider` и `TransparentProxyProvider` |
 | Режим «Весь трафик» | `NETunnelProviderManager` → `PacketTunnelProvider` → `fdtunnel` (wireguard-go поверх `utun`) |
 | Режим «Только выбранные приложения» | `NETransparentProxyManager` → `TransparentProxyProvider` → `usernet` (wireguard-go поверх gVisor netstack) |
-| DNS выбранных приложений | `NEDNSProxyManager` → `DNSProxyProvider` → DNS через тот же `usernet` (решение D-09) |
+| DNS выбранных приложений | `TransparentProxyProvider`: запрос к порту 53 уходит через `usernet` на DNS туннеля (решения D-09 и D-34) |
 
 Почему системное расширение, а не app extension: по [TN3134](https://developer.apple.com/documentation/technotes/tn3134-network-extension-provider-deployment) app extension для packet tunnel и transparent proxy на macOS — «App Store only». Для Developer ID остаётся только system extension. Ещё плюс: системное расширение работает в глобальном контексте и не завершается, когда пользователь выходит из системы.
 
@@ -31,8 +31,7 @@ Splitway.app/
 NetworkExtension
 ├── NEProviderClasses
 │   ├── com.apple.networkextension.packet-tunnel → $(PRODUCT_MODULE_NAME).PacketTunnelProvider
-│   ├── com.apple.networkextension.app-proxy     → $(PRODUCT_MODULE_NAME).TransparentProxyProvider
-│   └── com.apple.networkextension.dns-proxy     → $(PRODUCT_MODULE_NAME).DNSProxyProvider
+│   └── com.apple.networkextension.app-proxy     → $(PRODUCT_MODULE_NAME).TransparentProxyProvider
 └── NEMachServiceName → 8625S77CSU.com.facelessdiplomat.splitway.network-extension
 NSSystemExtensionUsageDescription → описание для одобрения (без него sysextd не пропускает сетевое расширение)
 SplitwayTeamIdentifier, SplitwayClientBundleIdentifier → требование к клиенту XPC доставки секретов
@@ -44,7 +43,7 @@ SplitwayAppGroupIdentifier → App Group для журнала
 | Entitlement | Приложение | Расширение |
 |---|---|---|
 | `com.apple.developer.system-extension.install` | да | — |
-| `com.apple.developer.networking.networkextension` | Debug: `packet-tunnel-provider`, `app-proxy-provider`, `dns-proxy`; Release (Developer ID): те же с суффиксом `-systemextension`. Суффикс задаёт настройка `SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX` в `project.yml` | то же |
+| `com.apple.developer.networking.networkextension` | Debug: `packet-tunnel-provider`, `app-proxy-provider`; Release (Developer ID): те же с суффиксом `-systemextension`. Суффикс задаёт настройка `SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX` в `project.yml` | то же |
 | `com.apple.security.application-groups` | `8625S77CSU.com.facelessdiplomat.splitway` | то же |
 | `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
 | `com.apple.security.app-sandbox` | нет (Developer ID) | да, сетевые расширения обязаны быть в песочнице |
@@ -63,7 +62,7 @@ notInstalled → activationRequested → awaitingUserApproval → activated
 
 1. При первом включении туннеля приложение отправляет `OSSystemExtensionRequest.activationRequest`.
 2. `requestNeedsUserApproval` → мастер показывает пошаговую инструкцию: «Системные настройки → Основные → Объекты входа и расширения → Сетевые расширения» и кнопку открытия нужного раздела.
-3. `didFinishWithResult` (`.completed`) → сохраняется системная VPN-конфигурация, и система показывает запросы на добавление конфигураций VPN, прокси и DNS-прокси.
+3. `didFinishWithResult` (`.completed`) → сохраняется системная VPN-конфигурация, и система показывает запросы на добавление конфигураций VPN и прокси.
 4. Обновление приложения: `actionForReplacingExtension` сравнивает `CFBundleVersion` и возвращает `.replace`. Активный туннель перезапускается автоматически после замены.
 5. Удаление: пункт «Удалить Splitway» в настройках выполняет `deactivationRequest`, удаляет системные конфигурации и данные из Keychain. Затем приложение предлагает переместить себя в корзину.
 
@@ -144,17 +143,16 @@ sequenceDiagram
 - **Потоки выполнения**: выделенная `DispatchQueue` на группу потоков, без блокировок на кооперативном пуле Swift Concurrency.
 - Цель по скорости фиксируется по итогам спайка **SP-3** и проверяется бенчмарком перед каждым релизом (`Scripts/check.sh --bench`).
 
-### 6.5. DNS (решение D-09)
+### 6.5. DNS (решения D-09 и D-34)
 
-- Если приложение подключается по имени (`URLSession`, Network.framework), у потока заполнен `remoteHostname`. Transparent proxy резолвит имя **через туннель** (`usernet`, DNS из конфига) и подключается к полученному адресу.
-- Если приложение резолвит имя само (BSD sockets + `getaddrinfo`), запрос идёт через системный резолвер. Его перехватывает `DNSProxyProvider` (фича `DNSProxy`) в том же системном расширении:
-  - запрос выбранного приложения пересылается через `usernet` на DNS-сервер из конфига туннеля. Если туннель не несёт ни одного сервера из конфига, запрос идёт на запасной `1.1.1.1` через туннель, а если не несёт и его — к исходному резолверу (`DNSUpstreamSelection`);
-  - запрос любого другого приложения без изменений уходит к исходному резолверу — туда, куда его отправила система;
-  - при `whenTunnelUnavailable = .block` выбранное приложение получает ответ `REFUSED`, при `.bypass` его запрос уходит к исходному резолверу.
-- Спайк SP-2 (ВМ, 2026-10-30) показал, что запросы, которые `mDNSResponder` отправляет за приложение, приходят в transparent proxy UDP-потоками к порту 53 с audit token и signing identifier этого приложения, а `remoteHostname` у них — запрашиваемое имя. Chrome отправляет запросы своим резолвером, тоже от своего имени. Поэтому запрос выбранного приложения уже обрабатывает transparent proxy (`DNSQueryRedirection`): запрос уходит через `usernet` на сервер из той же `DNSUpstreamSelection`, а ответ возвращается от исходного резолвера. Туннель с частью сетей дополнительно забирает в прокси порт 53 любых адресов. Нужен ли сверх этого `DNSProxyProvider`, решает SP-9.
-- DNS-прокси включается только на время работы туннеля в режиме выбора приложений.
-- При любой внутренней ошибке DNS-прокси запрос пересылается исходному резолверу: сбой прокси не должен оставить без DNS всю систему.
-- Риск: запросы фактически отправляет `mDNSResponder`, поэтому атрибуцию запроса к приложению и работу всех провайдеров в одном процессе проверяет спайк **SP-9**. Если атрибуции нет, в M0-11 выбирается одно из двух: все DNS-запросы через туннель на время его работы или возврат к ограничению «DNS-запрос мимо туннеля».
+- Запросы, которые `mDNSResponder` отправляет за приложение, приходят в transparent proxy UDP-потоками к порту 53 с audit token и signing identifier этого приложения, а `remoteHostname` у них — запрашиваемое имя (SP-2). Приложения со своим резолвером (Chrome, Electron) отправляют запросы сами, тоже от своего имени.
+- Запрос выбранного приложения transparent proxy отправляет через `usernet` на DNS-сервер из конфига туннеля (`DNSQueryRedirection` поверх `DNSUpstreamSelection`). Если туннель не несёт ни одного сервера из конфига, запрос идёт на запасной `1.1.1.1` через туннель, а если не несёт и его — к исходному резолверу. Ответ возвращается от исходного резолвера.
+- Туннель с частью сетей дополнительно забирает в прокси порт 53 любых адресов: так до прокси доходит и запрос к резолверу вне сетей туннеля.
+- Запрос любого другого приложения прокси отпускает (`false`), и запрос уходит к исходному резолверу.
+- При недоступном туннеле и `whenTunnelUnavailable = .block` выбранное приложение получает ответ `REFUSED` (`DNSRefusalResponseBuilder`), а при `.bypass` его запрос уходит к исходному резолверу.
+- Если приложение подключается по имени (`URLSession`, Network.framework), у потока заполнен `remoteHostname`. Transparent proxy резолвит имя ещё раз **через туннель** и подключается к полученному адресу.
+- Отдельного `NEDNSProxyProvider` нет (решение D-34). По SP-9 он видит те же приложения, а запросы выбранных приложений transparent proxy получает раньше него. Его падение оставляло бы всю систему без DNS примерно на минуту.
+- Не покрыто: запросы к link-local резолверу (они входят в исключения правил прокси) и собственные запросы `mDNSResponder`, которые не отнести к приложению.
 
 ### 6.6. Поведение при недоступном туннеле и IPv6
 
@@ -200,7 +198,7 @@ sequenceDiagram
 
 | ID | Что проверить | Критерий готовности | Что делаем при провале |
 |---|---|---|---|
-| SP-9 | `NEDNSProxyProvider`: видно ли в метаданных DNS-потока приложение-источник; работают ли все провайдеры в одном процессе (общий `usernet`); что происходит с DNS системы при сбое прокси | Таблица атрибуции для приложений из SP-2, подтверждён общий процесс | Решение в M0-11: все DNS-запросы через туннель на время его работы или возврат к ограничению v1 |
+| SP-9 | `NEDNSProxyProvider`: видно ли в метаданных DNS-потока приложение-источник; работают ли все провайдеры в одном процессе (общий `usernet`); что происходит с DNS системы при сбое прокси | Таблица атрибуции для приложений из SP-2, подтверждён общий процесс | Итог в ВМ: DNS-прокси видит то же, что transparent proxy; выбран вариант без DNS-прокси (решение D-34, [SP-9](features/spikes/SP-9.md)) |
 | SP-2 | Атрибуция потоков в transparent proxy: Safari, WKWebView, Chrome, Firefox, Electron, `curl`, `nsurlsessiond`; заполнение `remoteHostname`; поведение возврата `false` | Таблица «приложение → что видим в метаданных» в документе фичи | Неподдерживаемые приложения помечаются в каталоге |
 | SP-3 | Скорость ретрансляции TCP через netstack | Замер скорости и задержки против режима «Весь трафик»; профиль CPU | Оптимизация буферов, перенос насосов в Go |
 | SP-5 | Доставка секретов в системное расширение (варианты A/B/C) | Работающий вариант, ADR в документе фичи | Вариант C как временный, с предупреждением о рисках |

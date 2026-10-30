@@ -9,16 +9,10 @@ public struct TransparentProxyStarter: Sendable {
 
     private let engine: any UserspaceNetworkEngine
     private let endpointResolution: ResolveTunnelEndpointsUseCase
-    private let registry: TunnelRuntimeRegistry
 
-    public init(
-        engine: any UserspaceNetworkEngine,
-        endpointResolution: ResolveTunnelEndpointsUseCase,
-        registry: TunnelRuntimeRegistry
-    ) {
+    public init(engine: any UserspaceNetworkEngine, endpointResolution: ResolveTunnelEndpointsUseCase) {
         self.engine = engine
         self.endpointResolution = endpointResolution
-        self.registry = registry
     }
 
     public func start(_ tunnel: ActiveTunnel) async throws(TransparentProxyError) -> TransparentProxyRuntime {
@@ -37,7 +31,6 @@ public struct TransparentProxyStarter: Sendable {
         guard let snapshot = RoutingPolicySnapshot(policy: tunnel.routingPolicy, tunnelNetworks: plan.includedNetworks)
         else { throw .routingModeUnsupported }
         let network = try startNetwork(for: configuration, endpoints: endpoints)
-        await registry.register(network)
         return TransparentProxyRuntime(
             network: network,
             configuration: configuration,
@@ -54,9 +47,8 @@ public struct TransparentProxyStarter: Sendable {
         )
     }
 
-    public func stop(_ runtime: TransparentProxyRuntime) async {
+    public func stop(_ runtime: TransparentProxyRuntime) {
         runtime.network.stop()
-        await registry.unregister()
     }
 
     public func refreshEndpoints(of runtime: TransparentProxyRuntime) async {

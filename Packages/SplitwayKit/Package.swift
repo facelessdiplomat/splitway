@@ -233,8 +233,8 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         name: "DNSProxy",
-        coreDependencies: ["AppRouting", "TunnelConfiguration"],
-        testDependencies: ["AppRoutingTestSupport", "TunnelConfigurationTestSupport"]
+        coreDependencies: ["TunnelConfiguration"],
+        testDependencies: ["TunnelConfigurationTestSupport"]
     ),
     FeatureModule(
         name: "SecretDelivery",
