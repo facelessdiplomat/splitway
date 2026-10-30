@@ -40,6 +40,21 @@ struct PacketTunnelSessionTests {
     }
 
     @Test
+    func keepsThePeerSessionsWhenTheNetworkPathReturns() async throws {
+        let environment = try SessionTestEnvironment()
+        try await environment.start()
+        environment.resolver.answer(
+            SessionTestEnvironment.endpoint, with: try SessionTestEnvironment.resolvedEndpoint("64:ff9b::cb00:7105"))
+
+        await environment.session.handle(.available)
+
+        let update = try #require(environment.device.receivedConfigurations.last?.text)
+        #expect(!update.contains("private_key="))
+        #expect(!update.contains("replace_peers="))
+        #expect(!update.contains("allowed_ip="))
+    }
+
+    @Test
     func waitsForTheNetworkWhenThePathIsLost() async throws {
         let environment = try SessionTestEnvironment()
         try await environment.start()

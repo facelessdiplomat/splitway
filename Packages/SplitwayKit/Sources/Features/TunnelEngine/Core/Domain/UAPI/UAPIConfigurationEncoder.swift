@@ -12,6 +12,18 @@ public enum UAPIConfigurationEncoder {
         return UAPIConfiguration(text: (interfaceLines + peerLines).map { line in line + "\n" }.joined())
     }
 
+    public static func endpointUpdate(
+        for configuration: TunnelConfiguration,
+        resolvedEndpoints: [PublicKey: ResolvedEndpoint]
+    ) -> UAPIConfiguration? {
+        let lines = configuration.peers.flatMap { peer -> [String] in
+            guard let endpoint = resolvedEndpoints[peer.publicKey] else { return [] }
+            return ["public_key=\(peer.publicKey.hexEncodedText)", "endpoint=\(endpoint.uapiText)"]
+        }
+        guard !lines.isEmpty else { return nil }
+        return UAPIConfiguration(text: lines.map { line in line + "\n" }.joined())
+    }
+
     private static func interfaceLines(of interface: InterfaceConfiguration) -> [String] {
         var lines = ["private_key=\(interface.privateKey.hexEncodedText)"]
         if let listenPort = interface.listenPort {
