@@ -92,6 +92,8 @@ sequenceDiagram
   - обработчик сообщений.
 - 8 тестов в `PacketTunnelInfrastructureTests`: поля `NEPacketTunnelNetworkSettings`, резолвинг адресных литералов и `localhost` без сети, процесс без utun.
 
+- Живой UI-тест `LiveTunnelTests` на iPhone (`Scripts/live-tunnel-test.sh <устройство>`): подключает импортированный тестовый туннель, сравнивает внешний адрес без туннеля и через него (`api.ipify.org` в Safari, сами адреса не печатаются) и отключает туннель. Прошёл 2026-10-30 на iPhone 13 Pro. Журнал этой сессии: рукопожатие есть, после старта пир ни разу не пересоздавался.
+
 Composition root по правилам не тестируется.
 
 ## История изменений
