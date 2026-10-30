@@ -80,7 +80,11 @@ notInstalled → activationRequested → awaitingUserApproval → activated
 | **B. XPC + System Keychain (рекомендуется)** | Приложение по XPC (`NEMachServiceName`) передаёт конфиг расширению, расширение хранит его в System Keychain под своим ACL | Секреты никогда не лежат в открытом plist; работает без запущенного туннеля | Нужен XPC-протокол и проверка подписи клиента XPC (только наш Team ID) |
 | C. `providerConfiguration` | Конфиг целиком в словаре протокола | Проще всего | Приватный ключ хранится в системных настройках NE в открытом виде |
 
-Решение принимается по итогам спайка **SP-5**. Порт `TunnelSecretStore` в `TunnelLibrary` скрывает выбор: в macOS-сборке приложения его реализует `SystemExtensionSecretStore` (XPC-клиент), в расширении — `SystemKeychainSecretStore`.
+Решение принимается по итогам спайка **SP-5**. Порт `TunnelSecretStore` в `TunnelLibrary` скрывает выбор. Ядро варианта B уже есть в фиче [SecretDelivery](features/SecretDelivery.md):
+
+- в macOS-сборке приложения порт реализует `MirroredTunnelSecretStore` — своя копия в Keychain пользователя и зеркало в расширении через XPC-канал `ExtensionSecretChannel`;
+- в расширении запросы разбирает `SecretDeliveryRequestHandler` поверх `SystemKeychainSecretStore`;
+- клиента XPC проверяет требование `ClientCodeRequirement`: только приложение нашей команды.
 
 ## 6. Режим «Только выбранные приложения»
 
