@@ -16,7 +16,7 @@
 - [x] M0-10 Тестовый туннель
 - [x] M0-12 Тестовая ВМ macOS
 - [ ] SP-7 Hello tunnel: wireguard-go в пакетном туннеле
-- [ ] SP-2 Атрибуция потоков в transparent proxy
+- [ ] SP-2 Атрибуция потоков в transparent proxy — по проверке в тестовой ВМ поток приходит от имени приложения, Safari и WKWebView поддерживаются ([итоги](../features/spikes/SP-2.md)); Telegram и подтверждение на Mac владельца — позже
 - [ ] SP-6 UDP и QUIC в transparent proxy
 - [ ] SP-9 Атрибуция DNS-запросов в DNS-прокси
 - [ ] SP-3 Скорость ретрансляции через netstack
