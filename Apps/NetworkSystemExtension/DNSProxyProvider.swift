@@ -40,7 +40,7 @@ final class DNSProxyProvider: NEDNSProxyProvider, NEAppProxyUDPFlowHandling {
         let description = probe.description(of: flow, transport: "udp", remoteEndpoint: "\(remoteEndpoint)")
         log.record(
             .info, "SP-9 dns flow \(description) providerPid=\(ProcessInfo.processInfo.processIdentifier) handled=true")
-        DNSDatagramForwarder(flow, queue: queue).start()
+        DNSDatagramForwarder(flow, queue: queue, log: log).start()
         return true
     }
 }
