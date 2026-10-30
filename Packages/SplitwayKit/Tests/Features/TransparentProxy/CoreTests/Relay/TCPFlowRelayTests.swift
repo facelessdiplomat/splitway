@@ -168,6 +168,34 @@ struct TCPFlowRelayTests {
     }
 
     @Test
+    func neverCallsTheFlowBackFromInsideAFailedWriteCompletion() async throws {
+        let flow = ScriptedStreamFlow(writeFailure: .peerReset)
+        let (network, finished) = (InMemoryUserspaceNetwork(), FinishSignal())
+        try Self.relay(flow: flow, network: network).start(onFinish: finished.callAsFunction)
+        let connection = await Self.receivingConnection(of: network)
+
+        connection.deliver(Array("abc".utf8))
+
+        await finished.wait()
+        #expect(flow.state.current.reentrantCallCount == 0)
+        #expect(flow.state.current.writeClosings == [.peerReset])
+    }
+
+    @Test
+    func neverClosesTheFlowFromInsideItsLastWriteCompletion() async throws {
+        let (flow, network) = (ScriptedStreamFlow(holdsWrites: true), InMemoryUserspaceNetwork())
+        try Self.relay(flow: flow, network: network).start(onFinish: {})
+        let connection = await Self.receivingConnection(of: network)
+
+        connection.deliver(Array("abc".utf8))
+        connection.finishReceiving(with: nil)
+        flow.releaseHeldWrites()
+
+        await flow.state.wait { snapshot in snapshot.writeClosings == [nil] }
+        #expect(flow.state.current.reentrantCallCount == 0)
+    }
+
+    @Test
     func abortsBothSidesWhenCancelled() async throws {
         let (flow, network, finished) = (ScriptedStreamFlow(), InMemoryUserspaceNetwork(), FinishSignal())
         let relay = try Self.relay(flow: flow, network: network)
