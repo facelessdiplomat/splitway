@@ -16,7 +16,7 @@
 Нужны Xcode 27, Go 1.27, SwiftLint и XcodeGen (`brew install swiftlint xcodegen go`).
 
 1. `Scripts/bootstrap.sh` — устанавливает git-хуки, собирает `TunnelCore.xcframework` и генерирует `Splitway.xcodeproj`.
-2. `Scripts/check.sh` — все проверки: линтеры, тесты Go и Swift, сборка iOS и macOS, интеграционные тесты с хост-приложением на симуляторе iPhone. Хук `pre-merge-commit` запускает его при каждом слиянии в `main`. `Scripts/check.sh --ui` дополнительно запускает UI-тесты и аудит доступности на симуляторах iPhone и iPad.
+2. `Scripts/check.sh` — все проверки: линтеры, тесты Go и Swift, сборка iOS и macOS, интеграционные тесты с хост-приложением на симуляторе iPhone. Хук `pre-merge-commit` запускает его при каждом слиянии в `master`. `Scripts/check.sh --ui` дополнительно запускает UI-тесты и аудит доступности на симуляторах iPhone и iPad.
 3. Открыть `Splitway.xcodeproj` в Xcode.
 
 Тестовый туннель для спайков и тестов утечек настраивается по [Scripts/test-tunnel/README.md](Scripts/test-tunnel/README.md). Реальные конфиги и ключи в репозиторий не попадают.
