@@ -71,12 +71,32 @@ struct TransparentProxyTestEnvironment {
         )
     }
 
-    static func tunnel(routing mode: RoutingMode) throws -> ActiveTunnel {
-        let configuration = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.minimal).configuration)
+    static func tunnel(routing mode: RoutingMode, configuration: TunnelConfiguration? = nil) throws -> ActiveTunnel {
+        let minimal = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.minimal).configuration)
         return ActiveTunnel(
             id: TunnelIdentifier(),
-            configuration: configuration,
+            configuration: configuration ?? minimal,
             routingPolicy: RoutingPolicy(mode: mode)
+        )
+    }
+
+    static func tunnelWithItsOwnResolver() throws -> TunnelConfiguration {
+        try ProxyTestConfigurations.configuration(allowedIPs: "192.0.2.0/24", dnsServers: "192.0.2.53")
+    }
+
+    static func resolverOfTheTunnel() throws -> UserspaceNetworkDestination {
+        UserspaceNetworkDestination(address: try IPAddress("192.0.2.53"), port: try NetworkPort(53))
+    }
+
+    static func systemResolver() throws -> FlowEndpoint {
+        FlowEndpoint(address: .ipv4(0xC0A8_4001), port: try NetworkPort(53))
+    }
+
+    static func dnsQuery(from process: ProcessInstance) throws -> ProxiedFlowRequest {
+        ProxiedFlowRequest(
+            auditToken: try AuditToken.fixture(processIdentifier: process.identifier, version: process.version),
+            remoteEndpoint: try systemResolver(),
+            remoteHostname: nil
         )
     }
 
