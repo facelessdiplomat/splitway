@@ -33,18 +33,18 @@ NetworkExtension
 │   ├── com.apple.networkextension.packet-tunnel → $(PRODUCT_MODULE_NAME).PacketTunnelProvider
 │   ├── com.apple.networkextension.app-proxy     → $(PRODUCT_MODULE_NAME).TransparentProxyProvider
 │   └── com.apple.networkextension.dns-proxy     → $(PRODUCT_MODULE_NAME).DNSProxyProvider
-└── NEMachServiceName → <App Group ID>.network-extension.xpc
+└── NEMachServiceName → 8625S77CSU.com.facelessdiplomat.splitway.network-extension
 ```
 
 | Entitlement | Приложение | Расширение |
 |---|---|---|
 | `com.apple.developer.system-extension.install` | да | — |
-| `com.apple.developer.networking.networkextension` | `packet-tunnel-provider-systemextension`, `app-proxy-provider-systemextension`, `dns-proxy-systemextension` | то же |
+| `com.apple.developer.networking.networkextension` | Debug: `packet-tunnel-provider`, `app-proxy-provider`, `dns-proxy`; Release (Developer ID): те же с суффиксом `-systemextension`. Суффикс задаёт настройка `SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX` в `project.yml` | то же |
 | `com.apple.security.application-groups` | `8625S77CSU.com.facelessdiplomat.splitway` | то же |
 | `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
 | `com.apple.security.app-sandbox` | нет (Developer ID) | да, сетевые расширения обязаны быть в песочнице |
 
-Provisioning-профили — Developer ID с возможностями Network Extensions и System Extension. Для отладки нужны Development-профили и одноразовая команда `systemextensionsctl developer on` (по необходимости).
+Provisioning-профили выпуска — Developer ID с возможностями Network Extensions и System Extension. Отладочные сборки подписываются автоматически профилями разработки: Mac зарегистрирован в аккаунте, а профиль разработки разрешает значения Network Extension только без суффикса `-systemextension`. Системное расширение активируется, только когда приложение лежит в `/Applications`.
 
 ## 3. Установка и обновление системного расширения (фича `SystemExtension`)
 
