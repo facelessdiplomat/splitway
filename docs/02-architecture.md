@@ -29,11 +29,9 @@ flowchart LR
   subgraph Ext["Сетевое расширение"]
     PT[PacketTunnelProvider]
     TP["TransparentProxyProvider<br/>(только macOS)"]
-    DP["DNSProxyProvider<br/>(только macOS)"]
     Engine[TunnelCoreAdapter]
     PT --> Engine
     TP --> Engine
-    DP --> Engine
   end
   subgraph Go["TunnelCore (Go)"]
     WG[wireguard-go]
@@ -51,11 +49,11 @@ flowchart LR
 | Приложение | `iOSApp` (универсальное для iPhone и iPad) | `macOSApp` (окно + строка меню) |
 | Пакетный туннель («Весь трафик») | `PacketTunnelExtension` (app extension) | `NetworkSystemExtension` (system extension) |
 | Выбор приложений | — | `NetworkSystemExtension`, класс `TransparentProxyProvider` |
-| DNS выбранных приложений | — | `NetworkSystemExtension`, класс `DNSProxyProvider` |
+| DNS выбранных приложений | — | `NetworkSystemExtension`, тот же `TransparentProxyProvider` (решение D-34) |
 | Выбор сервисов | `PacketTunnelExtension` + `servicerouting` в Go | Бэклог |
 | Виджеты и Controls | `ControlsExtension` | — |
 
-На macOS все три провайдера живут **в одном** системном расширении, и пользователь одобряет одно расширение. Провайдеры работают в одном процессе, поэтому DNS-прокси пользуется тем же экземпляром `usernet`, что и transparent proxy (это проверяет спайк SP-9).
+На macOS оба провайдера живут **в одном** системном расширении, и пользователь одобряет одно расширение. Отдельного DNS-прокси нет: DNS-запросы выбранных приложений приходят в transparent proxy от их имени, и он отправляет их через свой `usernet` (решение D-34, спайки SP-2 и SP-9).
 
 ## 3. Структура репозитория
 
@@ -126,7 +124,7 @@ flowchart LR
 | `TunnelEngine` | Порт движка WireGuard и кодирование конфигурации в UAPI, разбор статистики | все | да |
 | `PacketTunnel` | Логика пакетного туннеля: сетевые настройки, резолвинг endpoint, реакция на смену сети | все | да |
 | `TransparentProxy` | Перехват потоков, определение приложения-источника, TCP/UDP-ретрансляция | macOS | да |
-| `DNSProxy` | DNS-запросы выбранных приложений — через туннель, остальных — к исходному резолверу без изменений | macOS | да |
+| `DNSProxy` | Решения и ответы DNS для transparent proxy: сервер через туннель, ответ `REFUSED` (провайдера DNS-прокси нет, решение D-34) | macOS | да |
 | `TunnelConnection` | Подключение, отключение, статус, статистика, последняя ошибка | все | нет |
 | `ProviderMessaging` | Типизированный протокол сообщений «приложение ↔ расширение» с версионированием | все | да |
 | `SystemExtension` | Установка и обновление системного расширения, мастер одобрения | macOS | нет |
@@ -179,7 +177,7 @@ RoutingPolicy
 |---|---|---|
 | Метаданные туннелей: id, имя, порядок, политика маршрутизации | JSON в контейнере App Group, атомарная запись, версия схемы с миграциями | приложение; расширение — только активный туннель |
 | Конфиг wg-quick целиком, с ключами | Keychain, общая access group. На iOS — `AfterFirstUnlockThisDeviceOnly`. Для системного расширения macOS — см. [03-platform-macos.md](03-platform-macos.md), раздел 5 | приложение, расширение |
-| Системная конфигурация VPN | По одному «слоту» на тип провайдера: `NETunnelProviderManager`, на macOS ещё `NETransparentProxyManager` и `NEDNSProxyManager`. В `providerConfiguration` лежит только id активного туннеля и снимок политики маршрутизации, без секретов | система, расширение |
+| Системная конфигурация VPN | По одному «слоту» на тип провайдера: `NETunnelProviderManager`, на macOS ещё `NETransparentProxyManager`. В `providerConfiguration` лежит только id активного туннеля и снимок политики маршрутизации, без секретов | система, расширение |
 | Журнал | Кольцевой файл в App Group (до 2 МБ) + OSLog | приложение, расширение |
 | Настройки приложения | `UserDefaults` с suite App Group | приложение |
 
@@ -201,7 +199,7 @@ Go-модуль разбит на пакеты по фичам:
 |---|---|
 | `bridge` | Экспортируемые C-функции (`//export`), таблица хэндлов, обратные вызовы в Swift |
 | `fdtunnel` | WireGuard поверх файлового дескриптора `utun` (режим «Весь трафик» и выбор сервисов на iOS) |
-| `usernet` | WireGuard поверх gVisor netstack: `DialTCP`, UDP-сокеты, DNS через туннель (выбор приложений и DNS-прокси на macOS) |
+| `usernet` | WireGuard поверх gVisor netstack: `DialTCP`, UDP-сокеты, DNS через туннель (выбор приложений на macOS) |
 | `servicerouting` | Пул фиктивных адресов, перехват DNS выбранных доменов, трансляция адресов (выбор сервисов на iOS) |
 | `logbridge` | Передача логов wireguard-go в Swift |
 | `internal/testpeer`, `testpeer` | Пир WireGuard с эхо-серверами и DNS для тестов: пакет для Go-тестов, утилита — для тестов Swift. В ядро не входит |
@@ -276,7 +274,7 @@ tc_free(pointer)
 | ADR-08 | ZIPFoundation для `.zip` | Своя реализация на Compression | Импорт и экспорт архивов — не ядро продукта. |
 | ADR-09 | macOS: Developer ID + системное расширение + Sparkle | Mac App Store | Индивидуальный аккаунт не может публиковать VPN в App Store (правило 5.4). |
 | ADR-10 | Минимум macOS 26 / iOS 26 / iPadOS 26 | Поддержка более старых ОС | Свежие API без веток совместимости; к релизу это две последние версии ОС (сейчас актуальны 26 и 27). Решение D-04. |
-| ADR-11 | macOS: DNS-прокси (`NEDNSProxyProvider`) в v1 | Принять утечку DNS-запросов в v1 и добавить прокси позже | Решение D-09. DNS-запросы выбранных приложений резолвятся через туннель, остальные без изменений уходят к исходному резолверу. Атрибуцию запросов к приложениям проверяет спайк SP-9. |
+| ADR-11 | macOS: DNS выбранных приложений через туннель в v1. **Механизм заменён решением D-34:** вместо `NEDNSProxyProvider` запросы перенаправляет transparent proxy | Принять утечку DNS-запросов в v1 и добавить прокси позже; отдельный `NEDNSProxyProvider` | Решение D-09. DNS-запросы выбранных приложений резолвятся через туннель, остальные без изменений уходят к исходному резолверу. По SP-2 и SP-9 запросы приходят в transparent proxy от имени приложения, а DNS-прокси ничего не добавляет, но при падении оставляет систему без DNS. |
 | ADR-12 | Только публичные API Apple | Приватные API ради поддержки Safari/WebKit | Решение D-10: надёжность при обновлениях macOS важнее поддержки Safari. |
 | ADR-13 | Проверки локально: `Scripts/check.sh` + git-хуки, без CI | GitHub Actions, GitLab CI | Решение D-23. Хук `pre-merge-commit` не даёт слить ветку в `master` (D-31) без зелёного `check.sh`. |
 | ADR-14 | Точка расширения под второй протокол (AmneziaWG) | Ничего не закладывать заранее | Решение D-07. Таблица ключей парсера расширяется наборами ключей; мост Go принимает вид движка (`engine_kind`, в v1 только `wireguard`); поля редактора строятся из описаний полей. |
