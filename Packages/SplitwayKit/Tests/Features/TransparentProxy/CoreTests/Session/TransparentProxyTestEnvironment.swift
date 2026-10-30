@@ -45,6 +45,8 @@ struct TransparentProxyTestEnvironment {
     ]
 
     let engine = InMemoryUserspaceNetworkEngine()
+    let ticker = ManualTicker()
+    let clock = ManualWallClock(Date(timeIntervalSince1970: 1_793_268_900))
     let attributionLog = RecordingSuspiciousAttributionLog()
     let session: TransparentProxySession
 
@@ -62,20 +64,22 @@ struct TransparentProxyTestEnvironment {
                 attribution: SuspiciousAttributionMonitor(log: attributionLog),
                 environment: RelayEnvironment(
                     targetQueue: DispatchQueue(label: "TransparentProxyTests"),
-                    clock: FixedWallClock(Date(timeIntervalSince1970: 1_793_268_900))
+                    clock: clock
                 )
             ),
-            pathMonitor: SilentNetworkPathMonitor()
+            pathMonitor: SilentNetworkPathMonitor(),
+            ticker: ticker,
+            clock: clock
         )
     }
 
     static func tunnel(routing mode: RoutingMode, configuration: TunnelConfiguration? = nil) throws -> ActiveTunnel {
+        try tunnel(policy: RoutingPolicy(mode: mode), configuration: configuration)
+    }
+
+    static func tunnel(policy: RoutingPolicy, configuration: TunnelConfiguration? = nil) throws -> ActiveTunnel {
         let minimal = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.minimal).configuration)
-        return ActiveTunnel(
-            id: TunnelIdentifier(),
-            configuration: configuration ?? minimal,
-            routingPolicy: RoutingPolicy(mode: mode)
-        )
+        return ActiveTunnel(id: TunnelIdentifier(), configuration: configuration ?? minimal, routingPolicy: policy)
     }
 
     static func tunnelWithItsOwnResolver() throws -> TunnelConfiguration {
@@ -107,6 +111,20 @@ struct TransparentProxyTestEnvironment {
                     path: "/Applications/Browser.app",
                     signingIdentifiers: ["com.example.browser"],
                     teamIdentifier: FlowRoutingFixtures.browserTeam
+                )
+            ])
+        )
+    }
+
+    static func selectedMail() throws -> RoutingMode {
+        .selectedApplications(
+            ApplicationSelection([
+                try ApplicationIdentity(
+                    kind: .application,
+                    displayName: "Mail Client",
+                    path: "/Applications/Mail Client.app",
+                    signingIdentifiers: ["com.example.mail"],
+                    teamIdentifier: "MAIL123456"
                 )
             ])
         )

@@ -9,11 +9,15 @@ public final class ProxiedFlowRouter: Sendable {
 
     private struct ActiveRuntime: Sendable {
         let runtime: TransparentProxyRuntime
+        let decider: FlowRoutingDecider
+        let readiness: TunnelReadiness
         let generation: Int
     }
 
     private struct State: Sendable {
         var runtime: TransparentProxyRuntime?
+        var decider: FlowRoutingDecider?
+        var readiness = TunnelReadiness.unavailable
         var generation = 0
         var relays: [ObjectIdentifier: any FlowRelay] = [:]
     }
@@ -36,10 +40,37 @@ public final class ProxiedFlowRouter: Sendable {
         self.policy = policy
     }
 
+    public var currentRuntime: TransparentProxyRuntime? {
+        state.withLock { state in state.runtime }
+    }
+
     public func activate(_ runtime: TransparentProxyRuntime) {
         state.withLock { state in
             state.runtime = runtime
+            state.decider = runtime.decider
+            state.readiness = .ready(carriesIPv6: runtime.carriesIPv6)
             state.generation += 1
+        }
+    }
+
+    public func replaceDecider(with decider: FlowRoutingDecider) {
+        state.withLock { state in
+            guard state.runtime != nil else { return }
+            state.decider = decider
+        }
+    }
+
+    public func updateReadiness(_ readiness: TunnelReadiness) {
+        state.withLock { state in
+            guard state.runtime != nil else { return }
+            state.readiness = readiness
+        }
+    }
+
+    public func closeIdleRelays(at moment: Date) {
+        let relays = state.withLock { state in Array(state.relays.values) }
+        for relay in relays {
+            _ = relay.closeIfIdle(at: moment)
         }
     }
 
@@ -47,6 +78,7 @@ public final class ProxiedFlowRouter: Sendable {
         let (runtime, relays) = state.withLock { state -> (TransparentProxyRuntime?, [any FlowRelay]) in
             let current = (state.runtime, Array(state.relays.values))
             state.runtime = nil
+            state.decider = nil
             state.generation += 1
             state.relays = [:]
             return current
@@ -60,7 +92,7 @@ public final class ProxiedFlowRouter: Sendable {
     public func handleStream(_ flow: any ProxiedStreamFlow, request: ProxiedFlowRequest) -> Bool {
         guard let active = activeRuntime() else { return false }
         let target = active.runtime.plan.dnsRedirection.target(for: request.remoteEndpoint)
-        switch decision(for: request, target: target, transport: .tcp, in: active.runtime) {
+        switch decision(for: request, target: target, transport: .tcp, in: active) {
         case .direct:
             return false
         case .block:
@@ -79,7 +111,7 @@ public final class ProxiedFlowRouter: Sendable {
         guard let active = activeRuntime() else { return false }
         let redirection = active.runtime.plan.dnsRedirection
         let target = redirection.target(for: request.remoteEndpoint)
-        switch decision(for: request, target: target, transport: .udp, in: active.runtime) {
+        switch decision(for: request, target: target, transport: .udp, in: active) {
         case .direct:
             return false
         case .block:
@@ -110,7 +142,9 @@ public final class ProxiedFlowRouter: Sendable {
 
     private func activeRuntime() -> ActiveRuntime? {
         state.withLock { state in
-            state.runtime.map { runtime in ActiveRuntime(runtime: runtime, generation: state.generation) }
+            guard let runtime = state.runtime, let decider = state.decider else { return nil }
+            return ActiveRuntime(
+                runtime: runtime, decider: decider, readiness: state.readiness, generation: state.generation)
         }
     }
 
@@ -118,7 +152,7 @@ public final class ProxiedFlowRouter: Sendable {
         for request: ProxiedFlowRequest,
         target: FlowEndpoint,
         transport: FlowTransport,
-        in runtime: TransparentProxyRuntime
+        in active: ActiveRuntime
     ) -> FlowRouteDecision {
         let source = sourceResolver.sourceApplication(of: request.auditToken)
         attribution.inspect(source)
@@ -128,7 +162,7 @@ public final class ProxiedFlowRouter: Sendable {
             port: target.port.value,
             transport: transport
         )
-        return runtime.decider.decision(for: flow, tunnel: runtime.readiness)
+        return active.decider.decision(for: flow, tunnel: active.readiness)
     }
 
     private func startStreamRelay(

@@ -21,6 +21,10 @@ final class TransparentProxyProvider: NETransparentProxyProvider, NEAppProxyUDPF
         await composition.session.stop()
     }
 
+    override nonisolated(nonsending) func handleAppMessage(_ messageData: Data) async -> Data? {
+        await composition.messageDispatcher.response(to: messageData)
+    }
+
     override func handleNewFlow(_ flow: NEAppProxyFlow) -> Bool {
         guard let streamFlow = flow as? NEAppProxyTCPFlow, let request = ProxiedFlowRequest(streamFlow) else {
             return false

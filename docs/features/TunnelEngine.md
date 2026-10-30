@@ -31,7 +31,7 @@ flowchart LR
   LogBridge -->|tc_set_log_callback| Recorder[LogRecorder движка]
 ```
 
-- **Кодирование.** `UAPIConfigurationEncoder` превращает `TunnelConfiguration` и endpoint, уже разрезолвленные платформой, в `UAPIConfiguration`:
+- **Кодирование.** `UAPIConfigurationEncoder` превращает `TunnelConfiguration` и endpoint, уже разрезолвленные платформой, в `UAPIConfiguration`. Отдельно он строит обновления для работающего устройства: `endpointUpdate` (только endpoint-ы) и `keepaliveUpdate` (keepalive для пиров без своего, нужен прозрачному прокси, M4-15). Полная конфигурация:
   - ключи в hex, `replace_peers=true` и `replace_allowed_ips=true`;
   - `allowed_ip` без битов хоста;
   - `endpoint` только у разрезолвленных пиров.
@@ -92,7 +92,7 @@ flowchart LR
 ## Тесты
 
 - `TunnelEngineTestSupport` даёт фейки режима netstack `InMemoryUserspaceNetwork` и `InMemoryUserspaceConnection`: они записывают запись, кредит и закрытия и отдают данные получателю по команде теста. Ими проверяются насосы `TransparentProxy`.
-- 10 тестов в `TunnelEngineTests`: снимок UAPI для фикстур, пропуск неразрезолвленных endpoint, `allowed_ip` без битов хоста, скрытие текста UAPI, разбор статистики, `errno`, повреждённые ответы.
+- 14 тестов в `TunnelEngineTests`: keepalive для пиров без своего и ничего для пиров со своим; снимок UAPI для фикстур, пропуск неразрезолвленных endpoint, `allowed_ip` без битов хоста, скрытие текста UAPI, разбор статистики, `errno`, повреждённые ответы.
 - 17 Go-тестов режима fd (тесты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md)):
   - рукопожатие и доставка пакета между двумя wireguard-go на `tuntest`;
   - wireguard-go принимает фикстуру Swift;
@@ -117,3 +117,4 @@ flowchart LR
 | 2026-10-30 | Общая таблица хэндлов для режимов fd и netstack, `recover` в экспортных функциях | M4-06 |
 | 2026-10-30 | Фейки режима netstack в `TunnelEngineTestSupport` | M4-10 |
 | 2026-10-30 | Причина сбоя запуска в журнале движка (найдено в системном расширении macOS) | M2-12 |
+| 2026-10-31 | `UAPIConfigurationEncoder.keepaliveUpdate` | M4-15 |

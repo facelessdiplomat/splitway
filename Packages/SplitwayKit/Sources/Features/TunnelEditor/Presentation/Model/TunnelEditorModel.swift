@@ -147,15 +147,20 @@ public final class TunnelEditorModel: Identifiable {
     public func save() async {
         guard canSave else { return }
         if let editedTunnel, await actions.activityProbe.isActive(editedTunnel.id) {
-            isConfirmingRestart = true
+            let configuration = currentDraft.validation.configuration
+            if LiveRoutingChange.isPossible(from: editedTunnel, to: configuration, routedBy: routing.policy) {
+                await performSave(.applyingRoutingPolicy)
+            } else {
+                isConfirmingRestart = true
+            }
             return
         }
-        await performSave(restartingConnection: false)
+        await performSave(.keepingConnection)
     }
 
     public func confirmRestart() async {
         isConfirmingRestart = false
-        await performSave(restartingConnection: true)
+        await performSave(.restartingConnection)
     }
 
     public func cancelRestart() {
@@ -173,16 +178,24 @@ public final class TunnelEditorModel: Identifiable {
         return textDraft
     }
 
-    private func performSave(restartingConnection: Bool) async {
+    private func performSave(_ connectionChange: TunnelEditorConnectionChange) async {
         let validation = currentDraft.validation
         guard let name = validation.name, let configuration = validation.configuration else { return }
         isSaving = true
         defer { isSaving = false }
         do {
             let saved = try await savedTunnel(named: name, configuration: configuration)
-            if restartingConnection {
+            switch connectionChange {
+            case .keepingConnection:
+                break
+            case .restartingConnection:
                 await actions.deactivateTunnel.execute()
                 try await restart(saved)
+            case .applyingRoutingPolicy:
+                guard (try? await actions.applyRoutingPolicy.execute(saved)) != nil else {
+                    isConfirmingRestart = true
+                    return
+                }
             }
             await didSave(saved)
         } catch {

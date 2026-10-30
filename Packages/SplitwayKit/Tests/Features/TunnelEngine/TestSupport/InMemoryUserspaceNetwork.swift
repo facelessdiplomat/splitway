@@ -6,6 +6,8 @@ public final class InMemoryUserspaceNetwork: RunningUserspaceNetwork {
     public struct Snapshot: Sendable {
         public var connections: [InMemoryUserspaceConnection] = []
         public var isStopped = false
+        public var appliedConfigurations: [UAPIConfiguration] = []
+        public var statistics = RuntimeStatistics(peers: [])
     }
 
     public let state = AwaitableState(Snapshot())
@@ -17,10 +19,12 @@ public final class InMemoryUserspaceNetwork: RunningUserspaceNetwork {
         self.resolvedAddresses = resolvedAddresses
     }
 
-    public func apply(_ configuration: UAPIConfiguration) throws(TunnelEngineError) {}
+    public func apply(_ configuration: UAPIConfiguration) throws(TunnelEngineError) {
+        state.update { snapshot in snapshot.appliedConfigurations.append(configuration) }
+    }
 
     public func runtimeStatistics() throws(TunnelEngineError) -> RuntimeStatistics {
-        RuntimeStatistics(peers: [])
+        state.update { snapshot in snapshot.statistics }
     }
 
     public func bumpSockets() throws(TunnelEngineError) {}

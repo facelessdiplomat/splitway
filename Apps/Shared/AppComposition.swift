@@ -179,7 +179,8 @@ struct AppComposition {
                 renameTunnel: library.renameTunnel,
                 activityProbe: connection.activityProbe,
                 activateTunnel: connection.activateTunnel,
-                deactivateTunnel: connection.deactivateTunnel
+                deactivateTunnel: connection.deactivateTunnel,
+                applyRoutingPolicy: connection.applyRoutingPolicy
             ),
             applicationPicker: applicationPicker
         ) { text in

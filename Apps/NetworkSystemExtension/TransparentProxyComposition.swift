@@ -3,6 +3,7 @@ import DiagnosticsInfrastructure
 import Foundation
 import PacketTunnel
 import PacketTunnelInfrastructure
+import ProviderMessaging
 import SecretDeliveryInfrastructure
 import SharedKernel
 import TransparentProxy
@@ -11,9 +12,11 @@ import TunnelCoreAdapter
 
 struct TransparentProxyComposition: Sendable {
     private static let fallbackSubsystem = "Splitway.TransparentProxy"
+    private static let maintenanceInterval = Duration.seconds(5)
 
     let session: TransparentProxySession
     let loadActiveTunnel: LoadActiveTunnelUseCase
+    let messageDispatcher: ProviderMessageDispatcher
     let log: LogRecorder
 
     init(bundle: Bundle = .main) {
@@ -36,8 +39,11 @@ struct TransparentProxyComposition: Sendable {
                     clock: SystemWallClock()
                 )
             ),
-            pathMonitor: NetworkPathObserver()
+            pathMonitor: NetworkPathObserver(),
+            ticker: RepeatingTicker(interval: Self.maintenanceInterval),
+            clock: SystemWallClock()
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: SystemKeychainSecretStore())
+        messageDispatcher = ProviderMessageDispatcher(handler: TransparentProxyMessageHandler(session: session))
     }
 }

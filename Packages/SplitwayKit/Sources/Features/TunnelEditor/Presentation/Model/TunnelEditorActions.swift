@@ -8,6 +8,7 @@ public struct TunnelEditorActions: Sendable {
     let activityProbe: any TunnelActivityProbe
     let activateTunnel: ActivateTunnelUseCase
     let deactivateTunnel: DeactivateTunnelUseCase
+    let applyRoutingPolicy: ApplyRoutingPolicyUseCase
 
     public init(
         createTunnel: CreateTunnelUseCase,
@@ -15,7 +16,8 @@ public struct TunnelEditorActions: Sendable {
         renameTunnel: RenameTunnelUseCase,
         activityProbe: any TunnelActivityProbe,
         activateTunnel: ActivateTunnelUseCase,
-        deactivateTunnel: DeactivateTunnelUseCase
+        deactivateTunnel: DeactivateTunnelUseCase,
+        applyRoutingPolicy: ApplyRoutingPolicyUseCase
     ) {
         self.createTunnel = createTunnel
         self.updateTunnel = updateTunnel
@@ -23,5 +25,6 @@ public struct TunnelEditorActions: Sendable {
         self.activityProbe = activityProbe
         self.activateTunnel = activateTunnel
         self.deactivateTunnel = deactivateTunnel
+        self.applyRoutingPolicy = applyRoutingPolicy
     }
 }
