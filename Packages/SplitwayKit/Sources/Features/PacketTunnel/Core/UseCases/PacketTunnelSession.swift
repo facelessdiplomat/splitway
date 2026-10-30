@@ -5,7 +5,7 @@ import TunnelEngine
 public actor PacketTunnelSession {
     private let engine: any WireGuardDeviceEngine
     private let interfaceLocator: any TunnelInterfaceLocator
-    private let endpointResolver: any EndpointResolver
+    private let endpointResolution: ResolveTunnelEndpointsUseCase
     private let pathMonitor: any NetworkPathMonitor
     private var configuration: TunnelConfiguration?
     private var device: (any RunningWireGuardDevice)?
@@ -20,7 +20,7 @@ public actor PacketTunnelSession {
     ) {
         self.engine = engine
         self.interfaceLocator = interfaceLocator
-        self.endpointResolver = endpointResolver
+        endpointResolution = ResolveTunnelEndpointsUseCase(resolver: endpointResolver)
         self.pathMonitor = pathMonitor
     }
 
@@ -62,7 +62,7 @@ public actor PacketTunnelSession {
 
     public func handle(_ path: NetworkPathStatus) async {
         guard path == .available, let configuration, device != nil else { return }
-        let endpoints = await reachableEndpoints(of: configuration)
+        let endpoints = await endpointResolution.reachableEndpoints(of: configuration)
         guard let device else { return }
         if let update = UAPIConfigurationEncoder.endpointUpdate(for: configuration, resolvedEndpoints: endpoints) {
             try? device.apply(update)
@@ -86,25 +86,11 @@ public actor PacketTunnelSession {
     private func resolvedEndpoints(
         of configuration: TunnelConfiguration
     ) async throws(PacketTunnelError) -> [PublicKey: ResolvedEndpoint] {
-        var resolved: [PublicKey: ResolvedEndpoint] = [:]
-        for peer in configuration.peers {
-            guard let endpoint = peer.endpoint else { continue }
-            do {
-                resolved[peer.publicKey] = try await endpointResolver.resolve(endpoint)
-            } catch {
-                throw .endpointUnresolvable
-            }
+        do {
+            return try await endpointResolution.allEndpoints(of: configuration)
+        } catch {
+            throw .endpointUnresolvable
         }
-        return resolved
-    }
-
-    private func reachableEndpoints(of configuration: TunnelConfiguration) async -> [PublicKey: ResolvedEndpoint] {
-        var resolved: [PublicKey: ResolvedEndpoint] = [:]
-        for peer in configuration.peers {
-            guard let endpoint = peer.endpoint else { continue }
-            resolved[peer.publicKey] = try? await endpointResolver.resolve(endpoint)
-        }
-        return resolved
     }
 
     private func throwIfStopRequested() throws(PacketTunnelError) {
