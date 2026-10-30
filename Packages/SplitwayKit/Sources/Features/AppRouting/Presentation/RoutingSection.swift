@@ -5,10 +5,16 @@ import SwiftUI
 public struct RoutingSection: View {
     private let model: RoutingSectionModel
     private let excludesPrivateNetworks: Binding<Bool>?
+    private let chooseApplications: (@MainActor () -> Void)?
 
-    public init(model: RoutingSectionModel, excludesPrivateNetworks: Binding<Bool>?) {
+    public init(
+        model: RoutingSectionModel,
+        excludesPrivateNetworks: Binding<Bool>?,
+        chooseApplications: (@MainActor () -> Void)? = nil
+    ) {
         self.model = model
         self.excludesPrivateNetworks = excludesPrivateNetworks
+        self.chooseApplications = chooseApplications
     }
 
     public var body: some View {
@@ -21,6 +27,11 @@ public struct RoutingSection: View {
                 Text("Through the tunnel", bundle: .module)
             }
             RoutingSelectionSummary(model: model)
+            if let chooseApplications {
+                Button(action: chooseApplications) {
+                    Text("Choose Apps…", bundle: .module)
+                }
+            }
             if let excludesPrivateNetworks {
                 Toggle(isOn: excludesPrivateNetworks) {
                     Text("Exclude private networks", bundle: .module)

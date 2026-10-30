@@ -47,6 +47,10 @@ public final class RoutingSectionModel {
         services.services.count
     }
 
+    public var applicationSelection: ApplicationSelection {
+        applications
+    }
+
     public var offersUnavailableTunnelChoice: Bool {
         platform == .macOS
     }
@@ -68,5 +72,14 @@ public final class RoutingSectionModel {
 
     public func setBlocksWhenTunnelUnavailable(_ blocks: Bool) {
         policy = RoutingPolicy(mode: policy.mode, whenTunnelUnavailable: blocks ? .block : .bypass)
+    }
+
+    public func setApplications(_ selection: ApplicationSelection) {
+        applications = selection
+        guard policy.mode.kind == .selectedApplications else { return }
+        policy = RoutingPolicy(
+            mode: .selectedApplications(selection),
+            whenTunnelUnavailable: policy.whenTunnelUnavailable
+        )
     }
 }

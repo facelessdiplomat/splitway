@@ -125,6 +125,16 @@
         }
       }
     },
+    "Choose Apps…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать приложения…"
+          }
+        }
+      }
+    },
     "Choose at least one app, or no traffic will use the tunnel." : {
       "localizations" : {
         "ru" : {
