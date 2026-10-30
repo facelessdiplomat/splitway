@@ -84,21 +84,24 @@ print_device_identifier() {
 }
 
 install_application() {
-    local checkout
+    local checkout build_number install_directory
     checkout="$(cd "${1:-$repository_root}" && pwd)"
+    build_number="$(date +%s)"
+    install_directory="install-$build_number"
     (
         cd "$checkout"
         Scripts/generate-project.sh >/dev/null
         xcodebuild build -project Splitway.xcodeproj -scheme macOSApp -configuration Debug \
             -destination 'platform=macOS,arch=arm64' -derivedDataPath "$derived_data_directory" \
-            -allowProvisioningUpdates -quiet CURRENT_PROJECT_VERSION="$(date +%s)"
+            -allowProvisioningUpdates -quiet CURRENT_PROJECT_VERSION="$build_number"
     )
-    rm -rf "$shared_directory/Splitway.app"
-    mkdir -p "$shared_directory"
-    ditto "$checkout/$derived_data_directory/Build/Products/Debug/Splitway.app" "$shared_directory/Splitway.app"
+    rm -rf "$shared_directory"/install-*
+    mkdir -p "$shared_directory/$install_directory"
+    ditto "$checkout/$derived_data_directory/Build/Products/Debug/Splitway.app" \
+        "$shared_directory/$install_directory/Splitway.app"
     guest_exec pkill -x Splitway || true
     guest_exec rm -rf /Applications/Splitway.app
-    guest_exec ditto "$shared_directory_in_guest/Splitway.app" /Applications/Splitway.app
+    guest_exec ditto "$shared_directory_in_guest/$install_directory/Splitway.app" /Applications/Splitway.app
 }
 
 launch_application() {
