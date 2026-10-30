@@ -15,6 +15,7 @@
         ]
         private static let queue = DispatchQueue(label: "Splitway.ApplicationScanner", qos: .userInitiated)
         private static let bundleExtension = "app"
+        private static let hiddenNamePrefix = "."
 
         private let directories: [URL]
         private let includesRunningApplications: Bool
@@ -72,10 +73,10 @@
             let items =
                 (try? FileManager.default.contentsOfDirectory(
                     at: directory,
-                    includingPropertiesForKeys: [.isDirectoryKey],
-                    options: [.skipsHiddenFiles]
+                    includingPropertiesForKeys: [.isDirectoryKey]
                 )) ?? []
-            return items.flatMap { item -> [URL] in
+            let visibleItems = items.filter { item in !item.lastPathComponent.hasPrefix(hiddenNamePrefix) }
+            return visibleItems.flatMap { item -> [URL] in
                 if item.pathExtension == bundleExtension {
                     return [item]
                 }

@@ -45,8 +45,15 @@
         }
 
         func makeSymbolicLink(_ relativePath: String, to destination: URL) throws {
-            try FileManager.default.createSymbolicLink(
-                at: root.appending(path: relativePath), withDestinationURL: destination)
+            let link = root.appending(path: relativePath)
+            try FileManager.default.createDirectory(
+                at: link.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try FileManager.default.createSymbolicLink(at: link, withDestinationURL: destination)
+        }
+
+        func hideItem(_ relativePath: String) throws {
+            let path = root.appending(path: relativePath).path(percentEncoded: false)
+            guard lchflags(path, UInt32(UF_HIDDEN)) == 0 else { throw CocoaError(.fileWriteUnknown) }
         }
 
         func path(_ relativePath: String) -> String {

@@ -9,12 +9,14 @@ public struct TransparentProxyNetworkPlan: Sendable, Hashable {
 
     public let includedNetworks: IPNetworkSet
     public let excludedNetworks: IPNetworkSet
+    public let dnsRedirection: DNSQueryRedirection
 
     public init(for configuration: TunnelConfiguration, resolvedEndpointAddresses: [IPAddress]) {
         let allowedNetworks = IPNetworkSet(configuration.peers.flatMap(\.allowedIPs.networks))
         let endpointAddresses = configuration.peers.compactMap(Self.literalEndpointAddress) + resolvedEndpointAddresses
         includedNetworks = IPv6LeakProtection.applying(to: allowedNetworks)
         excludedNetworks = Self.localDestinations.union(IPNetworkSet(endpointAddresses.map(IPNetwork.init(host:))))
+        dnsRedirection = DNSQueryRedirection(for: configuration)
     }
 
     private static func literalEndpointAddress(of peer: PeerConfiguration) -> IPAddress? {
