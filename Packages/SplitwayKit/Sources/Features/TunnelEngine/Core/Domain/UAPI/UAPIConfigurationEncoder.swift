@@ -24,6 +24,19 @@ public enum UAPIConfigurationEncoder {
         return UAPIConfiguration(text: lines.map { line in line + "\n" }.joined())
     }
 
+    public static func keepaliveUpdate(
+        for configuration: TunnelConfiguration,
+        interval: PersistentKeepalive
+    ) -> UAPIConfiguration? {
+        let lines = configuration.peers
+            .filter { peer in peer.persistentKeepalive == nil }
+            .flatMap { peer in
+                ["public_key=\(peer.publicKey.hexEncodedText)", "persistent_keepalive_interval=\(interval.seconds)"]
+            }
+        guard !lines.isEmpty else { return nil }
+        return UAPIConfiguration(text: lines.map { line in line + "\n" }.joined())
+    }
+
     private static func interfaceLines(of interface: InterfaceConfiguration) -> [String] {
         var lines = ["private_key=\(interface.privateKey.hexEncodedText)"]
         if let listenPort = interface.listenPort {

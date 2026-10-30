@@ -8,5 +8,5 @@ public struct TransparentProxyRuntime: Sendable {
     public let plan: TransparentProxyNetworkPlan
     public let decider: FlowRoutingDecider
     public let names: HostnameResolutionPolicy
-    public let readiness: TunnelReadiness
+    public let carriesIPv6: Bool
 }

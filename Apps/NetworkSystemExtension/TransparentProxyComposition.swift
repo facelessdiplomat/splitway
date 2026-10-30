@@ -12,6 +12,7 @@ import TunnelCoreAdapter
 
 struct TransparentProxyComposition: Sendable {
     private static let fallbackSubsystem = "Splitway.TransparentProxy"
+    private static let maintenanceInterval = Duration.seconds(5)
 
     let session: TransparentProxySession
     let loadActiveTunnel: LoadActiveTunnelUseCase
@@ -38,7 +39,9 @@ struct TransparentProxyComposition: Sendable {
                     clock: SystemWallClock()
                 )
             ),
-            pathMonitor: NetworkPathObserver()
+            pathMonitor: NetworkPathObserver(),
+            ticker: RepeatingTicker(interval: Self.maintenanceInterval),
+            clock: SystemWallClock()
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: SystemKeychainSecretStore())
         messageDispatcher = ProviderMessageDispatcher(handler: TransparentProxyMessageHandler(session: session))

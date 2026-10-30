@@ -104,6 +104,31 @@ struct UAPIConfigurationEncoderTests {
         #expect(UAPIConfigurationEncoder.endpointUpdate(for: configuration, resolvedEndpoints: [:]) == nil)
     }
 
+    @Test
+    func addsTheKeepaliveToPeersWithoutTheirOwn() throws {
+        let configuration = try Self.configuration(of: WgQuickFixtures.multiplePeers)
+        let (firstPeer, secondPeer) = (try SampleKeys.firstPeerPublicKey(), try SampleKeys.secondPeerPublicKey())
+
+        let update = UAPIConfigurationEncoder.keepaliveUpdate(
+            for: configuration, interval: try PersistentKeepalive(seconds: 25))
+
+        #expect(
+            update?.text
+                == "public_key=\(firstPeer.hexEncodedText)\npersistent_keepalive_interval=25\n"
+                + "public_key=\(secondPeer.hexEncodedText)\npersistent_keepalive_interval=25\n"
+        )
+    }
+
+    @Test
+    func keepsTheOwnKeepaliveOfEveryPeer() throws {
+        let configuration = try Self.configuration(of: WgQuickFixtures.full)
+
+        let update = UAPIConfigurationEncoder.keepaliveUpdate(
+            for: configuration, interval: try PersistentKeepalive(seconds: 25))
+
+        #expect(update == nil)
+    }
+
     private static func configuration(of fixture: String) throws -> TunnelConfiguration {
         try #require(WgQuickConfigurationParser.parse(fixture).configuration)
     }

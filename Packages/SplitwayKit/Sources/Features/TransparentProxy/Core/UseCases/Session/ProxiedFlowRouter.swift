@@ -48,7 +48,7 @@ public final class ProxiedFlowRouter: Sendable {
         state.withLock { state in
             state.runtime = runtime
             state.decider = runtime.decider
-            state.readiness = runtime.readiness
+            state.readiness = .ready(carriesIPv6: runtime.carriesIPv6)
             state.generation += 1
         }
     }

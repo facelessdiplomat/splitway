@@ -6,6 +6,7 @@ import TunnelEngine
 
 public struct TransparentProxyStarter: Sendable {
     private static let standardWireGuardMTU = 1_420
+    private static let readinessKeepaliveSeconds = 25
 
     private let engine: any UserspaceNetworkEngine
     private let endpointResolution: ResolveTunnelEndpointsUseCase
@@ -30,6 +31,7 @@ public struct TransparentProxyStarter: Sendable {
         )
         let decider = try Self.decider(for: tunnel.routingPolicy, plan: plan)
         let network = try startNetwork(for: configuration, endpoints: endpoints)
+        keepHandshakesFresh(in: network, for: configuration)
         return TransparentProxyRuntime(
             network: network,
             configuration: configuration,
@@ -39,10 +41,7 @@ public struct TransparentProxyStarter: Sendable {
                 tunnelNetworks: plan.includedNetworks,
                 resolvesNamesThroughTunnel: !configuration.interface.dns.servers.isEmpty
             ),
-            readiness: .ready(
-                carriesIPv6: configuration.interface.addresses.contains { network in
-                    network.address.family == .ipv6
-                })
+            carriesIPv6: configuration.interface.addresses.contains { network in network.address.family == .ipv6 }
         )
     }
 
@@ -67,6 +66,13 @@ public struct TransparentProxyStarter: Sendable {
             try? runtime.network.apply(update)
         }
         try? runtime.network.bumpSockets()
+    }
+
+    private func keepHandshakesFresh(in network: any RunningUserspaceNetwork, for configuration: TunnelConfiguration) {
+        guard let interval = try? PersistentKeepalive(seconds: Self.readinessKeepaliveSeconds),
+            let update = UAPIConfigurationEncoder.keepaliveUpdate(for: configuration, interval: interval)
+        else { return }
+        try? network.apply(update)
     }
 
     private func startNetwork(
