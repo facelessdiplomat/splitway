@@ -191,8 +191,9 @@ let features: [FeatureModule] = [
     FeatureModule(name: "DesignSystem", layers: [.presentation], layersWithoutTests: [.presentation]),
     FeatureModule(
         name: "ApplicationCatalog",
-        layers: [.core, .infrastructure],
+        layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["AppRouting"],
+        presentationDependencies: ["DesignSystemPresentation"],
         providesTestSupport: true
     ),
     FeatureModule(
