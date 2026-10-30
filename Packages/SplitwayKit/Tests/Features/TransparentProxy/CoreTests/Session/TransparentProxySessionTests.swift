@@ -109,6 +109,77 @@ struct TransparentProxySessionTests {
     }
 
     @Test
+    func sendsADNSQueryOfASelectedApplicationToTheResolverOfTheTunnel() async throws {
+        let environment = TransparentProxyTestEnvironment()
+        _ = try await environment.session.start(
+            TransparentProxyTestEnvironment.tunnel(
+                routing: TransparentProxyTestEnvironment.selectedBrowser(),
+                configuration: TransparentProxyTestEnvironment.tunnelWithItsOwnResolver()
+            )
+        )
+        let flow = ScriptedDatagramFlow()
+        let resolver = try TransparentProxyTestEnvironment.resolverOfTheTunnel()
+
+        let isHandled = environment.session.handleDatagrams(
+            flow,
+            request: try TransparentProxyTestEnvironment.dnsQuery(from: TransparentProxyTestEnvironment.browserProcess)
+        )
+        await flow.state.wait { snapshot in snapshot.isOpened }
+        flow.send([
+            ProxiedDatagram(
+                payload: Data([1, 2, 3]),
+                remoteEndpoint: try TransparentProxyTestEnvironment.systemResolver()
+            )
+        ])
+
+        #expect(isHandled)
+        await environment.engine.network.state.wait { snapshot in
+            snapshot.connections.map(\.destination) == [resolver]
+        }
+    }
+
+    @Test
+    func sendsADNSQueryOverTCPToTheResolverOfTheTunnel() async throws {
+        let environment = TransparentProxyTestEnvironment()
+        _ = try await environment.session.start(
+            TransparentProxyTestEnvironment.tunnel(
+                routing: TransparentProxyTestEnvironment.selectedBrowser(),
+                configuration: TransparentProxyTestEnvironment.tunnelWithItsOwnResolver()
+            )
+        )
+        let resolver = try TransparentProxyTestEnvironment.resolverOfTheTunnel()
+
+        let isHandled = environment.session.handleStream(
+            ScriptedStreamFlow(),
+            request: try TransparentProxyTestEnvironment.dnsQuery(from: TransparentProxyTestEnvironment.browserProcess)
+        )
+
+        #expect(isHandled)
+        await environment.engine.network.state.wait { snapshot in
+            snapshot.connections.map(\.destination) == [resolver]
+        }
+    }
+
+    @Test
+    func leavesADNSQueryOfAnotherApplicationToTheSystem() async throws {
+        let environment = TransparentProxyTestEnvironment()
+        _ = try await environment.session.start(
+            TransparentProxyTestEnvironment.tunnel(
+                routing: TransparentProxyTestEnvironment.selectedBrowser(),
+                configuration: TransparentProxyTestEnvironment.tunnelWithItsOwnResolver()
+            )
+        )
+
+        let isHandled = environment.session.handleDatagrams(
+            ScriptedDatagramFlow(),
+            request: try TransparentProxyTestEnvironment.dnsQuery(from: TransparentProxyTestEnvironment.mailProcess)
+        )
+
+        #expect(!isHandled)
+        #expect(environment.engine.network.state.update { snapshot in snapshot.connections.isEmpty })
+    }
+
+    @Test
     func leavesFlowsToTheSystemBeforeTheStart() throws {
         let environment = TransparentProxyTestEnvironment()
 

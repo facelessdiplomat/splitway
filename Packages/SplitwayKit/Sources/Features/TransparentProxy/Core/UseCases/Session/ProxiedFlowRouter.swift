@@ -59,7 +59,8 @@ public final class ProxiedFlowRouter: Sendable {
 
     public func handleStream(_ flow: any ProxiedStreamFlow, request: ProxiedFlowRequest) -> Bool {
         guard let active = activeRuntime() else { return false }
-        switch decision(for: request, transport: .tcp, in: active.runtime) {
+        let target = active.runtime.plan.dnsRedirection.target(for: request.remoteEndpoint)
+        switch decision(for: request, target: target, transport: .tcp, in: active.runtime) {
         case .direct:
             return false
         case .block:
@@ -68,7 +69,7 @@ public final class ProxiedFlowRouter: Sendable {
             return true
         case .tunnel:
             environment.targetQueue.async {
-                self.startStreamRelay(for: flow, request: request, in: active)
+                self.startStreamRelay(for: flow, request: request, target: target, in: active)
             }
             return true
         }
@@ -76,7 +77,9 @@ public final class ProxiedFlowRouter: Sendable {
 
     public func handleDatagrams(_ flow: any ProxiedDatagramFlow, request: ProxiedFlowRequest) -> Bool {
         guard let active = activeRuntime() else { return false }
-        switch decision(for: request, transport: .udp, in: active.runtime) {
+        let redirection = active.runtime.plan.dnsRedirection
+        let target = redirection.target(for: request.remoteEndpoint)
+        switch decision(for: request, target: target, transport: .udp, in: active.runtime) {
         case .direct:
             return false
         case .block:
@@ -90,7 +93,8 @@ public final class ProxiedFlowRouter: Sendable {
                 policy: policy.udp,
                 environment: environment
             ) { endpoint in
-                UserspaceNetworkDestination(address: endpoint.address, port: endpoint.port)
+                let destination = redirection.target(for: endpoint)
+                return UserspaceNetworkDestination(address: destination.address, port: destination.port)
             }
             track(relay, generation: active.generation)
             return true
@@ -105,6 +109,7 @@ public final class ProxiedFlowRouter: Sendable {
 
     private func decision(
         for request: ProxiedFlowRequest,
+        target: FlowEndpoint,
         transport: FlowTransport,
         in runtime: TransparentProxyRuntime
     ) -> FlowRouteDecision {
@@ -112,8 +117,8 @@ public final class ProxiedFlowRouter: Sendable {
         attribution.inspect(source)
         let flow = FlowDescriptor(
             source: source,
-            destination: .address(request.remoteEndpoint.address),
-            port: request.remoteEndpoint.port.value,
+            destination: .address(target.address),
+            port: target.port.value,
             transport: transport
         )
         return runtime.decider.decision(for: flow, tunnel: runtime.readiness)
@@ -122,13 +127,15 @@ public final class ProxiedFlowRouter: Sendable {
     private func startStreamRelay(
         for flow: any ProxiedStreamFlow,
         request: ProxiedFlowRequest,
+        target: FlowEndpoint,
         in active: ActiveRuntime
     ) {
+        let isRedirected = target != request.remoteEndpoint
         let relay = TCPFlowRelay(
             flow: flow,
             destination: UserspaceNetworkDestination(
-                address: tunnelAddress(for: request, in: active.runtime),
-                port: request.remoteEndpoint.port
+                address: isRedirected ? target.address : tunnelAddress(for: request, in: active.runtime),
+                port: target.port
             ),
             network: active.runtime.network,
             policy: policy.tcp,

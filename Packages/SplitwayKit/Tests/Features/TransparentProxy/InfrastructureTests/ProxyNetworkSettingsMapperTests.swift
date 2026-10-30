@@ -33,6 +33,25 @@
         }
 
         @Test
+        func takesDNSQueriesToEveryResolverWhenTheTunnelRedirectsThem() throws {
+            let partialTunnel = WgQuickFixtures.commercialProviderStyle.replacingOccurrences(
+                of: "AllowedIPs = 0.0.0.0/0", with: "AllowedIPs = 192.0.2.0/24")
+
+            let settings = try Self.settings(for: partialTunnel)
+
+            let rules = settings.includedNetworkRules ?? []
+            #expect(Set(rules.compactMap(Self.dnsQueryHost(of:))) == ["0.0.0.0", "::"])
+            #expect(rules.map(Self.description(of:)).contains("192.0.2.0/24"))
+        }
+
+        @Test
+        func leavesDNSQueriesOutWhenNothingRedirectsThem() throws {
+            let settings = try Self.settings(for: WgQuickFixtures.multiplePeers)
+
+            #expect((settings.includedNetworkRules ?? []).compactMap(Self.dnsQueryHost(of:)).isEmpty)
+        }
+
+        @Test
         func excludesTheEndpointOfTheTunnel() throws {
             let settings = try Self.settings(for: WgQuickFixtures.minimal)
 
@@ -56,6 +75,13 @@
             let configuration = try #require(WgQuickConfigurationParser.parse(text).configuration)
             let plan = TransparentProxyNetworkPlan(for: configuration, resolvedEndpointAddresses: [endpointAddress])
             return TransparentProxyNetworkSettingsMapper.settings(for: plan)
+        }
+
+        private static func dnsQueryHost(of rule: NENetworkRule) -> String? {
+            guard case .hostPort(let host, let port) = rule.matchRemoteHostOrNetworkEndpoint, port == 53 else {
+                return nil
+            }
+            return "\(host)"
         }
 
         private static func description(of rule: NENetworkRule) -> String {
