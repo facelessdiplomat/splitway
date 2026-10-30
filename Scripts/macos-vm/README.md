@@ -36,6 +36,7 @@ Scripts/macos-vm.sh exec systemextensionsctl list
 - `install <рабочая копия>` собирает приложение из другой рабочей копии, например ветки спайка.
 - Журнал ВМ читается через `exec`, например `Scripts/macos-vm.sh exec log show --last 5m --predicate 'process == "sysextd"'`.
 - `Scripts/macos-vm.sh screenshot <файл>` сохраняет снимок экрана ВМ: так видно окна приложения и системные запросы.
+- `Scripts/macos-vm.sh leak-test <сценарий>` ставит в ВМ утилиту RoutingProbe и запускает там тесты утечек ([Scripts/RoutingProbe](../RoutingProbe/README.md)).
 - Тестовый конфиг попадает в ВМ потоком, минуя репозиторий: `tart exec -i splitway-macos26 /bin/sh -c 'umask 077; cat > "$HOME/Desktop/cz-prg.conf"' < "$SPLITWAY_TEST_TUNNEL_CONFIG"`. После проверки ВМ возвращается к чистому состоянию: удалённый файл остался бы в свободных блоках диска, а чистое состояние ключа не видело.
 - После перезагрузки ВМ macOS сама открывает приложение без аргументов. Чтобы передать аргументы, приложение сначала закрывают: `Scripts/macos-vm.sh exec pkill -x Splitway`.
 
