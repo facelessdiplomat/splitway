@@ -53,7 +53,7 @@ struct PacketTunnelComposition: Sendable {
         #endif
     }
 
-    private static func logDirectory(in bundle: Bundle) -> URL {
+    static func logDirectory(in bundle: Bundle) -> URL {
         let groupIdentifier = bundle.object(forInfoDictionaryKey: appGroupInfoKey) as? String
         let container = groupIdentifier.flatMap { identifier in
             FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)

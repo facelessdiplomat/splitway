@@ -222,6 +222,10 @@ targets:
       - package: SplitwayKit
         product: SecretDelivery
       - package: SplitwayKit
+        product: TransparentProxy
+      - package: SplitwayKit
+        product: TransparentProxyInfrastructure
+      - package: SplitwayKit
         product: SecretDeliveryInfrastructure
       - package: TunnelCore
         product: TunnelCoreAdapter
