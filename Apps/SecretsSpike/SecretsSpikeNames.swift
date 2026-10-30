@@ -1,6 +1,7 @@
 enum SecretsSpikeNames {
     static let subsystem = "com.facelessdiplomat.splitway.spike"
     static let launchArgument = "-SplitwaySecretsSpike"
+    static let loadOnlyArgument = "-SplitwaySecretsSpikeLoadOnly"
     static let keychainService = "Splitway SP-5"
     static let keychainAccount = "spike"
     static let providerConfigurationKey = "spikeSecret"

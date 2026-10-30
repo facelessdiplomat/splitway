@@ -8,9 +8,15 @@ enum SecretsSpikeRunner {
     private static let systemExtensionsDirectory = "Contents/Library/SystemExtensions"
     private static let systemExtensionSuffix = ".systemextension"
     private static let logger = Logger(subsystem: SecretsSpikeNames.subsystem, category: "Application")
+    private static var connection: NSXPCConnection?
 
     static func runIfRequested() {
-        guard ProcessInfo.processInfo.arguments.contains(SecretsSpikeNames.launchArgument) else { return }
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains(SecretsSpikeNames.loadOnlyArgument) {
+            deliverOverConnection(nil)
+            return
+        }
+        guard arguments.contains(SecretsSpikeNames.launchArgument) else { return }
         Task {
             await run()
         }
@@ -36,7 +42,7 @@ enum SecretsSpikeRunner {
         return networkExtension?[SecretsSpikeNames.machServiceNameKey] as? String
     }
 
-    private static func deliverOverConnection(_ secret: Data) {
+    private static func deliverOverConnection(_ secret: Data?) {
         let logger = Self.logger
         guard let machServiceName = extensionMachServiceName else {
             logger.error("SP-5 no Mach service name in the extension bundle")
@@ -45,6 +51,7 @@ enum SecretsSpikeRunner {
         let connection = NSXPCConnection(machServiceName: machServiceName, options: [])
         connection.remoteObjectInterface = NSXPCInterface(with: (any SecretsSpikeService).self)
         connection.resume()
+        Self.connection = connection
         let proxy = connection.remoteObjectProxyWithErrorHandler { error in
             logger.error("SP-5 connection error: \(String(describing: error), privacy: .public)")
         }
@@ -55,8 +62,10 @@ enum SecretsSpikeRunner {
         service.describeProcess { description in
             logger.log("SP-5 extension process: \(description, privacy: .public)")
         }
-        service.storeInSystemKeychain(secret) { status in
-            logger.log("SP-5 variant B store reply: \(status, privacy: .public)")
+        if let secret {
+            service.storeInSystemKeychain(secret) { status in
+                logger.log("SP-5 variant B store reply: \(status, privacy: .public)")
+            }
         }
         service.loadFromSystemKeychain { loaded, status in
             let fingerprint = loaded.map(SecretFingerprint.of) ?? "none"
