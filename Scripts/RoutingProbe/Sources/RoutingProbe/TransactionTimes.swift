@@ -6,8 +6,10 @@ struct TransactionTimes: Sendable {
     let secureConnection: TimeInterval?
     let firstByte: TimeInterval?
     let transfer: TimeInterval?
+    let networkProtocol: String
 
     init(_ transaction: URLSessionTaskTransactionMetrics) {
+        networkProtocol = transaction.networkProtocolName ?? "unknown"
         domainLookup = Self.interval(transaction.domainLookupStartDate, transaction.domainLookupEndDate)
         connection = Self.interval(
             transaction.connectStartDate, transaction.secureConnectionStartDate ?? transaction.connectEndDate)

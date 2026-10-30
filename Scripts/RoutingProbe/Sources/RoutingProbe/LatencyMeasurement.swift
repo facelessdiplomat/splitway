@@ -33,6 +33,7 @@ struct LatencyMeasurement {
             + " tcp-ms=\(MeasurementFormat.milliseconds(times.connection))"
             + " tls-ms=\(MeasurementFormat.milliseconds(times.secureConnection))"
             + " first-byte-ms=\(MeasurementFormat.milliseconds(times.firstByte))"
+            + " protocol=\(times.networkProtocol)"
     }
 
     private static func summary(of samples: [TransactionTimes]) -> String {
