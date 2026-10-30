@@ -22,6 +22,7 @@ let package = Package(
             name: "TunnelCoreAdapter",
             dependencies: [
                 "TunnelCoreFramework",
+                .product(name: "SharedKernel", package: "SplitwayKit"),
                 .product(name: "TunnelEngine", package: "SplitwayKit"),
                 .product(name: "Diagnostics", package: "SplitwayKit"),
             ],
@@ -32,6 +33,7 @@ let package = Package(
             name: "TunnelCoreAdapterTests",
             dependencies: [
                 "TunnelCoreAdapter",
+                .product(name: "SharedKernel", package: "SplitwayKit"),
                 .product(name: "TunnelEngine", package: "SplitwayKit"),
                 .product(name: "TunnelConfiguration", package: "SplitwayKit"),
                 .product(name: "Diagnostics", package: "SplitwayKit"),

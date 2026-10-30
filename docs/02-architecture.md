@@ -203,28 +203,33 @@ Go-модуль разбит на пакеты по фичам:
 | `usernet` | WireGuard поверх gVisor netstack: `DialTCP`, UDP-сокеты, DNS через туннель (выбор приложений и DNS-прокси на macOS) |
 | `servicerouting` | Пул фиктивных адресов, перехват DNS выбранных доменов, трансляция адресов (выбор сервисов на iOS) |
 | `logbridge` | Передача логов wireguard-go в Swift |
+| `internal/testpeer`, `testpeer` | Пир WireGuard с эхо-серверами и DNS для тестов: пакет для Go-тестов, утилита — для тестов Swift. В ядро не входит |
 
 Go-пакеты документируются так же, как Swift-фичи: например, `docs/features/ServiceRouting.md` описывает `servicerouting`.
 
-C API (черновик, фиксируется в задаче M2-02):
+C API (действующие функции описаны в [TunnelEngine](features/TunnelEngine.md) и [UserspaceNetwork](features/UserspaceNetwork.md); `tc_fd_tunnel_set_service_routing` появится в M5):
 
 ```
 tc_version() -> *char
-tc_fd_tunnel_start(engine_kind, uapi_config, tun_fd, log_callback) -> handle
+tc_fd_tunnel_start(tun_fd, uapi_config, &handle) -> status
 tc_fd_tunnel_set_service_routing(handle, routing_plan_json) -> status
-tc_usernet_start(engine_kind, uapi_config, addresses, dns_servers, mtu, log_callback) -> handle
-tc_usernet_dial_tcp(handle, host, port, callbacks) -> connection
-tc_usernet_open_udp(handle, callbacks) -> socket
-tc_connection_write(connection, bytes, length) -> status
-tc_connection_close(connection, mode)
+tc_usernet_start(uapi_config, addresses, dns_servers, mtu, &handle) -> status
+tc_usernet_dial_tcp(handle, address, port, timeout_ms, &connection) -> status
+tc_usernet_dial_udp(handle, address, port, &connection) -> status
+tc_usernet_lookup_host(handle, name, timeout_ms, &addresses) -> status
+tc_connection_start_receiving(connection, callbacks, read_bytes, initial_credit) -> status
+tc_connection_write(connection, bytes, length, &written) -> status
+tc_connection_grant(connection, bytes) -> status
+tc_connection_close(connection, mode) -> status
 tc_tunnel_update_config(handle, uapi_config) -> status
-tc_tunnel_get_config(handle) -> *char
-tc_tunnel_bump_sockets(handle)
-tc_tunnel_stop(handle)
+tc_tunnel_get_config(handle, &config) -> status
+tc_tunnel_bump_sockets(handle) -> status
+tc_tunnel_stop(handle) -> status
+tc_set_log_callback(callback, context)
 tc_free(pointer)
 ```
 
-Данные из Go в Swift передаются через C-callback с пулом буферов, из Swift в Go — указателем на байты без лишних копий. Это «горячий путь» (раздел 10).
+Данные из Go в Swift передаются через C-callback из буфера в памяти C, из Swift в Go — указателем на байты без лишних копий. Это «горячий путь» (раздел 10).
 
 ## 10. Производительность
 

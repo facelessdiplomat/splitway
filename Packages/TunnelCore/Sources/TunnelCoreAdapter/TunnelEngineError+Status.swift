@@ -5,8 +5,9 @@ extension TunnelEngineError {
     init?(status: TCStatus) {
         switch status {
         case .OK: return nil
-        case .invalidArgument, .internalFailure: self = .internalFailure
-        case .unknownHandle: self = .deviceNotRunning
+        case .invalidArgument, .internalFailure, .connectionFailed, .timedOut, .lookupFailed, .connectionClosed:
+            self = .internalFailure
+        case .unknownHandle, .networkStopped: self = .deviceNotRunning
         case .tunnelInterfaceUnavailable: self = .tunnelInterfaceUnavailable
         case .configurationRejected: self = .configurationRejected
         case .deviceUnavailable: self = .socketsUnavailable

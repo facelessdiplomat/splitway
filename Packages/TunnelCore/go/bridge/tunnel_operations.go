@@ -2,36 +2,46 @@ package main
 
 import (
 	"golang.zx2c4.com/wireguard/device"
-	"splitway/tunnelcore/fdtunnel"
 	"splitway/tunnelcore/logbridge"
 )
 
-type tunnelStarter func(logger *device.Logger) (*fdtunnel.Tunnel, error)
+type runningDevice interface {
+	Apply(configuration string) error
+	Configuration() (string, error)
+	BumpSockets() error
+	Stop()
+}
 
-var runningTunnels = newTunnelRegistry()
+type deviceStarter func(logger *device.Logger) (runningDevice, error)
 
-func startTunnel(start tunnelStarter) (int32, tunnelStatus) {
-	tunnel, err := start(logbridge.DeviceLogger(forwardLog))
+var runningDevices = newHandleTable[runningDevice]()
+
+func startTunnel(start deviceStarter) (int32, tunnelStatus) {
+	return startDevice(start, statusOf)
+}
+
+func startDevice(start deviceStarter, statusOfFailure func(error) tunnelStatus) (int32, tunnelStatus) {
+	started, err := start(logbridge.DeviceLogger(forwardLog))
 	if err != nil {
-		return 0, statusOf(err)
+		return 0, statusOfFailure(err)
 	}
-	return runningTunnels.add(tunnel), statusOK
+	return runningDevices.add(started), statusOK
 }
 
 func updateTunnelConfiguration(handle int32, configuration string) tunnelStatus {
-	tunnel, found := runningTunnels.tunnel(handle)
+	running, found := runningDevices.value(handle)
 	if !found {
 		return statusUnknownHandle
 	}
-	return statusOf(tunnel.Apply(configuration))
+	return statusOf(running.Apply(configuration))
 }
 
 func tunnelConfiguration(handle int32) (string, tunnelStatus) {
-	tunnel, found := runningTunnels.tunnel(handle)
+	running, found := runningDevices.value(handle)
 	if !found {
 		return "", statusUnknownHandle
 	}
-	configuration, err := tunnel.Configuration()
+	configuration, err := running.Configuration()
 	if err != nil {
 		return "", statusInternalFailure
 	}
@@ -39,21 +49,21 @@ func tunnelConfiguration(handle int32) (string, tunnelStatus) {
 }
 
 func bumpTunnelSockets(handle int32) tunnelStatus {
-	tunnel, found := runningTunnels.tunnel(handle)
+	running, found := runningDevices.value(handle)
 	if !found {
 		return statusUnknownHandle
 	}
-	if err := tunnel.BumpSockets(); err != nil {
+	if err := running.BumpSockets(); err != nil {
 		return statusDeviceUnavailable
 	}
 	return statusOK
 }
 
 func stopTunnel(handle int32) tunnelStatus {
-	tunnel, found := runningTunnels.remove(handle)
+	running, found := runningDevices.remove(handle)
 	if !found {
 		return statusUnknownHandle
 	}
-	tunnel.Stop()
+	running.Stop()
 	return statusOK
 }

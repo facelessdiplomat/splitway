@@ -18,7 +18,7 @@ sources_fingerprint() {
     {
         go version
         printf 'ios %s macos %s\n' "$minimum_ios_version" "$minimum_macos_version"
-        find "$go_module" "$interface_directory" "$package_root/Scripts" -type f \
+        find "$go_module" "$interface_directory" "$package_root/Scripts" -type f ! -path '*/testpeer/*' \
             \( \( -name '*.go' ! -name '*_test.go' \) -o -name 'go.mod' -o -name 'go.sum' \
             -o -name '*.h' -o -name '*.modulemap' -o -name '*.sh' \) -print0 \
             | sort -z \
