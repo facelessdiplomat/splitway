@@ -75,6 +75,9 @@ done
 step "SplitwayKit tests"
 swift test --package-path Packages/SplitwayKit --quiet
 
+step "RoutingProbe tests"
+swift test --package-path Scripts/RoutingProbe --quiet
+
 step "TunnelCore test peer"
 Packages/TunnelCore/Scripts/build-test-peer.sh
 
