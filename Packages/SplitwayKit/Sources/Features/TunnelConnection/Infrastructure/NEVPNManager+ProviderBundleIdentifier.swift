@@ -1,6 +1,6 @@
 import NetworkExtension
 
-extension NETunnelProviderManager {
+extension NEVPNManager {
     var providerBundleIdentifier: String? {
         (protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier
     }

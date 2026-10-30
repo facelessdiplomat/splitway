@@ -11,9 +11,23 @@ public struct TunnelConnectionAssembly: Sendable {
             controller
         }
     ) {
-        controller = wrap(PacketTunnelSlotController(providerBundleIdentifier: providerBundleIdentifier))
+        controller = wrap(Self.systemSlots(providerBundleIdentifier: providerBundleIdentifier))
         coordinator = ConnectionCoordinator(controller: controller)
         messenger = PacketTunnelSlotMessenger(providerBundleIdentifier: providerBundleIdentifier)
+    }
+
+    private static func systemSlots(providerBundleIdentifier: String) -> any SystemTunnelController {
+        let packetTunnel = ProviderSlotController<PacketTunnelSlot>(providerBundleIdentifier: providerBundleIdentifier)
+        #if os(macOS)
+            return SlotSelectingTunnelController(
+                packetTunnel: packetTunnel,
+                transparentProxy: ProviderSlotController<TransparentProxySlot>(
+                    providerBundleIdentifier: providerBundleIdentifier
+                )
+            )
+        #else
+            return packetTunnel
+        #endif
     }
 
     public var activateTunnel: ActivateTunnelUseCase {

@@ -262,7 +262,7 @@ let features: [FeatureModule] = [
     FeatureModule(
         name: "TunnelConnection",
         layers: [.core, .infrastructure, .presentation],
-        coreDependencies: ["TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
+        coreDependencies: ["AppRouting", "TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
         infrastructureDependencies: ["ProviderMessagingInfrastructure"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         providesTestSupport: true
