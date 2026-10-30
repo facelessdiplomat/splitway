@@ -3,6 +3,7 @@ import DiagnosticsInfrastructure
 import Foundation
 import PacketTunnel
 import PacketTunnelInfrastructure
+import ProviderMessaging
 import SecretDeliveryInfrastructure
 import SharedKernel
 import TransparentProxy
@@ -14,6 +15,7 @@ struct TransparentProxyComposition: Sendable {
 
     let session: TransparentProxySession
     let loadActiveTunnel: LoadActiveTunnelUseCase
+    let messageDispatcher: ProviderMessageDispatcher
     let log: LogRecorder
 
     init(bundle: Bundle = .main) {
@@ -39,5 +41,6 @@ struct TransparentProxyComposition: Sendable {
             pathMonitor: NetworkPathObserver()
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: SystemKeychainSecretStore())
+        messageDispatcher = ProviderMessageDispatcher(handler: TransparentProxyMessageHandler(session: session))
     }
 }

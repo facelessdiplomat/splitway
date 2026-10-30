@@ -28,14 +28,13 @@ public struct TransparentProxyStarter: Sendable {
             for: configuration,
             resolvedEndpointAddresses: endpoints.values.map(\.address)
         )
-        guard let snapshot = RoutingPolicySnapshot(policy: tunnel.routingPolicy, tunnelNetworks: plan.includedNetworks)
-        else { throw .routingModeUnsupported }
+        let decider = try Self.decider(for: tunnel.routingPolicy, plan: plan)
         let network = try startNetwork(for: configuration, endpoints: endpoints)
         return TransparentProxyRuntime(
             network: network,
             configuration: configuration,
             plan: plan,
-            decider: FlowRoutingDecider(snapshot: snapshot),
+            decider: decider,
             names: HostnameResolutionPolicy(
                 tunnelNetworks: plan.includedNetworks,
                 resolvesNamesThroughTunnel: !configuration.interface.dns.servers.isEmpty
@@ -45,6 +44,16 @@ public struct TransparentProxyStarter: Sendable {
                     network.address.family == .ipv6
                 })
         )
+    }
+
+    public static func decider(
+        for policy: RoutingPolicy,
+        plan: TransparentProxyNetworkPlan
+    ) throws(TransparentProxyError) -> FlowRoutingDecider {
+        guard policy.mode.kind == .selectedApplications,
+            let snapshot = RoutingPolicySnapshot(policy: policy, tunnelNetworks: plan.includedNetworks)
+        else { throw .routingModeUnsupported }
+        return FlowRoutingDecider(snapshot: snapshot)
     }
 
     public func stop(_ runtime: TransparentProxyRuntime) {

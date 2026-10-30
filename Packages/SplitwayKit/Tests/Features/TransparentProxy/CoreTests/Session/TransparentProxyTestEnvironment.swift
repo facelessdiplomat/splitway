@@ -112,6 +112,20 @@ struct TransparentProxyTestEnvironment {
         )
     }
 
+    static func selectedMail() throws -> RoutingMode {
+        .selectedApplications(
+            ApplicationSelection([
+                try ApplicationIdentity(
+                    kind: .application,
+                    displayName: "Mail Client",
+                    path: "/Applications/Mail Client.app",
+                    signingIdentifiers: ["com.example.mail"],
+                    teamIdentifier: "MAIL123456"
+                )
+            ])
+        )
+    }
+
     static func request(from process: ProcessInstance) throws -> ProxiedFlowRequest {
         ProxiedFlowRequest(
             auditToken: try AuditToken.fixture(processIdentifier: process.identifier, version: process.version),

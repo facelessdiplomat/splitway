@@ -1,5 +1,7 @@
+import AppRouting
 import PacketTunnel
 import Synchronization
+import TunnelEngine
 
 public final class TransparentProxySession: Sendable {
     private let starter: TransparentProxyStarter
@@ -18,6 +20,24 @@ public final class TransparentProxySession: Sendable {
         router.activate(runtime)
         observePathChanges(of: runtime)
         return runtime.plan
+    }
+
+    public var isRunning: Bool {
+        router.currentRuntime != nil
+    }
+
+    public func apply(_ policy: RoutingPolicy) throws(TransparentProxyError) {
+        guard let runtime = router.currentRuntime else { throw .notRunning }
+        router.replaceDecider(with: try TransparentProxyStarter.decider(for: policy, plan: runtime.plan))
+    }
+
+    public func runtimeStatistics() throws(TransparentProxyError) -> RuntimeStatistics {
+        guard let runtime = router.currentRuntime else { throw .notRunning }
+        do {
+            return try runtime.network.runtimeStatistics()
+        } catch {
+            throw .engineFailed(error)
+        }
     }
 
     public func handleStream(_ flow: any ProxiedStreamFlow, request: ProxiedFlowRequest) -> Bool {
