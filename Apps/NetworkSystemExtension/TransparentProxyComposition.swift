@@ -15,6 +15,7 @@ struct TransparentProxyComposition: Sendable {
     let session: TransparentProxySession
     let loadActiveTunnel: LoadActiveTunnelUseCase
     let log: LogRecorder
+    let attributionProbe: FlowAttributionProbe
 
     init(bundle: Bundle = .main) {
         log = LogRecorder(
@@ -40,5 +41,6 @@ struct TransparentProxyComposition: Sendable {
             pathMonitor: NetworkPathObserver()
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: SystemKeychainSecretStore())
+        attributionProbe = FlowAttributionProbe(log: log)
     }
 }

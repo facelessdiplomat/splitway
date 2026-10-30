@@ -22,17 +22,34 @@ final class TransparentProxyProvider: NETransparentProxyProvider, NEAppProxyUDPF
     }
 
     override func handleNewFlow(_ flow: NEAppProxyFlow) -> Bool {
-        guard let streamFlow = flow as? NEAppProxyTCPFlow, let request = ProxiedFlowRequest(streamFlow) else {
+        let probe = composition.attributionProbe
+        guard let streamFlow = flow as? NEAppProxyTCPFlow else {
+            probe.record(probe.description(of: flow, transport: "other", remoteEndpoint: "none"), isHandled: false)
             return false
         }
-        return composition.session.handleStream(AppProxyStreamFlow(streamFlow), request: request)
+        let description = probe.description(
+            of: streamFlow, transport: "tcp", remoteEndpoint: "\(streamFlow.remoteFlowEndpoint)")
+        guard let request = ProxiedFlowRequest(streamFlow) else {
+            probe.record(description, isHandled: false)
+            return false
+        }
+        let isHandled = composition.session.handleStream(AppProxyStreamFlow(streamFlow), request: request)
+        probe.record(description, isHandled: isHandled)
+        return isHandled
     }
 
     func handleNewUDPFlow(_ flow: NEAppProxyUDPFlow, initialRemoteFlowEndpoint remoteEndpoint: Network.NWEndpoint)
         -> Bool
     {
-        guard let request = ProxiedFlowRequest(flow, initialRemoteEndpoint: remoteEndpoint) else { return false }
-        return composition.session.handleDatagrams(AppProxyDatagramFlow(flow), request: request)
+        let probe = composition.attributionProbe
+        let description = probe.description(of: flow, transport: "udp", remoteEndpoint: "\(remoteEndpoint)")
+        guard let request = ProxiedFlowRequest(flow, initialRemoteEndpoint: remoteEndpoint) else {
+            probe.record(description, isHandled: false)
+            return false
+        }
+        let isHandled = composition.session.handleDatagrams(AppProxyDatagramFlow(flow), request: request)
+        probe.record(description, isHandled: isHandled)
+        return isHandled
     }
 
     private nonisolated(nonsending) func startSession() async throws {
