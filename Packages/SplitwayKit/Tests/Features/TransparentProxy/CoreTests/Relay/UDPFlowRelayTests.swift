@@ -146,6 +146,21 @@ struct UDPFlowRelayTests {
         await connection.state.wait { snapshot in snapshot.grantedByteCount == 5 }
     }
 
+    @Test
+    func neverCallsTheFlowBackFromInsideAFailedReplyCompletion() async throws {
+        let flow = ScriptedDatagramFlow(writeFailure: .aborted)
+        let (network, finished) = (InMemoryUserspaceNetwork(), FinishSignal())
+        try Self.relay(flow: flow, network: network).start(onFinish: finished.callAsFunction)
+        flow.send([Self.datagram("one", to: try RelayFixtures.endpoint(7))])
+        let connection = await Self.receivingConnection(0, of: network)
+
+        connection.deliver(Array("reply".utf8))
+
+        await finished.wait()
+        #expect(flow.state.current.reentrantCallCount == 0)
+        #expect(flow.state.current.readClosings == [.aborted])
+    }
+
     private static func relay(
         flow: ScriptedDatagramFlow,
         network: InMemoryUserspaceNetwork,

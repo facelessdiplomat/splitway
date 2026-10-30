@@ -35,7 +35,7 @@
                         }
                     }
                     if datagrams.isEmpty, !received.isEmpty {
-                        self.readDatagrams(completion: completion)
+                        DispatchQueue.global(qos: .userInitiated).async { self.readDatagrams(completion: completion) }
                     } else {
                         completion(.success(datagrams))
                     }

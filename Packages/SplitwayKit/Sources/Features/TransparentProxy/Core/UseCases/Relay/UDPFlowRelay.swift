@@ -87,7 +87,7 @@ public final class UDPFlowRelay: Sendable {
         guard isActive else { return }
         flow.writeDatagrams([datagram]) { error in
             if let error {
-                self.finish(with: error)
+                self.queue.async { self.finish(with: error) }
             } else {
                 association.grant(datagram.payload.count)
             }

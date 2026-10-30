@@ -54,7 +54,7 @@ public final class TCPFlowRelay: Sendable {
         guard progress.withLock({ progress in progress.beginAppWrite(at: now) }) else { return }
         flow.write(data) { error in
             if let error {
-                self.abort(with: error)
+                self.queue.async { self.abort(with: error) }
             } else {
                 self.completeAppWrite(of: data.count)
             }
@@ -142,7 +142,7 @@ public final class TCPFlowRelay: Sendable {
         }
         connection?.grant(byteCount)
         if closesAppWrite {
-            closeAppWrite()
+            queue.async { self.closeAppWrite() }
         }
     }
 
