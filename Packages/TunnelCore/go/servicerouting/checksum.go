@@ -13,19 +13,14 @@ const (
 	transmittedZeroChecksum  = 0xFFFF
 	foldedSumMask            = 0xFFFF
 	foldShift                = 16
+	byteShift                = 8
 )
 
 func replaceAddress(packet []byte, layout packetLayout, offset int, replacement netip.Addr) {
 	var previous [ipv6AddressByteCount]byte
 	address := packet[offset : offset+layout.addressByteCount]
 	copy(previous[:], address)
-	if layout.isIPv4 {
-		next := replacement.As4()
-		copy(address, next[:])
-	} else {
-		next := replacement.As16()
-		copy(address, next[:])
-	}
+	writeAddress(packet, layout, offset, replacement)
 	delta := checksumDelta(previous[:layout.addressByteCount], address)
 	if layout.isIPv4 {
 		adjustChecksum(packet[ipv4HeaderChecksumOffset:], delta)
@@ -33,6 +28,47 @@ func replaceAddress(packet []byte, layout packetLayout, offset int, replacement 
 	if layout.hasPorts {
 		adjustTransportChecksum(packet, layout, delta)
 	}
+}
+
+func writeAddress(packet []byte, layout packetLayout, offset int, address netip.Addr) {
+	if layout.isIPv4 {
+		bytes := address.As4()
+		copy(packet[offset:], bytes[:])
+		return
+	}
+	bytes := address.As16()
+	copy(packet[offset:], bytes[:])
+}
+
+func refreshChecksums(packet []byte, layout packetLayout) {
+	if layout.isIPv4 {
+		binary.BigEndian.PutUint16(packet[ipv4HeaderChecksumOffset:], 0)
+		binary.BigEndian.PutUint16(packet[ipv4HeaderChecksumOffset:], ^fold(onesComplementSum(packet[:layout.transportOffset], 0)))
+	}
+	offset := tcpChecksumOffset
+	if layout.protocol == protocolUDP {
+		offset = udpChecksumOffset
+	}
+	segment := packet[layout.transportOffset:layout.packetEnd]
+	binary.BigEndian.PutUint16(segment[offset:], 0)
+	addresses := packet[layout.sourceOffset : layout.destinationOffset+layout.addressByteCount]
+	pseudoHeader := onesComplementSum(addresses, 0) + uint32(layout.protocol) + uint32(len(segment))
+	checksum := ^fold(onesComplementSum(segment, pseudoHeader))
+	if layout.protocol == protocolUDP && checksum == 0 {
+		checksum = transmittedZeroChecksum
+	}
+	binary.BigEndian.PutUint16(segment[offset:], checksum)
+}
+
+func onesComplementSum(data []byte, initial uint32) uint32 {
+	sum := initial
+	for index := 0; index+1 < len(data); index += checksumWordByteCount {
+		sum += uint32(binary.BigEndian.Uint16(data[index:]))
+	}
+	if len(data)%checksumWordByteCount == 1 {
+		sum += uint32(data[len(data)-1]) << byteShift
+	}
+	return sum
 }
 
 func checksumDelta(previous, replacement []byte) uint32 {
