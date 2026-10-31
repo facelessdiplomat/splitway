@@ -32,13 +32,13 @@ NetworkExtension
 ├── NEProviderClasses
 │   ├── com.apple.networkextension.packet-tunnel → $(PRODUCT_MODULE_NAME).PacketTunnelProvider
 │   └── com.apple.networkextension.app-proxy     → $(PRODUCT_MODULE_NAME).TransparentProxyProvider
-└── NEMachServiceName → 8625S77CSU.com.facelessdiplomat.splitway.network-extension
+└── NEMachServiceName → 8625S77CSU.com.facelessdiplomat.splitway.network-extension.$(CURRENT_PROJECT_VERSION)
 NSSystemExtensionUsageDescription → описание для одобрения (без него sysextd не пропускает сетевое расширение)
 SplitwayTeamIdentifier, SplitwayClientBundleIdentifier → требование к клиенту XPC доставки секретов
 SplitwayAppGroupIdentifier → App Group для журнала
 ```
 
-Приложение находит Mach-сервис расширения по ключу `SplitwayExtensionMachServiceName` своего `Info.plist`.
+Приложение находит Mach-сервис расширения по ключу `SplitwayExtensionMachServiceName` своего `Info.plist`. В обоих именах — номер сборки, чтобы задание `launchd` обновлённого расширения не делило имя со старым ([SecretDelivery](features/SecretDelivery.md)).
 
 | Entitlement | Приложение | Расширение |
 |---|---|---|
