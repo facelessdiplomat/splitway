@@ -169,7 +169,7 @@ flowchart LR
 - `BenchmarkUploadThroughTheTunnel` — клиент пишет в приёмник пира без ответа;
 - `BenchmarkDownloadThroughTheTunnel` — источник пира (`testpeer.SourcePort`) пишет без остановки, клиент читает с кредитом. Кроме скорости он отчитывается метрикой `acks/segment`: сколько пакетов клиент отправил пиру на один пакет данных. Пакеты считает устройство пира (`PacketCounts`).
 
-`Scripts/check.sh --bench` (или `Scripts/benchmark.sh`) запускает их пять раз по 2 с и сравнивает медианы с базовой линией `usernet/testdata/benchmark-baseline.txt` (`Scripts/benchmark-check`). Скорость и время на операцию хуже базовой линии больше чем на 10 % — ошибка. Для `acks/segment` допуск 35 %: доля подтверждений зависит от планировщика и между прогонами одного кода меняется на 15 %. Новая базовая линия пишется `Scripts/benchmark.sh --write-baseline`.
+`Scripts/check.sh --bench` (или `Scripts/benchmark.sh`) запускает их пять раз по 2 с и сравнивает медианы с базовой линией `usernet/testdata/benchmark-baseline.txt` (`Scripts/benchmark-check`). Скорость и время на операцию хуже базовой линии больше чем на 10 % — ошибка. Для `acks/segment` допуск 35 %: доля подтверждений зависит от планировщика и между прогонами одного кода меняется на 15 %. Новая базовая линия пишется `Scripts/benchmark.sh --write-baseline`. Тот же скрипт сравнивает бенчмарки `servicerouting` с их собственной базовой линией ([ServiceRouting](ServiceRouting.md)), и `--write-baseline` переписывает обе.
 
 Запуск: `go test ./...` в `Packages/TunnelCore/go`; бенчмарк — `go test -run '^$' -bench . ./usernet/`; Swift — `Packages/TunnelCore/Scripts/build-test-peer.sh` и `swift test --package-path Packages/TunnelCore`.
 
