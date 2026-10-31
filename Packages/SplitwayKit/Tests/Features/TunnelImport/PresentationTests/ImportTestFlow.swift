@@ -16,7 +16,8 @@ final class ImportTestFlow {
 
     func model(
         files: ImportFileBatch = ImportFileBatch(payloads: [], unreadableFileNames: []),
-        clipboard: String? = nil
+        clipboard: String? = nil,
+        fileReader: (any ImportFileReader)? = nil
     ) throws -> TunnelImportModel {
         TunnelImportModel(
             actions: TunnelImportActions(
@@ -30,7 +31,7 @@ final class ImportTestFlow {
                     )
                 ),
                 confirmImport: ConfirmImportUseCase(records: records, secrets: secrets),
-                fileReader: FakeImportFileReader(batch: files),
+                fileReader: fileReader ?? FakeImportFileReader(batch: files),
                 clipboard: FakeClipboard(contents: clipboard),
                 cameraAccess: FakeCameraAccess(.authorized),
                 qrCodeDecoder: StubQRCodeDecoder()

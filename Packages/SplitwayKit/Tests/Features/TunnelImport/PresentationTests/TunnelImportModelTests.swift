@@ -7,6 +7,10 @@ import TunnelImportPresentation
 @MainActor
 @Suite
 struct TunnelImportModelTests {
+    private static let officeAndHome = NamedImportFileReader(
+        contentsByName: ["Office.conf": WgQuickFixtures.minimal, "Home.conf": WgQuickFixtures.full]
+    )
+
     @Test
     func previewsPickedFiles() async throws {
         let files = ImportFileBatch(
@@ -21,6 +25,51 @@ struct TunnelImportModelTests {
         #expect(
             model.preview?.failures == [ImportSourceFailure(source: .file(name: "Locked.conf"), reason: .unreadable)]
         )
+    }
+
+    @Test
+    func addsFilesOpenedWhileThePreviewIsOpen() async throws {
+        let model = try ImportTestFlow().model(fileReader: Self.officeAndHome)
+
+        await model.importFiles([URL(filePath: "/Office.conf")])
+        await model.importFiles([URL(filePath: "/Home.conf")])
+
+        #expect(model.preview?.rows.map(\.name) == ["Office", "Home"])
+    }
+
+    @Test
+    func collectsFilesOpenedTogetherIntoOnePreview() async throws {
+        let model = try ImportTestFlow().model(fileReader: Self.officeAndHome)
+
+        await withTaskGroup(of: Void.self) { group in
+            for name in ["Office.conf", "Home.conf"] {
+                group.addTask { await model.importFiles([URL(filePath: "/" + name)]) }
+            }
+        }
+
+        #expect(Set(model.preview?.rows.map(\.name) ?? []) == ["Office", "Home"])
+    }
+
+    @Test
+    func startsANewPreviewAfterTheOpenOneWasImported() async throws {
+        let model = try ImportTestFlow().model(fileReader: Self.officeAndHome)
+        await model.importFiles([URL(filePath: "/Office.conf")])
+        await model.preview?.confirm()
+
+        await model.importFiles([URL(filePath: "/Home.conf")])
+
+        #expect(model.preview?.rows.map(\.name) == ["Home"])
+    }
+
+    @Test
+    func startsANewPreviewAfterTheOpenOneWasDismissed() async throws {
+        let model = try ImportTestFlow().model(fileReader: Self.officeAndHome)
+        await model.importFiles([URL(filePath: "/Office.conf")])
+        model.preview = nil
+
+        await model.importFiles([URL(filePath: "/Home.conf")])
+
+        #expect(model.preview?.rows.map(\.name) == ["Home"])
     }
 
     @Test

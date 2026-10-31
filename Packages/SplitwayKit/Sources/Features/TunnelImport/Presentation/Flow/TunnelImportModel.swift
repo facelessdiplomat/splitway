@@ -11,6 +11,8 @@ public final class TunnelImportModel {
     public private(set) var alert: TunnelImportAlert?
     public var qrScanner: QRScannerModel?
     private var scannedTexts: [String] = []
+    private var previewedBatch = ImportFileBatch.empty
+    private var requestedBatch: ImportFileBatch?
 
     private let actions: TunnelImportActions
     private let didImport: @MainActor () async -> Void
@@ -33,7 +35,7 @@ public final class TunnelImportModel {
 
     public func importFiles(_ files: [URL]) async {
         let batch = await actions.fileReader.read(files)
-        await showPreview(of: batch.payloads, unreadableFileNames: batch.unreadableFileNames)
+        await showPreview(of: batch)
     }
 
     public func importClipboard() async {
@@ -42,11 +44,11 @@ public final class TunnelImportModel {
             alert = .emptyClipboard
             return
         }
-        await showPreview(of: [.text(text)])
+        await showPreview(of: ImportFileBatch(payloads: [.text(text)], unreadableFileNames: []))
     }
 
     public func importDropped(_ payloads: [ImportPayload]) async {
-        await showPreview(of: payloads)
+        await showPreview(of: ImportFileBatch(payloads: payloads, unreadableFileNames: []))
     }
 
     public func scanQRCode() {
@@ -62,7 +64,7 @@ public final class TunnelImportModel {
         let texts = scannedTexts
         scannedTexts = []
         guard !texts.isEmpty else { return }
-        await showPreview(of: texts.map(ImportPayload.qrCode))
+        await showPreview(of: ImportFileBatch(payloads: texts.map(ImportPayload.qrCode), unreadableFileNames: []))
     }
 
     public func dismissAlert() {
@@ -74,11 +76,26 @@ public final class TunnelImportModel {
         qrScanner = nil
     }
 
-    private func showPreview(of payloads: [ImportPayload], unreadableFileNames: [String] = []) async {
+    private var acceptsMoreForOpenPreview: Bool {
+        guard let preview else { return false }
+        return preview.summary == nil && !preview.isImporting
+    }
+
+    private func showPreview(of addition: ImportFileBatch) async {
+        let base = requestedBatch ?? (acceptsMoreForOpenPreview ? previewedBatch : .empty)
+        let batch = base.appending(addition)
+        requestedBatch = batch
         do {
-            let prepared = try await actions.prepareImport.execute(payloads, unreadableFileNames: unreadableFileNames)
+            let prepared = try await actions.prepareImport.execute(
+                batch.payloads, unreadableFileNames: batch.unreadableFileNames
+            )
+            guard requestedBatch == batch else { return }
+            requestedBatch = nil
+            previewedBatch = batch
             preview = ImportPreviewModel(preview: prepared, confirmImport: actions.confirmImport, didImport: didImport)
         } catch {
+            guard requestedBatch == batch else { return }
+            requestedBatch = nil
             alert = .library(error)
         }
     }
