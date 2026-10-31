@@ -5,8 +5,6 @@ import Synchronization
 import TunnelEngine
 
 public final class ProxiedFlowRouter: Sendable {
-    private static let nameLookupTimeout = Duration.seconds(5)
-
     private struct ActiveRuntime: Sendable {
         let runtime: TransparentProxyRuntime
         let decider: FlowRoutingDecider
@@ -26,6 +24,7 @@ public final class ProxiedFlowRouter: Sendable {
     private let attribution: SuspiciousAttributionMonitor
     private let environment: RelayEnvironment
     private let policy: RelayPolicy
+    private let addresses: TunnelAddressResolver
     private let state = Mutex(State())
 
     public init(
@@ -38,6 +37,7 @@ public final class ProxiedFlowRouter: Sendable {
         self.attribution = attribution
         self.environment = environment
         self.policy = policy
+        addresses = TunnelAddressResolver(clock: environment.clock)
     }
 
     public var currentRuntime: TransparentProxyRuntime? {
@@ -126,18 +126,27 @@ public final class ProxiedFlowRouter: Sendable {
             )
             return true
         case .tunnel:
-            let relay = UDPFlowRelay(
-                flow: flow,
-                network: active.runtime.network,
-                policy: policy.udp,
-                environment: environment
-            ) { endpoint in
-                let destination = redirection.target(for: endpoint)
-                return UserspaceNetworkDestination(address: destination.address, port: destination.port)
-            }
-            track(relay, generation: active.generation)
+            startDatagramRelay(for: flow, redirectedBy: redirection, in: active)
             return true
         }
+    }
+
+    private func startDatagramRelay(
+        for flow: any ProxiedDatagramFlow,
+        redirectedBy redirection: DNSQueryRedirection,
+        in active: ActiveRuntime
+    ) {
+        let relay = UDPFlowRelay(
+            flow: flow,
+            network: active.runtime.network,
+            policy: policy.udp,
+            environment: environment,
+            replyObserver: addresses.recordingAnswers(into: active.runtime.answeredNames)
+        ) { endpoint in
+            let destination = redirection.target(for: endpoint)
+            return UserspaceNetworkDestination(address: destination.address, port: destination.port)
+        }
+        track(relay, generation: active.generation)
     }
 
     private func activeRuntime() -> ActiveRuntime? {
@@ -175,7 +184,7 @@ public final class ProxiedFlowRouter: Sendable {
         let relay = TCPFlowRelay(
             flow: flow,
             destination: UserspaceNetworkDestination(
-                address: isRedirected ? target.address : tunnelAddress(for: request, in: active.runtime),
+                address: isRedirected ? target.address : addresses.address(for: request, in: active.runtime),
                 port: target.port
             ),
             network: active.runtime.network,
@@ -183,14 +192,6 @@ public final class ProxiedFlowRouter: Sendable {
             environment: environment
         )
         track(relay, generation: active.generation)
-    }
-
-    private func tunnelAddress(for request: ProxiedFlowRequest, in runtime: TransparentProxyRuntime) -> IPAddress {
-        let address = request.remoteEndpoint.address
-        guard case .hostname(let name) = runtime.names.target(forHostname: request.remoteHostname, address: address),
-            let resolved = try? runtime.network.lookUpAddresses(of: name, timeout: Self.nameLookupTimeout)
-        else { return address }
-        return runtime.names.address(choosingFrom: resolved, insteadOf: address)
     }
 
     private func track(_ relay: any FlowRelay, generation: Int) {

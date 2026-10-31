@@ -8,6 +8,7 @@ public final class InMemoryUserspaceNetwork: RunningUserspaceNetwork {
         public var isStopped = false
         public var appliedConfigurations: [UAPIConfiguration] = []
         public var statistics = RuntimeStatistics(peers: [])
+        public var lookedUpNames: [DomainName] = []
     }
 
     public let state = AwaitableState(Snapshot())
@@ -47,6 +48,7 @@ public final class InMemoryUserspaceNetwork: RunningUserspaceNetwork {
     }
 
     public func lookUpAddresses(of name: DomainName, timeout: Duration) throws(UserspaceNetworkError) -> [IPAddress] {
+        state.update { snapshot in snapshot.lookedUpNames.append(name) }
         guard !resolvedAddresses.isEmpty else { throw .lookupFailed }
         return resolvedAddresses
     }

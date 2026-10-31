@@ -187,5 +187,6 @@
 | Форматирование | `swift format`, `gofmt` | хук `pre-commit`, `Scripts/check.sh` |
 | Strict concurrency | Swift 6 language mode | сборка |
 | Тесты | `swift test`, `xcodebuild test`, `go test` | `Scripts/check.sh`, хук `pre-merge-commit` |
+| Скорость горячего пути | `go test -bench` против базовой линии (`Scripts/benchmark-check`): регресс скорости больше 10 % — ошибка | `Scripts/check.sh --bench` |
 | Доступность и UI-тесты | XCUITest, `performAccessibilityAudit` на симуляторах iPhone и iPad: симулятор сначала загружается, каждый тест ограничен 3 минутами, после сбоя тяжёлая диагностика симулятора не собирается | `Scripts/check.sh --ui` |
 | Формат коммитов и отсутствие ИИ-трейлеров | хук `commit-msg`: Conventional Commits, отклоняет `Co-Authored-By` с ИИ и «Generated with» | хук `commit-msg` |

@@ -19,7 +19,8 @@ public struct HostnameResolutionPolicy: Sendable {
     }
 
     public func address(choosingFrom resolvedAddresses: [IPAddress], insteadOf address: IPAddress) -> IPAddress {
-        resolvedAddresses.first { resolved in
+        guard !resolvedAddresses.contains(address) else { return address }
+        return resolvedAddresses.first { resolved in
             resolved.family == address.family && tunnelNetworks.contains(resolved)
         } ?? address
     }

@@ -6,18 +6,21 @@ source "$repository_root/Scripts/lib/xcode-environment.sh"
 cd "$repository_root"
 
 runs_ui_tests=false
-case "${1-}" in
-    "") ;;
-    --ui) runs_ui_tests=true ;;
-    *)
-        printf 'usage: Scripts/check.sh [--ui]\n' >&2
-        exit 2
-        ;;
-esac
+runs_benchmarks=false
+for argument in "$@"; do
+    case "$argument" in
+        --ui) runs_ui_tests=true ;;
+        --bench) runs_benchmarks=true ;;
+        *)
+            printf 'usage: Scripts/check.sh [--ui] [--bench]\n' >&2
+            exit 2
+            ;;
+    esac
+done
 
 derived_data="$repository_root/build/DerivedData"
 ui_test_time_allowance=180
-go_modules=(Packages/TunnelCore/go Scripts/go-comment-check)
+go_modules=(Packages/TunnelCore/go Scripts/go-comment-check Scripts/benchmark-check)
 started_at=$SECONDS
 
 step() {
@@ -104,6 +107,11 @@ if [[ "$runs_ui_tests" == true ]]; then
     run_ui_tests iPhone
     step "UI tests on iPad"
     run_ui_tests iPad
+fi
+
+if [[ "$runs_benchmarks" == true ]]; then
+    step "Benchmarks"
+    Scripts/benchmark.sh
 fi
 
 printf '\nAll checks passed in %ds\n' "$((SECONDS - started_at))"

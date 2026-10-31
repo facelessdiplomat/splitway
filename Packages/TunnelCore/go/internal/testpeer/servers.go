@@ -12,6 +12,7 @@ import (
 const (
 	largestDatagramByteCount = 65535
 	answerTimeToLive         = 60
+	sourceChunkByteCount     = 64 * 1024
 )
 
 type servers struct {
@@ -20,7 +21,7 @@ type servers struct {
 
 func startServers(stack *netstack.Net) (*servers, error) {
 	running := &servers{}
-	streams := map[uint16]func(net.Conn){EchoPort: echo, DiscardPort: discard}
+	streams := map[uint16]func(net.Conn){EchoPort: echo, DiscardPort: discard, SourcePort: source}
 	for port, handle := range streams {
 		listener, err := stack.ListenTCPAddrPort(netip.AddrPortFrom(ServerAddress, port))
 		if err != nil {
@@ -72,6 +73,16 @@ func echo(connection net.Conn) {
 func discard(connection net.Conn) {
 	defer connection.Close()
 	io.Copy(io.Discard, connection)
+}
+
+func source(connection net.Conn) {
+	defer connection.Close()
+	chunk := make([]byte, sourceChunkByteCount)
+	for {
+		if _, err := connection.Write(chunk); err != nil {
+			return
+		}
+	}
 }
 
 func serveDatagrams(socket net.PacketConn, respond func([]byte) ([]byte, bool)) {

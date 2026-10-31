@@ -29,6 +29,7 @@ usage() {
     printf '  exec <command>        run a command in the VM\n' >&2
     printf '  screenshot <file>     save a PNG of the VM screen\n' >&2
     printf '  leak-test <scenario>  install RoutingProbe in the VM and run Scripts/leak-test-macos.sh there\n' >&2
+    printf '  relay-benchmark <label>  install RoutingProbe in the VM and run Scripts/relay-benchmark-macos.sh there\n' >&2
     printf '  save-clean-state      stop the VM and keep its disk as the clean state\n' >&2
     printf '  restore-clean-state   stop the VM and return its disk to the clean state\n' >&2
     printf '  stop                  stop the VM\n' >&2
@@ -125,20 +126,27 @@ launch_application() {
     guest_exec open -a /Applications/Splitway.app --args "$@"
 }
 
-run_leak_test() {
+install_routing_probe_with() {
+    local script="$1"
+    "$repository_root/Scripts/build-routing-probe.sh" >/dev/null
+    routing_probe_folder="routing-probe-$(date +%s)"
+    rm -rf "$shared_directory"/routing-probe-*
+    mkdir -p "$shared_directory/$routing_probe_folder"
+    ditto "$repository_root/build/RoutingProbe/RoutingProbe.app" \
+        "$shared_directory/$routing_probe_folder/RoutingProbe.app"
+    cp "$repository_root/Scripts/$script" "$shared_directory/$routing_probe_folder/$script"
+    guest_exec rm -rf /Applications/RoutingProbe.app
+    guest_exec ditto "$shared_directory_in_guest/$routing_probe_folder/RoutingProbe.app" /Applications/RoutingProbe.app
+}
+
+run_with_routing_probe() {
+    local script="$1"
+    shift
     if [[ $# -lt 1 ]]; then
         usage
     fi
-    "$repository_root/Scripts/build-routing-probe.sh" >/dev/null
-    local folder
-    folder="routing-probe-$(date +%s)"
-    rm -rf "$shared_directory"/routing-probe-*
-    mkdir -p "$shared_directory/$folder"
-    ditto "$repository_root/build/RoutingProbe/RoutingProbe.app" "$shared_directory/$folder/RoutingProbe.app"
-    cp "$repository_root/Scripts/leak-test-macos.sh" "$shared_directory/$folder/leak-test-macos.sh"
-    guest_exec rm -rf /Applications/RoutingProbe.app
-    guest_exec ditto "$shared_directory_in_guest/$folder/RoutingProbe.app" /Applications/RoutingProbe.app
-    guest_exec /bin/bash "$shared_directory_in_guest/$folder/leak-test-macos.sh" "$@"
+    install_routing_probe_with "$script"
+    guest_exec /bin/bash "$shared_directory_in_guest/$routing_probe_folder/$script" "$@"
 }
 
 save_clean_state() {
@@ -180,7 +188,8 @@ install) install_application "$@" ;;
 launch) launch_application "$@" ;;
 exec) guest_exec "$@" ;;
 screenshot) save_screenshot "$@" ;;
-leak-test) run_leak_test "$@" ;;
+leak-test) run_with_routing_probe leak-test-macos.sh "$@" ;;
+relay-benchmark) run_with_routing_probe relay-benchmark-macos.sh "$@" ;;
 save-clean-state) save_clean_state ;;
 restore-clean-state) restore_clean_state ;;
 stop) stop_virtual_machine ;;

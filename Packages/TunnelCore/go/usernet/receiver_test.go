@@ -3,6 +3,7 @@ package usernet
 import (
 	"bytes"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -80,5 +81,38 @@ func (receiver *recordingReceiver) waitForFinish(t testing.TB) error {
 	case <-time.After(deliveryTimeout):
 		t.Fatal("receiving did not finish")
 		return nil
+	}
+}
+
+type countingReceiver struct {
+	connection *Connection
+	received   atomic.Int64
+	arrived    chan struct{}
+}
+
+func newCountingReceiver(connection *Connection) *countingReceiver {
+	return &countingReceiver{connection: connection, arrived: make(chan struct{}, 1)}
+}
+
+func (receiver *countingReceiver) Receive(data []byte) {
+	receiver.received.Add(int64(len(data)))
+	receiver.connection.Grant(len(data))
+	select {
+	case receiver.arrived <- struct{}{}:
+	default:
+	}
+}
+
+func (receiver *countingReceiver) Finish(error) {}
+
+func (receiver *countingReceiver) waitUntilReceived(t testing.TB, byteCount int64) {
+	t.Helper()
+	deadline := time.After(deliveryTimeout)
+	for receiver.received.Load() < byteCount {
+		select {
+		case <-receiver.arrived:
+		case <-deadline:
+			t.Fatalf("received %d of %d bytes", receiver.received.Load(), byteCount)
+		}
 	}
 }
