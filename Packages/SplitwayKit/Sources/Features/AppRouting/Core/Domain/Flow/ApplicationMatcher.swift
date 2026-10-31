@@ -19,6 +19,10 @@ public struct ApplicationMatcher: Sendable {
     }
 
     public func matches(_ source: SourceApplication) -> Bool {
+        matchesItself(source) || source.launchers.contains(where: matchesItself)
+    }
+
+    private func matchesItself(_ source: SourceApplication) -> Bool {
         if let identifier = source.signingIdentifier, let teams = teamsBySigningIdentifier[identifier] {
             return teams.contains(source.teamIdentifier)
         }

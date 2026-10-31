@@ -24,7 +24,8 @@ struct SourceApplicationResolverTests {
     @Test
     func resolvesTheIdentifierTeamAndPathOfADeveloperSignedProcess() throws {
         let resolver = SourceApplicationResolver(
-            reader: InMemoryCodeIdentityReader(identities: [Self.browserProcess: Self.browserIdentity]))
+            reader: InMemoryCodeIdentityReader(identities: [Self.browserProcess: Self.browserIdentity]),
+            ancestry: InMemoryProcessAncestryReader())
 
         let source = resolver.sourceApplication(of: try Self.token(of: Self.browserProcess))
 
@@ -35,7 +36,8 @@ struct SourceApplicationResolverTests {
     @Test
     func keepsTheIdentifierOfAppleSignedCodeWithoutATeam() throws {
         let resolver = SourceApplicationResolver(
-            reader: InMemoryCodeIdentityReader(identities: [Self.curlProcess: Self.appleCurlIdentity]))
+            reader: InMemoryCodeIdentityReader(identities: [Self.curlProcess: Self.appleCurlIdentity]),
+            ancestry: InMemoryProcessAncestryReader())
 
         let source = resolver.sourceApplication(of: try Self.token(of: Self.curlProcess))
 
@@ -51,7 +53,8 @@ struct SourceApplicationResolverTests {
             isSignedByApple: false
         )
         let resolver = SourceApplicationResolver(
-            reader: InMemoryCodeIdentityReader(identities: [Self.curlProcess: adHocCurl]))
+            reader: InMemoryCodeIdentityReader(identities: [Self.curlProcess: adHocCurl]),
+            ancestry: InMemoryProcessAncestryReader())
 
         let source = resolver.sourceApplication(of: try Self.token(of: Self.curlProcess))
 
@@ -65,7 +68,7 @@ struct SourceApplicationResolverTests {
     @Test
     func readsTheCodeOfEachProcessOnlyOnce() throws {
         let reader = InMemoryCodeIdentityReader(identities: [Self.browserProcess: Self.browserIdentity])
-        let resolver = SourceApplicationResolver(reader: reader)
+        let resolver = SourceApplicationResolver(reader: reader, ancestry: InMemoryProcessAncestryReader())
         let auditToken = try Self.token(of: Self.browserProcess)
 
         let first = resolver.sourceApplication(of: auditToken)
@@ -81,7 +84,7 @@ struct SourceApplicationResolverTests {
         let reader = InMemoryCodeIdentityReader(identities: [
             Self.browserProcess: Self.browserIdentity, reusedIdentifier: Self.appleCurlIdentity,
         ])
-        let resolver = SourceApplicationResolver(reader: reader)
+        let resolver = SourceApplicationResolver(reader: reader, ancestry: InMemoryProcessAncestryReader())
 
         _ = resolver.sourceApplication(of: try Self.token(of: Self.browserProcess))
         let source = resolver.sourceApplication(of: try Self.token(of: reusedIdentifier))
@@ -93,7 +96,7 @@ struct SourceApplicationResolverTests {
     @Test
     func treatsAFlowWithoutAnAuditTokenAsUnknown() {
         let reader = InMemoryCodeIdentityReader()
-        let resolver = SourceApplicationResolver(reader: reader)
+        let resolver = SourceApplicationResolver(reader: reader, ancestry: InMemoryProcessAncestryReader())
 
         let source = resolver.sourceApplication(of: nil)
 
@@ -104,7 +107,7 @@ struct SourceApplicationResolverTests {
     @Test
     func remembersAProcessWhoseCodeCannotBeReadAsUnknown() throws {
         let reader = InMemoryCodeIdentityReader()
-        let resolver = SourceApplicationResolver(reader: reader)
+        let resolver = SourceApplicationResolver(reader: reader, ancestry: InMemoryProcessAncestryReader())
         let auditToken = try Self.token(of: Self.browserProcess)
 
         let first = resolver.sourceApplication(of: auditToken)
@@ -116,7 +119,8 @@ struct SourceApplicationResolverTests {
 
     @Test
     func takesTheIdentifierOfTheFlowWhenTheCodeCannotBeRead() throws {
-        let resolver = SourceApplicationResolver(reader: InMemoryCodeIdentityReader())
+        let resolver = SourceApplicationResolver(
+            reader: InMemoryCodeIdentityReader(), ancestry: InMemoryProcessAncestryReader())
         let auditToken = try Self.token(of: Self.browserProcess)
 
         let source = resolver.sourceApplication(of: auditToken, signedAs: "com.example.browser")
@@ -127,7 +131,8 @@ struct SourceApplicationResolverTests {
     @Test
     func prefersTheCodeOfTheProcessOverTheIdentifierOfTheFlow() throws {
         let resolver = SourceApplicationResolver(
-            reader: InMemoryCodeIdentityReader(identities: [Self.browserProcess: Self.browserIdentity]))
+            reader: InMemoryCodeIdentityReader(identities: [Self.browserProcess: Self.browserIdentity]),
+            ancestry: InMemoryProcessAncestryReader())
         let auditToken = try Self.token(of: Self.browserProcess)
 
         let source = resolver.sourceApplication(of: auditToken, signedAs: "com.example.mail")
@@ -137,7 +142,8 @@ struct SourceApplicationResolverTests {
 
     @Test
     func keepsAFlowWithoutAnIdentifierUnknownWhenTheCodeCannotBeRead() throws {
-        let resolver = SourceApplicationResolver(reader: InMemoryCodeIdentityReader())
+        let resolver = SourceApplicationResolver(
+            reader: InMemoryCodeIdentityReader(), ancestry: InMemoryProcessAncestryReader())
 
         let source = resolver.sourceApplication(of: try Self.token(of: Self.browserProcess), signedAs: "")
 
@@ -151,7 +157,8 @@ struct SourceApplicationResolverTests {
             Self.browserProcess: Self.browserIdentity, Self.curlProcess: Self.appleCurlIdentity,
             thirdProcess: Self.browserIdentity,
         ])
-        let resolver = SourceApplicationResolver(reader: reader, cacheCapacity: 2)
+        let resolver = SourceApplicationResolver(
+            reader: reader, ancestry: InMemoryProcessAncestryReader(), cacheCapacity: 2)
 
         for process in [Self.browserProcess, Self.curlProcess, Self.browserProcess, thirdProcess, Self.curlProcess] {
             _ = resolver.sourceApplication(of: try Self.token(of: process))

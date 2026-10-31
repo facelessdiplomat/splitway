@@ -62,7 +62,8 @@ struct TransparentProxyTestEnvironment {
             ),
             router: ProxiedFlowRouter(
                 sourceResolver: SourceApplicationResolver(
-                    reader: InMemoryCodeIdentityReader(identities: Self.identities)),
+                    reader: InMemoryCodeIdentityReader(identities: Self.identities),
+                    ancestry: InMemoryProcessAncestryReader()),
                 attribution: SuspiciousAttributionMonitor(log: attributionLog),
                 environment: RelayEnvironment(
                     targetQueue: DispatchQueue(label: "TransparentProxyTests"),
