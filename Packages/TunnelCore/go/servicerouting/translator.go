@@ -1,8 +1,13 @@
 package servicerouting
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+)
 
 const dnsPort = 53
+
+var errTruncatedDatagram = errors.New("the datagram is shorter than its UDP header")
 
 type translator struct {
 	plan Plan
@@ -56,6 +61,9 @@ func (translator *translator) inbound(packet []byte) ([]byte, bool) {
 
 func (translator *translator) answerFromVirtualResolver(packet []byte, headerByteCount int) ([]byte, error) {
 	totalByteCount := int(binary.BigEndian.Uint16(packet[ipv4TotalLengthOffset:]))
+	if totalByteCount < headerByteCount+udpHeaderByteCount {
+		return nil, errTruncatedDatagram
+	}
 	rewritten, err := rewriteAnswers(packet[headerByteCount+udpHeaderByteCount:totalByteCount], translator.pool)
 	if err != nil {
 		return nil, err
