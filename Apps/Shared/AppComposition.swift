@@ -18,8 +18,6 @@ import TunnelLibraryPresentation
 
 #if os(macOS)
     import ApplicationCatalogInfrastructure
-    import MenuBarInfrastructure
-    import MenuBarPresentation
     import SystemExtensionInfrastructure
 #endif
 
@@ -42,9 +40,6 @@ struct AppComposition {
     let settings: SettingsPresenter
     let onboarding: OnboardingModel
     let reportCollector: MetricKitReportCollector
-    #if os(macOS)
-        let menuBar: MenuBarModel
-    #endif
 
     init(configuration: AppConfiguration) {
         let diagnostics = DiagnosticsAssembly(
@@ -59,13 +54,6 @@ struct AppComposition {
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
         let tunnelList = Self.tunnelList(library: library, connection: connection)
         self.tunnelList = tunnelList
-        #if os(macOS)
-            menuBar = MenuBarModel(
-                tunnels: tunnelList,
-                quitConfirmation: AppKitQuitConfirmation(),
-                lifecycle: AppKitApplicationLifecycle()
-            )
-        #endif
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
         tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels)
         logViewer = Self.logViewer(diagnostics: diagnostics, configuration: configuration)
