@@ -15,7 +15,7 @@
 - [x] M0-09 Локальная проверка `Scripts/check.sh`
 - [x] M0-10 Тестовый туннель
 - [x] M0-12 Тестовая ВМ macOS
-- [ ] SP-7 Hello tunnel: wireguard-go в пакетном туннеле
+- [x] SP-7 Hello tunnel: wireguard-go в пакетном туннеле — wireguard-go на дескрипторе utun работает на iPhone 13 Pro и в системном расширении macOS в тестовой ВМ, расширение iOS после старта занимает 5–7 МБ ([итоги](../features/spikes/SP-7.md)); Mac владельца — в M2-14
 - [ ] SP-2 Атрибуция потоков в transparent proxy — по проверке в тестовой ВМ поток приходит от имени приложения, Safari и WKWebView поддерживаются ([итоги](../features/spikes/SP-2.md)); Telegram и подтверждение на Mac владельца — позже
 - [ ] SP-6 UDP и QUIC в transparent proxy
 - [ ] SP-9 Атрибуция DNS-запросов в DNS-прокси — по проверке в тестовой ВМ DNS-прокси видит то же, что прозрачный прокси, и по решению D-34 он не используется ([итоги](../features/spikes/SP-9.md)); подтверждение на Mac — позже
