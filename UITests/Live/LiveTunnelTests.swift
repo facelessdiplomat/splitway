@@ -13,7 +13,7 @@ final class LiveTunnelTests: XCTestCase {
     }
 
     @MainActor
-    func testFullTunnelChangesTheExternalAddressAndDisconnects() throws {
+    func testFullTunnelChangesTheExternalAddressAndDisconnects() async throws {
         let tunnelName = ProcessInfo.processInfo.environment["SPLITWAY_LIVE_TUNNEL_NAME"] ?? Self.defaultTunnelName
         let application = SplitwayLaunch.applicationWithStoredTunnels()
         application.tapText(startingWith: tunnelName)
@@ -25,13 +25,11 @@ final class LiveTunnelTests: XCTestCase {
             connectionSwitch.tap()
             XCTAssertTrue(disconnected.waitForExistence(timeout: Self.connectionTimeout))
         }
-        let addressWithoutTunnel = try ExternalAddressProbe.currentAddress()
+        let addressWithoutTunnel = try await ExternalAddressProbe.currentAddress()
 
-        application.activate()
         connectionSwitch.tap()
         XCTAssertTrue(connected.waitForExistence(timeout: Self.connectionTimeout))
-        let addressThroughTunnel = try ExternalAddressProbe.currentAddress()
-        application.activate()
+        let addressThroughTunnel = try await ExternalAddressProbe.currentAddress()
         connectionSwitch.tap()
 
         XCTAssertTrue(disconnected.waitForExistence(timeout: Self.connectionTimeout))

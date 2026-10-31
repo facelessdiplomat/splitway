@@ -3,33 +3,21 @@ import XCTest
 @MainActor
 enum ExternalAddressProbe {
     enum Failure: Error {
-        case addressNotShown
+        case notAnAddress
     }
 
     private static let addressService = "https://api.ipify.org"
-    private static let safariIdentifier = "com.apple.mobilesafari"
     private static let addressPattern = /^[0-9]{1,3}(\.[0-9]{1,3}){3}$|^[0-9a-fA-F:]+:[0-9a-fA-F:]+$/
-    private static let pageTimeout: TimeInterval = 30
-    private static let pollInterval: TimeInterval = 0.5
+    private static let requestTimeout: TimeInterval = 15
 
-    static func currentAddress() throws -> String {
-        let service = try XCTUnwrap(URL(string: addressService))
-        XCUIDevice.shared.system.open(service)
-        let safari = XCUIApplication(bundleIdentifier: safariIdentifier)
-        XCTAssertTrue(safari.wait(for: .runningForeground, timeout: pageTimeout))
-        let deadline = Date().addingTimeInterval(pageTimeout)
-        while Date() < deadline {
-            if let address = address(shownIn: safari) {
-                return address
-            }
-            RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
-        }
-        throw Failure.addressNotShown
-    }
-
-    private static func address(shownIn safari: XCUIApplication) -> String? {
-        safari.webViews.staticTexts.allElementsBoundByIndex
-            .map(\.label)
-            .first { label in label.wholeMatch(of: addressPattern) != nil }
+    static func currentAddress() async throws -> String {
+        let session = URLSession(configuration: .ephemeral)
+        defer { session.invalidateAndCancel() }
+        var request = URLRequest(url: try XCTUnwrap(URL(string: addressService)))
+        request.timeoutInterval = requestTimeout
+        let (data, _) = try await session.data(for: request)
+        let text = String(bytes: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard text.wholeMatch(of: addressPattern) != nil else { throw Failure.notAnAddress }
+        return text
     }
 }
