@@ -115,6 +115,36 @@ struct SourceApplicationResolverTests {
     }
 
     @Test
+    func takesTheIdentifierOfTheFlowWhenTheCodeCannotBeRead() throws {
+        let resolver = SourceApplicationResolver(reader: InMemoryCodeIdentityReader())
+        let auditToken = try Self.token(of: Self.browserProcess)
+
+        let source = resolver.sourceApplication(of: auditToken, signedAs: "com.example.browser")
+
+        #expect(source == FlowRoutingFixtures.exitedBrowser)
+    }
+
+    @Test
+    func prefersTheCodeOfTheProcessOverTheIdentifierOfTheFlow() throws {
+        let resolver = SourceApplicationResolver(
+            reader: InMemoryCodeIdentityReader(identities: [Self.browserProcess: Self.browserIdentity]))
+        let auditToken = try Self.token(of: Self.browserProcess)
+
+        let source = resolver.sourceApplication(of: auditToken, signedAs: "com.example.mail")
+
+        #expect(source == FlowRoutingFixtures.browser)
+    }
+
+    @Test
+    func keepsAFlowWithoutAnIdentifierUnknownWhenTheCodeCannotBeRead() throws {
+        let resolver = SourceApplicationResolver(reader: InMemoryCodeIdentityReader())
+
+        let source = resolver.sourceApplication(of: try Self.token(of: Self.browserProcess), signedAs: "")
+
+        #expect(source == SourceApplication(signingIdentifier: nil, teamIdentifier: nil, executablePath: nil))
+    }
+
+    @Test
     func forgetsTheLeastRecentlyUsedProcessWhenTheCacheIsFull() throws {
         let thirdProcess = ProcessInstance(identifier: 6000, version: 1)
         let reader = InMemoryCodeIdentityReader(identities: [

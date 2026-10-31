@@ -163,7 +163,7 @@ public final class ProxiedFlowRouter: Sendable {
         transport: FlowTransport,
         in active: ActiveRuntime
     ) -> FlowRouteDecision {
-        let source = sourceResolver.sourceApplication(of: request.auditToken)
+        let source = sourceResolver.sourceApplication(of: request.auditToken, signedAs: request.signingIdentifier)
         attribution.inspect(source)
         let flow = FlowDescriptor(
             source: source,

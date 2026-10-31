@@ -6,10 +6,14 @@ echo_address="https://api.ipify.org"
 resolver_identity="whoami.akamai.net"
 ipv6_destination="2606:4700:4700::1111"
 blocking_budget_milliseconds=5000
+background_delay_seconds=5
+background_wait_seconds=15
+background_collection_seconds=30
+background_address=""
 failures=0
 
 usage() {
-    printf 'usage: Scripts/leak-test-macos.sh <selected|unavailable> [--show-addresses]\n' >&2
+    printf 'usage: Scripts/leak-test-macos.sh <selected|unavailable|background> [--show-addresses]\n' >&2
     exit 2
 }
 
@@ -54,6 +58,9 @@ show_addresses() {
     printf '\nRoutingProbe:\n%s\n' "$probe_output"
     printf 'curl: %s, dig through %s: %s, curl over IPv6: HTTP %s\n' \
         "${direct_address:-none}" "$system_resolver" "${direct_resolver:-none}" "$direct_ipv6"
+    if [[ -n "$background_address" ]]; then
+        printf 'background download: %s\n' "$background_address"
+    fi
 }
 
 check_selected() {
@@ -90,6 +97,21 @@ check_unavailable() {
     check "the unselected curl still reaches the internet" is_true "$([[ -n "$direct_address" ]] && echo true)"
 }
 
+check_background() {
+    local probe_address
+    probe_address="$(probe_field address 3)"
+    "$probe" background-start "$echo_address" "$background_delay_seconds" >/dev/null
+    sleep "$background_wait_seconds"
+    background_address="$("$probe" background-collect "$background_collection_seconds" | awk '$1 == "background" && $2 == "ok" { print $3 }')"
+    check "the background download of RoutingProbe, begun after it exited, completes" \
+        is_true "$([[ -n "$background_address" ]] && echo true)"
+    if [[ -n "$background_address" && "$background_address" == "$probe_address" ]]; then
+        report INFO "the background download of the exited RoutingProbe leaves through the tunnel"
+    else
+        report INFO "the background download of the exited RoutingProbe leaves directly: nsurlsessiond sends it under its own identity"
+    fi
+}
+
 [[ $# -ge 1 ]] || usage
 scenario="$1"
 shows_addresses=false
@@ -103,6 +125,7 @@ measure
 case "$scenario" in
 selected) check_selected ;;
 unavailable) check_unavailable ;;
+background) check_background ;;
 *) usage ;;
 esac
 if [[ "$shows_addresses" == true ]]; then

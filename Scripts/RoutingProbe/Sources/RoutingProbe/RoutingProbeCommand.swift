@@ -4,7 +4,8 @@ import RoutingProbeCore
 @main
 struct RoutingProbeCommand {
     private static let usage =
-        "usage: RoutingProbe [download <url> [attempts] | upload <url> [attempts] [bytes] | latency <url> [attempts]]\n"
+        "usage: RoutingProbe [download <url> [attempts] | upload <url> [attempts] [bytes] | latency <url> [attempts]"
+        + " | background-start <url> [delay-seconds] | background-collect [timeout-seconds]]\n"
     private static let usageExitCode: Int32 = 2
 
     static func main() async {
@@ -30,6 +31,10 @@ struct RoutingProbeCommand {
                 .run()
         case .latency(let address, let attempts):
             await LatencyMeasurement(address: address, attempts: attempts).run()
+        case .backgroundStart(let address, let delaySeconds):
+            await BackgroundDownload.start(address, delaySeconds: delaySeconds)
+        case .backgroundCollect(let timeoutSeconds):
+            await BackgroundDownload.collect(timeoutSeconds: timeoutSeconds)
         }
     }
 }
