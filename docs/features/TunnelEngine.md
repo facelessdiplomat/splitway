@@ -41,6 +41,7 @@ flowchart LR
 - **Go-сторона.**
   - `fdtunnel` дублирует дескриптор (`unix.Dup`, неблокирующий режим), создаёт `tun.CreateTUNFromFile` и `device.NewDevice` со стандартным bind, применяет UAPI и поднимает устройство.
   - На iOS действует `debug.SetMemoryLimit` (30 МБ) и уменьшенные очереди wireguard-go для `GOOS=ios`.
+  - В режиме netstack `usernet` ставит между стеком gVisor и устройством wireguard-go обёртку `coalescingDevice`, которая прореживает исходящие подтверждения TCP ([UserspaceNetwork](UserspaceNetwork.md)).
   - `bridge` хранит устройства обоих режимов в одной таблице хэндлов: Go-указатели в C не попадают. Экспортные функции только преобразуют типы и выполняются внутри `guarded`, поэтому паника превращается в `TCStatusInternalFailure`.
 - **Адаптер.** `TunnelCoreWireGuardDevice` владеет хэндлом и останавливает туннель в `deinit`. Строку `tc_tunnel_get_config` он освобождает через `tc_free`, а коды `TCStatus` переводит в `TunnelEngineError`.
 - **Логи.** `TunnelCoreLogRouting.route(to:)` направляет логи wireguard-go в `LogRecorder`: verbose → `debug`, error → `error`. Маскирование выполняет `LogEntry`. Если устройство не запустилось, мост пишет причину уровнем error (`tunnel failed to start: …`), а у отклонённой конфигурации — только сам отказ, без подробностей с её значениями.
@@ -116,5 +117,6 @@ flowchart LR
 | 2026-10-30 | `fdtunnel.Start` поднимает и устройство `usernet` на netstack | M4-05 |
 | 2026-10-30 | Общая таблица хэндлов для режимов fd и netstack, `recover` в экспортных функциях | M4-06 |
 | 2026-10-30 | Фейки режима netstack в `TunnelEngineTestSupport` | M4-10 |
+| 2026-10-31 | Режим netstack прореживает подтверждения TCP (подробно — в UserspaceNetwork) | M4-18 |
 | 2026-10-30 | Причина сбоя запуска в журнале движка (найдено в системном расширении macOS) | M2-12 |
 | 2026-10-31 | `UAPIConfigurationEncoder.keepaliveUpdate` | M4-15 |
