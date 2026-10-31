@@ -9,6 +9,8 @@ import TunnelImportPresentation
 import TunnelLibraryPresentation
 
 struct SplitwayRootScene: Scene {
+    private static let everyExternalEvent: Set<String> = ["*"]
+
     let composition: AppComposition
 
     var body: some Scene {
@@ -38,8 +40,10 @@ struct SplitwayRootScene: Scene {
             .onOpenURL { url in
                 Task.immediate { await composition.tunnelImport.importFiles([url]) }
             }
+            .handlesExternalEvents(preferring: Self.everyExternalEvent, allowing: Self.everyExternalEvent)
             .task { await composition.onboarding.activateSystemExtensionOnLaunch() }
         }
+        .handlesExternalEvents(matching: Self.everyExternalEvent)
         .commands {
             TunnelLibraryCommands(addition: addition, navigation: navigation)
         }
