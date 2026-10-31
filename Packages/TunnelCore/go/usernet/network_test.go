@@ -247,6 +247,31 @@ func BenchmarkUploadThroughTheTunnel(b *testing.B) {
 	}
 }
 
+func BenchmarkDownloadThroughTheTunnel(b *testing.B) {
+	pair := startTestPair(b)
+	dialContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)
+	defer cancel()
+	connection, err := pair.client.DialTCP(dialContext, netip.AddrPortFrom(testpeer.ServerAddress, testpeer.SourcePort))
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer connection.Close()
+	receiver := newCountingReceiver(connection)
+	startReceiving(b, connection, receiver, streamReadByteCount, generousCredit)
+	receiver.waitUntilReceived(b, streamReadByteCount)
+	b.SetBytes(streamReadByteCount)
+	before := pair.peer.PacketCounts()
+	target := receiver.received.Load()
+
+	for b.Loop() {
+		target += streamReadByteCount
+		receiver.waitUntilReceived(b, target)
+	}
+
+	after := pair.peer.PacketCounts()
+	b.ReportMetric(float64(after.Received-before.Received)/float64(after.Sent-before.Sent), "acks/segment")
+}
+
 func dialReceiving(t testing.TB, network *Network, port uint16, readByteCount, credit int) (*Connection, *recordingReceiver) {
 	t.Helper()
 	dialContext, cancel := context.WithTimeout(context.Background(), deliveryTimeout)

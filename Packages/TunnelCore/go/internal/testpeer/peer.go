@@ -18,6 +18,7 @@ import (
 const (
 	EchoPort     = 7
 	DiscardPort  = 9
+	SourcePort   = 13
 	ClosedPort   = 19
 	DNSPort      = 53
 	Hostname     = "echo.tunnel.test"
@@ -33,6 +34,7 @@ var (
 
 type Peer struct {
 	tunnel     *fdtunnel.Tunnel
+	device     *countingDevice
 	servers    *servers
 	publicKey  [keyByteCount]byte
 	listenPort int
@@ -51,11 +53,12 @@ func Start(clientPublicKey [keyByteCount]byte, logger *device.Logger) (*Peer, er
 	if err != nil {
 		return nil, err
 	}
-	tunnel, err := fdtunnel.Start(tunnelInterface, configuration(privateKey, clientPublicKey), logger)
+	counted := &countingDevice{Device: tunnelInterface}
+	tunnel, err := fdtunnel.Start(counted, configuration(privateKey, clientPublicKey), logger)
 	if err != nil {
 		return nil, err
 	}
-	peer := &Peer{tunnel: tunnel, publicKey: [keyByteCount]byte(publicKey)}
+	peer := &Peer{tunnel: tunnel, device: counted, publicKey: [keyByteCount]byte(publicKey)}
 	if peer.listenPort, err = listenPort(tunnel); err != nil {
 		tunnel.Stop()
 		return nil, err
@@ -73,6 +76,10 @@ func (peer *Peer) PublicKey() [keyByteCount]byte {
 
 func (peer *Peer) ListenPort() int {
 	return peer.listenPort
+}
+
+func (peer *Peer) PacketCounts() PacketCounts {
+	return peer.device.counts()
 }
 
 func (peer *Peer) Stop() {
