@@ -9,12 +9,13 @@ import TunnelImportPresentation
 import TunnelLibraryPresentation
 
 struct SplitwayRootScene: Scene {
+    static let mainWindowIdentifier = "tunnels"
     private static let everyExternalEvent: Set<String> = ["*"]
 
     let composition: AppComposition
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: Self.mainWindowIdentifier) {
             TunnelLibraryRootView(
                 model: composition.tunnelList,
                 statistics: composition.statistics,

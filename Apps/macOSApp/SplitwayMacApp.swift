@@ -1,3 +1,4 @@
+import MenuBarPresentation
 import SettingsPresentation
 import SwiftUI
 
@@ -10,5 +11,6 @@ struct SplitwayMacApp: App {
         Settings {
             SettingsScreen(presenter: composition.settings)
         }
+        SplitwayMenuBar(model: composition.menuBar, mainWindowIdentifier: SplitwayRootScene.mainWindowIdentifier)
     }
 }
