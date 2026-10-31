@@ -1,0 +1,2 @@
+BenchmarkDownloadThroughTheTunnel 1 100.62 MB/s 0.5658 acks/segment 651314 ns/op
+BenchmarkUploadThroughTheTunnel 1 99.46 MB/s 658935 ns/op
