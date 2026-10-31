@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Статус | в работе: туннель поднимается на iPhone (M2-14) и в системном расширении macOS в тестовой ВМ (M2-12); остальные проверки M2-14 — на устройствах |
+| Статус | в работе: туннель поднимается на iPhone (M2-14) и в системном расширении macOS в тестовой ВМ (M2-12), журнал расширения на iPhone проверен (M2-13); остальные проверки M2-14 — на устройствах |
 | Платформы | shared |
 | Задачи | M2-05, M2-06, M2-08, M2-13, M4-08 (`IPv6LeakProtection.applying(to:)`) |
 | Таргеты | `PacketTunnel`, `PacketTunnelInfrastructure`; провайдер и composition root `Apps/SharedTunnelProvider` — общие для расширения iOS (`Apps/PacketTunnelExtension`) и системного расширения macOS (`Apps/NetworkSystemExtension`) |
