@@ -36,13 +36,21 @@ struct PacketTunnelComposition: Sendable {
                 source: .engine, store: logStore, systemLog: OSLogWriter(subsystem: subsystem, category: "Engine"))
         )
         session = PacketTunnelSession(
-            engine: TunnelCoreWireGuardEngine(),
+            engine: TunnelCoreWireGuardEngine(serviceRouting: Self.serviceRouting),
             interfaceLocator: UtunDescriptorLocator(),
             endpointResolver: SystemEndpointResolver(),
             pathMonitor: NetworkPathObserver()
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: Self.secretStore)
         messageDispatcher = ProviderMessageDispatcher(handler: PacketTunnelMessageHandler(session: session))
+    }
+
+    private static var serviceRouting: TunnelCoreServiceRoutingPlan? {
+        #if os(iOS)
+            ServiceRoutingSpike.plan
+        #else
+            nil
+        #endif
     }
 
     private static var secretStore: any TunnelSecretStore {

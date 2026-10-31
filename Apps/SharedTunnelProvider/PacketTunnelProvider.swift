@@ -42,11 +42,19 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
             routedBy: activeTunnel.routingPolicy
         )
         do {
-            try await setTunnelNetworkSettings(NetworkSettingsMapper.settings(for: preparedStart.networkPlan))
+            let settings = NetworkSettingsMapper.settings(for: preparedStart.networkPlan)
+            #if os(iOS)
+                ServiceRoutingSpike.apply(to: settings)
+            #endif
+            try await setTunnelNetworkSettings(settings)
         } catch {
             throw .networkSettingsRejected
         }
         try await composition.session.completeStart(preparedStart)
         composition.log.record(.info, "Tunnel started")
+        #if os(iOS)
+            let log = composition.log
+            _ = ServiceRoutingSpike.sampleFootprint { line in log.record(.info, line) }
+        #endif
     }
 }
