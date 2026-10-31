@@ -32,17 +32,19 @@
                 var peak = 0.0
                 while !Task.isCancelled {
                     let available = Double(os_proc_available_memory()) / bytesPerMegabyte
-                    let footprint = Double(Self.footprintBytes()) / bytesPerMegabyte
-                    peak = max(peak, footprint)
+                    let footprint = Self.footprint()
+                    let current = Double(footprint.current) / bytesPerMegabyte
+                    peak = max(peak, current)
                     record(
-                        "SP-4 footprint-mb=\(Self.text(footprint)) peak-mb=\(Self.text(peak))"
+                        "SP-4 footprint-mb=\(Self.text(current)) peak-mb=\(Self.text(peak))"
+                            + " lifetime-peak-mb=\(Self.text(Double(footprint.lifetimePeak) / bytesPerMegabyte))"
                             + " available-mb=\(Self.text(available))")
                     try? await Task.sleep(for: samplingInterval)
                 }
             }
         }
 
-        private static func footprintBytes() -> UInt64 {
+        private static func footprint() -> (current: UInt64, lifetimePeak: Int64) {
             var information = task_vm_info_data_t()
             var count = mach_msg_type_number_t(
                 MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
@@ -51,7 +53,8 @@
                     task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), words, &count)
                 }
             }
-            return result == KERN_SUCCESS ? information.phys_footprint : 0
+            guard result == KERN_SUCCESS else { return (0, 0) }
+            return (information.phys_footprint, information.ledger_phys_footprint_peak)
         }
 
         private static func text(_ megabytes: Double) -> String {
