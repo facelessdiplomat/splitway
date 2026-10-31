@@ -9,14 +9,17 @@
         public init() {}
 
         public func codeIdentity(of auditToken: AuditToken) throws(CodeIdentityReadingError) -> CodeIdentity {
-            let code = try Self.guestCode(of: auditToken)
-            let details = try Self.signingDetails(of: code)
+            try Self.codeIdentity(of: try Self.guestCode(of: auditToken))
+        }
+
+        static func codeIdentity(of code: SecCode) throws(CodeIdentityReadingError) -> CodeIdentity {
+            let details = try signingDetails(of: code)
             let executableURL = details[kSecCodeInfoMainExecutable as String] as? URL
             return CodeIdentity(
                 signingIdentifier: details[kSecCodeInfoIdentifier as String] as? String,
                 teamIdentifier: details[kSecCodeInfoTeamIdentifier as String] as? String,
                 executablePath: executableURL?.resolvingSymlinksInPath().path(percentEncoded: false),
-                isSignedByApple: Self.isSignedByApple(code)
+                isSignedByApple: isSignedByApple(code)
             )
         }
 

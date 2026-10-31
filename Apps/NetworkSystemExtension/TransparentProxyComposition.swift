@@ -32,7 +32,8 @@ struct TransparentProxyComposition: Sendable {
                 pathMTU: PrimaryInterfaceMTUReader()
             ),
             router: ProxiedFlowRouter(
-                sourceResolver: SourceApplicationResolver(reader: SecurityCodeIdentityReader()),
+                sourceResolver: SourceApplicationResolver(
+                    reader: SecurityCodeIdentityReader(), ancestry: KernelProcessAncestryReader()),
                 attribution: SuspiciousAttributionMonitor(log: SuspiciousAttributionLogRecorder(log: log)),
                 environment: RelayEnvironment(
                     targetQueue: DispatchQueue(
