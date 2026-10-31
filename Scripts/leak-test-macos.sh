@@ -3,6 +3,7 @@ set -euo pipefail
 
 probe="${ROUTING_PROBE:-/Applications/RoutingProbe.app/Contents/MacOS/RoutingProbe}"
 echo_address="https://api.ipify.org"
+reachability_address="https://captive.apple.com/hotspot-detect.html"
 resolver_identity="whoami.akamai.net"
 ipv6_destination="2606:4700:4700::1111"
 blocking_budget_milliseconds=5000
@@ -50,6 +51,7 @@ measure() {
     probe_output="$("$probe")"
     system_resolver="$(awk '/^nameserver/ { print $2; exit }' /etc/resolv.conf)"
     direct_address="$(curl -s --max-time 10 "$echo_address" || true)"
+    reachability_status="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$reachability_address" || true)"
     direct_resolver="$(dig +short +time=3 +tries=1 "@$system_resolver" "$resolver_identity" A 2>/dev/null | tail -1 || true)"
     direct_ipv6="$(curl -6 -s -o /dev/null -w '%{http_code}' --max-time 5 "https://[$ipv6_destination]/" || true)"
 }
@@ -94,7 +96,12 @@ check_unavailable() {
         is_true "$([[ "$(probe_elapsed address)" -lt "$blocking_budget_milliseconds" ]] && echo true)"
     check "the DNS query of the selected RoutingProbe is refused" \
         is_true "$([[ "$(probe_field resolver 2)" == ok && "$(probe_field resolver 3)" == REFUSED ]] && echo true)"
-    check "the unselected curl still reaches the internet" is_true "$([[ -n "$direct_address" ]] && echo true)"
+    check "the unselected curl still reaches the internet" is_true "$([[ "$reachability_status" == 200 ]] && echo true)"
+    if [[ -n "$direct_address" ]]; then
+        report INFO "the unselected curl resolves the name refused to RoutingProbe"
+    else
+        report INFO "the unselected curl cannot resolve the name refused to RoutingProbe: mDNSResponder gives every app the cached refusal for about a minute"
+    fi
 }
 
 check_background() {
