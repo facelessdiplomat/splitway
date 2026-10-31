@@ -116,6 +116,46 @@ struct FlowRoutingDeciderTests {
             decision: .direct
         ),
         DecisionCase(
+            "tool launched by the selected application",
+            source: FlowRoutingFixtures.appleGit.launched(by: [FlowRoutingFixtures.browser]),
+            decision: .tunnel
+        ),
+        DecisionCase(
+            "tool launched through a shell of the selected application",
+            source: FlowRoutingFixtures.appleGit.launched(by: [
+                FlowRoutingFixtures.appleShell, FlowRoutingFixtures.browser,
+            ]),
+            decision: .tunnel
+        ),
+        DecisionCase(
+            "agent outside the bundle launched by a helper of the selected application",
+            source: FlowRoutingFixtures.agentOutsideTheBundle.launched(by: [
+                FlowRoutingFixtures.bundledExecutable, FlowRoutingFixtures.browser,
+            ]),
+            decision: .tunnel
+        ),
+        DecisionCase(
+            "agent outside the bundle that nothing selected launched",
+            source: FlowRoutingFixtures.agentOutsideTheBundle,
+            decision: .direct
+        ),
+        DecisionCase(
+            "tool launched by an application that is not selected",
+            source: FlowRoutingFixtures.appleGit.launched(by: [FlowRoutingFixtures.otherApplication]),
+            decision: .direct
+        ),
+        DecisionCase(
+            "tool launched by code that claims the selected identifier",
+            source: FlowRoutingFixtures.appleGit.launched(by: [FlowRoutingFixtures.spoofedBrowser]),
+            decision: .direct
+        ),
+        DecisionCase(
+            "tool launched by the selected application, unavailable tunnel",
+            source: FlowRoutingFixtures.appleGit.launched(by: [FlowRoutingFixtures.browser]),
+            tunnel: .unavailable,
+            decision: .block
+        ),
+        DecisionCase(
             "destination given by host name",
             source: FlowRoutingFixtures.browser,
             destination: .hostname("example.com"),

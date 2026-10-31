@@ -57,6 +57,15 @@ public enum FlowRoutingFixtures {
         executablePath: "/Users/someone/Downloads/tool",
         unverifiedSigningIdentifier: "com.example.browser"
     )
+    public static let appleGit = SourceApplication(
+        signingIdentifier: "com.apple.git", teamIdentifier: nil, executablePath: "/usr/bin/git")
+    public static let appleShell = SourceApplication(
+        signingIdentifier: "com.apple.zsh", teamIdentifier: nil, executablePath: "/bin/zsh")
+    public static let agentOutsideTheBundle = SourceApplication(
+        signingIdentifier: "com.example.browser.agent",
+        teamIdentifier: browserTeam,
+        executablePath: "/Users/someone/Library/Application Support/Browser/agent.app/Contents/MacOS/agent"
+    )
     public static let otherApplication = SourceApplication(
         signingIdentifier: "com.example.mail",
         teamIdentifier: "MAIL123456",
