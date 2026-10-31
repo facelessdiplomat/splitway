@@ -14,7 +14,20 @@ public final class SourceApplicationResolver: Sendable {
         sources = Mutex(LeastRecentlyUsedCache(capacity: cacheCapacity))
     }
 
-    public func sourceApplication(of auditToken: AuditToken?) -> SourceApplication {
+    public func sourceApplication(of auditToken: AuditToken?, signedAs claimedIdentifier: String? = nil)
+        -> SourceApplication
+    {
+        let source = verifiedSource(of: auditToken)
+        guard source == Self.unknownSource, let claimedIdentifier, !claimedIdentifier.isEmpty else { return source }
+        return SourceApplication(
+            signingIdentifier: nil,
+            teamIdentifier: nil,
+            executablePath: nil,
+            unverifiedSigningIdentifier: claimedIdentifier
+        )
+    }
+
+    private func verifiedSource(of auditToken: AuditToken?) -> SourceApplication {
         guard let auditToken else { return Self.unknownSource }
         return sources.withLock { cache in
             if let cached = cache.value(for: auditToken.processInstance) {

@@ -22,9 +22,13 @@ public struct ApplicationMatcher: Sendable {
         if let identifier = source.signingIdentifier, let teams = teamsBySigningIdentifier[identifier] {
             return teams.contains(source.teamIdentifier)
         }
-        guard let executablePath = source.executablePath else { return false }
-        return pathRules.contains { rule in
-            rule.covers(executablePath) && (rule.teamIdentifier == nil || rule.teamIdentifier == source.teamIdentifier)
+        if let executablePath = source.executablePath {
+            return pathRules.contains { rule in
+                rule.covers(executablePath)
+                    && (rule.teamIdentifier == nil || rule.teamIdentifier == source.teamIdentifier)
+            }
         }
+        guard source.signingIdentifier == nil, let unverified = source.unverifiedSigningIdentifier else { return false }
+        return teamsBySigningIdentifier[unverified] != nil
     }
 }

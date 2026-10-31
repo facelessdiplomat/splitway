@@ -9,7 +9,8 @@
             self.init(
                 auditToken: Self.auditToken(of: flow),
                 remoteEndpoint: remoteEndpoint,
-                remoteHostname: flow.remoteHostname
+                remoteHostname: flow.remoteHostname,
+                signingIdentifier: Self.signingIdentifier(of: flow)
             )
         }
 
@@ -18,8 +19,14 @@
             self.init(
                 auditToken: Self.auditToken(of: flow),
                 remoteEndpoint: remoteEndpoint,
-                remoteHostname: flow.remoteHostname
+                remoteHostname: flow.remoteHostname,
+                signingIdentifier: Self.signingIdentifier(of: flow)
             )
+        }
+
+        private static func signingIdentifier(of flow: NEAppProxyFlow) -> String? {
+            let identifier = flow.metaData.sourceAppSigningIdentifier
+            return identifier.isEmpty ? nil : identifier
         }
 
         private static func auditToken(of flow: NEAppProxyFlow) -> AuditToken? {

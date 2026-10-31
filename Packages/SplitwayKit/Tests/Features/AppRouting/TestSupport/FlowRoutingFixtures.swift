@@ -39,6 +39,24 @@ public enum FlowRoutingFixtures {
         teamIdentifier: browserTeam,
         executablePath: "/Applications/Browser.app Tools/updater"
     )
+    public static let exitedBrowser = SourceApplication(
+        signingIdentifier: nil,
+        teamIdentifier: nil,
+        executablePath: nil,
+        unverifiedSigningIdentifier: "com.example.browser"
+    )
+    public static let exitedMail = SourceApplication(
+        signingIdentifier: nil,
+        teamIdentifier: nil,
+        executablePath: nil,
+        unverifiedSigningIdentifier: "com.example.mail"
+    )
+    public static let readableToolClaimingTheBrowser = SourceApplication(
+        signingIdentifier: nil,
+        teamIdentifier: nil,
+        executablePath: "/Users/someone/Downloads/tool",
+        unverifiedSigningIdentifier: "com.example.browser"
+    )
     public static let otherApplication = SourceApplication(
         signingIdentifier: "com.example.mail",
         teamIdentifier: "MAIL123456",

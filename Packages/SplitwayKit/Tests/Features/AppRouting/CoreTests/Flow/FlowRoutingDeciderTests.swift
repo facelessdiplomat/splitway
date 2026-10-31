@@ -95,6 +95,27 @@ struct FlowRoutingDeciderTests {
             decision: .direct
         ),
         DecisionCase(
+            "selected application that already exited",
+            source: FlowRoutingFixtures.exitedBrowser,
+            decision: .tunnel
+        ),
+        DecisionCase(
+            "selected application that already exited, unavailable tunnel",
+            source: FlowRoutingFixtures.exitedBrowser,
+            tunnel: .unavailable,
+            decision: .block
+        ),
+        DecisionCase(
+            "application that already exited and is not selected",
+            source: FlowRoutingFixtures.exitedMail,
+            decision: .direct
+        ),
+        DecisionCase(
+            "readable code that claims the identifier of a selected application",
+            source: FlowRoutingFixtures.readableToolClaimingTheBrowser,
+            decision: .direct
+        ),
+        DecisionCase(
             "destination given by host name",
             source: FlowRoutingFixtures.browser,
             destination: .hostname("example.com"),
