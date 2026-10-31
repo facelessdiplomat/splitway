@@ -13,7 +13,7 @@
 	<key>NetworkExtension</key>
 	<dict>
 		<key>NEMachServiceName</key>
-		<string>$(TeamIdentifierPrefix)$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension</string>
+		<string>$(TeamIdentifierPrefix)$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.network-extension.$(CURRENT_PROJECT_VERSION)</string>
 		<key>NEProviderClasses</key>
 		<dict>
 			<key>com.apple.networkextension.packet-tunnel</key>
