@@ -8,11 +8,22 @@ import (
 	"time"
 )
 
-type addressBook map[netip.Addr]netip.Addr
+type addressBook struct {
+	reals           map[netip.Addr]netip.Addr
+	openConnections map[netip.Addr]int
+}
 
 func (book addressBook) realAddress(fake netip.Addr) (netip.Addr, bool) {
-	real, isKnown := book[fake]
+	real, isKnown := book.reals[fake]
 	return real, isKnown
+}
+
+func (book addressBook) connectionOpened(fake netip.Addr) {
+	book.openConnections[fake]++
+}
+
+func (book addressBook) connectionClosed(fake netip.Addr) {
+	book.openConnections[fake]--
 }
 
 type manualClock struct {
@@ -35,7 +46,10 @@ type translatorFixture struct {
 
 func newTranslatorFixture(capacity int) translatorFixture {
 	clock := &manualClock{current: time.Unix(1_800_000_000, 0)}
-	book := addressBook{fakeIPv4: realIPv4, otherFake: realIPv4, fakeIPv6: realIPv6}
+	book := addressBook{
+		reals:           map[netip.Addr]netip.Addr{fakeIPv4: realIPv4, otherFake: realIPv4, fakeIPv6: realIPv6},
+		openConnections: map[netip.Addr]int{},
+	}
 	translator := newAddressTranslator([]netip.Prefix{fakeIPv4s, fakeIPv6s}, book, clock.now, capacity)
 	return translatorFixture{translator: translator, clock: clock, book: book}
 }
@@ -173,7 +187,7 @@ func TestTranslatorTranslatesIPv6(t *testing.T) {
 func TestTranslatorKeepsTheRealAddressOfAnOpenConnection(t *testing.T) {
 	fixture := newTranslatorFixture(maximumTrackedConnections)
 	fixture.send(t, tcpSpec(port(deviceIPv4, 50000), port(fakeIPv4, 443), tcpFlagSYN, nil))
-	fixture.book[fakeIPv4] = netip.MustParseAddr("93.184.216.34")
+	fixture.book.reals[fakeIPv4] = netip.MustParseAddr("93.184.216.34")
 
 	packet := fixture.send(t, tcpSpec(port(deviceIPv4, 50000), port(fakeIPv4, 443), tcpFlagACK, nil))
 
@@ -267,6 +281,19 @@ func TestTranslatorServesBothDirectionsConcurrently(t *testing.T) {
 	}
 
 	group.Wait()
+}
+
+func TestTranslatorHoldsTheFakeAddressWhileItsConnectionIsTracked(t *testing.T) {
+	fixture := newTranslatorFixture(1)
+	fixture.send(t, udpSpec(port(deviceIPv4, 50001), port(fakeIPv4, 443), nil))
+	openWhileTracked := fixture.book.openConnections[fakeIPv4]
+	fixture.clock.advance(udpMappingTimeout + time.Second)
+
+	fixture.send(t, udpSpec(port(deviceIPv4, 50002), port(otherFake, 443), nil))
+
+	if openWhileTracked != 1 || fixture.book.openConnections[fakeIPv4] != 0 || fixture.book.openConnections[otherFake] != 1 {
+		t.Fatalf("expected the first address held and then released, got %d then %v", openWhileTracked, fixture.book.openConnections)
+	}
 }
 
 func exchangeUDP(fixture translatorFixture, t *testing.T) {

@@ -38,6 +38,7 @@ const (
 	tcpDataOffsetShift                = 4
 	tcpFlagsOffset                    = 13
 	udpHeaderByteCount                = 8
+	udpLengthOffset                   = 4
 	sourcePortOffset                  = 0
 	destinationPortOffset             = 2
 	protocolTCP                       = 6

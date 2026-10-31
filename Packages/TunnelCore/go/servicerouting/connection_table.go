@@ -13,6 +13,7 @@ type recencyList struct {
 }
 
 type connectionTable struct {
+	observer   connectionObserver
 	slots      []connection
 	free       []int32
 	byOutbound map[connectionKey]int32
@@ -20,9 +21,10 @@ type connectionTable struct {
 	recency    [connectionClassCount]recencyList
 }
 
-func newConnectionTable(capacity int) *connectionTable {
+func newConnectionTable(capacity int, observer connectionObserver) *connectionTable {
 	capacity = max(capacity, 1)
 	table := &connectionTable{
+		observer:   observer,
 		slots:      make([]connection, capacity),
 		free:       make([]int32, capacity),
 		byOutbound: make(map[connectionKey]int32, capacity),
@@ -73,6 +75,7 @@ func (table *connectionTable) open(outboundKey connectionKey, real netip.Addr, n
 	table.byOutbound[outboundKey] = position
 	table.byInbound[inboundKey] = position
 	table.pushNewest(position)
+	table.observer.connectionOpened(outboundKey.remote.Addr())
 	return position, true
 }
 
@@ -127,6 +130,7 @@ func (table *connectionTable) remove(position int32) {
 	table.unlink(position)
 	delete(table.byOutbound, table.slots[position].outboundKey)
 	delete(table.byInbound, table.slots[position].inboundKey)
+	table.observer.connectionClosed(table.slots[position].fake)
 	table.slots[position] = connection{}
 	table.free = append(table.free, position)
 }

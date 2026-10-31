@@ -6,7 +6,13 @@ import (
 	"time"
 )
 
+type connectionObserver interface {
+	connectionOpened(fake netip.Addr)
+	connectionClosed(fake netip.Addr)
+}
+
 type fakeAddressSource interface {
+	connectionObserver
 	realAddress(fake netip.Addr) (netip.Addr, bool)
 }
 
@@ -25,7 +31,7 @@ func newAddressTranslator(fakeNetworks []netip.Prefix, addresses fakeAddressSour
 		addresses:    addresses,
 		clock:        clock,
 		start:        clock(),
-		connections:  newConnectionTable(capacity),
+		connections:  newConnectionTable(capacity, addresses),
 	}
 }
 
@@ -34,6 +40,16 @@ func (translator *addressTranslator) outbound(packet []byte) bool {
 	if !isParsed {
 		return true
 	}
+	return translator.translateOutbound(packet, layout)
+}
+
+func (translator *addressTranslator) inbound(packet []byte) {
+	if layout, isParsed := layoutOf(packet); isParsed {
+		translator.translateInbound(packet, layout)
+	}
+}
+
+func (translator *addressTranslator) translateOutbound(packet []byte, layout packetLayout) bool {
 	fake := layout.destination(packet)
 	if !translator.isFake(fake) {
 		return true
@@ -54,9 +70,8 @@ func (translator *addressTranslator) outbound(packet []byte) bool {
 	return true
 }
 
-func (translator *addressTranslator) inbound(packet []byte) {
-	layout, isParsed := layoutOf(packet)
-	if !isParsed || !layout.hasPorts {
+func (translator *addressTranslator) translateInbound(packet []byte, layout packetLayout) {
+	if !layout.hasPorts {
 		return
 	}
 	key := connectionKey{

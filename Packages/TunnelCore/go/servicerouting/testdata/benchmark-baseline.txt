@@ -1,5 +1,5 @@
-BenchmarkCopyingASegment 1 0 B/op 111633.67 MB/s 0 allocs/op 12.54 ns/op
-BenchmarkTranslatorOpensConnectionsInAFullTable 1 0 B/op 0 allocs/op 276.6 ns/op
-BenchmarkTranslatorRewritesAnInboundSegment 1 0 B/op 19268.21 MB/s 0 allocs/op 72.66 ns/op
-BenchmarkTranslatorRewritesAnOutboundIPv6Segment 1 0 B/op 17749.06 MB/s 0 allocs/op 80 ns/op
-BenchmarkTranslatorRewritesAnOutboundSegment 1 0 B/op 18761.64 MB/s 0 allocs/op 74.62 ns/op
+BenchmarkCopyingASegment 1 0 B/op 109452.15 MB/s 0 allocs/op 12.79 ns/op
+BenchmarkTranslatorOpensConnectionsInAFullTable 1 0 B/op 0 allocs/op 310.4 ns/op
+BenchmarkTranslatorRewritesAnInboundSegment 1 0 B/op 18000.58 MB/s 0 allocs/op 77.78 ns/op
+BenchmarkTranslatorRewritesAnOutboundIPv6Segment 1 0 B/op 16156.85 MB/s 0 allocs/op 87.89 ns/op
+BenchmarkTranslatorRewritesAnOutboundSegment 1 0 B/op 18099.9 MB/s 0 allocs/op 77.35 ns/op
