@@ -44,13 +44,14 @@ struct TransparentProxyTestEnvironment {
         ),
     ]
 
-    let engine = InMemoryUserspaceNetworkEngine()
+    let engine: InMemoryUserspaceNetworkEngine
     let ticker = ManualTicker()
     let clock = ManualWallClock(Date(timeIntervalSince1970: 1_793_268_900))
     let attributionLog = RecordingSuspiciousAttributionLog()
     let session: TransparentProxySession
 
-    init() {
+    init(network: InMemoryUserspaceNetwork = InMemoryUserspaceNetwork()) {
+        engine = InMemoryUserspaceNetworkEngine(network: network)
         session = TransparentProxySession(
             starter: TransparentProxyStarter(
                 engine: engine,

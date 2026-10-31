@@ -230,13 +230,16 @@ let features: [FeatureModule] = [
         coreDependencies: [
             "TunnelConfiguration", "AppRouting", "TunnelEngine", "PacketTunnel", "DNSProxy", "ProviderMessaging",
         ],
-        testDependencies: ["TunnelConfigurationTestSupport", "AppRoutingTestSupport", "TunnelEngineTestSupport"],
+        testDependencies: [
+            "TunnelConfigurationTestSupport", "AppRoutingTestSupport", "TunnelEngineTestSupport", "DNSProxyTestSupport",
+        ],
         providesTestSupport: true
     ),
     FeatureModule(
         name: "DNSProxy",
         coreDependencies: ["TunnelConfiguration"],
-        testDependencies: ["TunnelConfigurationTestSupport"]
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        providesTestSupport: true
     ),
     FeatureModule(
         name: "SecretDelivery",

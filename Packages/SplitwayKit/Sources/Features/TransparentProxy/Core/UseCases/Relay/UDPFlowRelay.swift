@@ -18,6 +18,7 @@ public final class UDPFlowRelay: Sendable {
     private let policy: UDPRelayPolicy
     private let clock: any WallClock
     private let destination: @Sendable (FlowEndpoint) -> UserspaceNetworkDestination?
+    private let replyObserver: (@Sendable (ProxiedDatagram) -> Void)?
     private let queue: DispatchQueue
     private let state: Mutex<State>
 
@@ -26,12 +27,14 @@ public final class UDPFlowRelay: Sendable {
         network: any RunningUserspaceNetwork,
         policy: UDPRelayPolicy,
         environment: RelayEnvironment,
+        replyObserver: (@Sendable (ProxiedDatagram) -> Void)? = nil,
         destination: @escaping @Sendable (FlowEndpoint) -> UserspaceNetworkDestination?
     ) {
         self.flow = flow
         self.network = network
         self.policy = policy
         self.destination = destination
+        self.replyObserver = replyObserver
         clock = environment.clock
         queue = DispatchQueue(label: "Splitway.UDPFlowRelay", target: environment.targetQueue)
         state = Mutex(State(associations: UDPAssociationTable(policy: policy), lastActivity: environment.clock.now()))
@@ -85,6 +88,7 @@ public final class UDPFlowRelay: Sendable {
             return true
         }
         guard isActive else { return }
+        replyObserver?(datagram)
         flow.writeDatagrams([datagram]) { error in
             if let error {
                 self.queue.async { self.finish(with: error) }

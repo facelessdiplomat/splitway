@@ -1,7 +1,11 @@
+import Foundation
+
 struct DNSMessageReader {
     private static let compressionPointerMarker: UInt8 = 0xC0
     private static let compressionPointerByteCount = 2
+    private static let compressionPointerOffsetMask: UInt8 = 0x3F
     private static let maximumNameByteCount = 255
+    private static let labelSeparator = "."
 
     private let bytes: [UInt8]
     private(set) var offset: Int
@@ -26,6 +30,41 @@ struct DNSMessageReader {
     mutating func readUInt32() -> UInt32? {
         guard bytes.count - offset >= 4, let high = readUInt16(), let low = readUInt16() else { return nil }
         return UInt32(high) << 16 | UInt32(low)
+    }
+
+    mutating func readName() -> String? {
+        var labels: [String] = []
+        var position = offset
+        var offsetAfterName: Int?
+        var nameByteCount = 0
+        while position < bytes.count {
+            let labelLength = bytes[position]
+            if labelLength & Self.compressionPointerMarker == Self.compressionPointerMarker {
+                guard position + 1 < bytes.count else { return nil }
+                let target = Int(labelLength & Self.compressionPointerOffsetMask) << 8 | Int(bytes[position + 1])
+                guard target < position else { return nil }
+                offsetAfterName = offsetAfterName ?? position + Self.compressionPointerByteCount
+                position = target
+                continue
+            }
+            guard labelLength & Self.compressionPointerMarker == 0 else { return nil }
+            if labelLength == 0 {
+                offset = offsetAfterName ?? position + 1
+                return labels.joined(separator: Self.labelSeparator)
+            }
+            let labelEnd = position + 1 + Int(labelLength)
+            nameByteCount += Int(labelLength) + 1
+            guard labelEnd <= bytes.count, nameByteCount <= Self.maximumNameByteCount,
+                let label = String(bytes: bytes[(position + 1)..<labelEnd], encoding: .utf8)
+            else { return nil }
+            labels.append(label)
+            position = labelEnd
+        }
+        return nil
+    }
+
+    func bytes(in range: Range<Int>) -> ArraySlice<UInt8> {
+        bytes[range]
     }
 
     mutating func skipName() -> Bool {

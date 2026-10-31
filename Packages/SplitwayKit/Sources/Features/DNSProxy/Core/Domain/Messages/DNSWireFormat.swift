@@ -12,6 +12,11 @@ enum DNSWireFormat {
     static let recordClassByteCount = 2
     static let queryResponseFlag: UInt8 = 0x80
     static let optionRecordType: UInt16 = 41
+    static let addressRecordType: UInt16 = 1
+    static let ipv6AddressRecordType: UInt16 = 28
+    static let internetClass: UInt16 = 1
+    static let responseCodeMask: UInt8 = 0x0F
+    static let noErrorResponseCode: UInt8 = 0
     static let dnssecOKFlag: UInt16 = 0x8000
 
     static func bytes(of value: UInt16) -> [UInt8] {

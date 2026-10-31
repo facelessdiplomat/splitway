@@ -41,6 +41,7 @@ public struct TransparentProxyStarter: Sendable {
                 tunnelNetworks: plan.includedNetworks,
                 resolvesNamesThroughTunnel: !configuration.interface.dns.servers.isEmpty
             ),
+            answeredNames: TunnelAnsweredNames(),
             carriesIPv6: configuration.interface.addresses.contains { network in network.address.family == .ipv6 }
         )
     }

@@ -1,6 +1,7 @@
 import Foundation
 import SharedKernel
 import SharedKernelTestSupport
+import Synchronization
 import Testing
 import TransparentProxy
 import TransparentProxyTestSupport
@@ -61,6 +62,29 @@ struct UDPFlowRelayTests {
         #expect(connection.destination == RelayFixtures.destination(of: tunnelResolver))
         connection.deliver(Array("answer".utf8))
         await flow.state.wait { snapshot in snapshot.writtenDatagrams == [Self.datagram("answer", to: queried)] }
+    }
+
+    @Test
+    func showsEachReplyToTheObserverBeforeTheApplication() async throws {
+        let (flow, network) = (ScriptedDatagramFlow(), InMemoryUserspaceNetwork())
+        let endpoint = try RelayFixtures.endpoint(53, port: 53)
+        let observed = Mutex<[ProxiedDatagram]>([])
+        let relay = UDPFlowRelay(
+            flow: flow,
+            network: network,
+            policy: .standard,
+            environment: RelayFixtures.environment(),
+            replyObserver: { reply in observed.withLock { replies in replies.append(reply) } },
+            destination: { endpoint in RelayFixtures.destination(of: endpoint) }
+        )
+        relay.start(onFinish: {})
+
+        flow.send([Self.datagram("query", to: endpoint)])
+        let connection = await Self.receivingConnection(0, of: network)
+        connection.deliver(Array("answer".utf8))
+
+        await flow.state.wait { snapshot in snapshot.writtenDatagrams == [Self.datagram("answer", to: endpoint)] }
+        #expect(observed.withLock { replies in replies } == [Self.datagram("answer", to: endpoint)])
     }
 
     @Test

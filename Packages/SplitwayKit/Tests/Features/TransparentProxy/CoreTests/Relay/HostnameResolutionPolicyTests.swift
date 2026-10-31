@@ -41,6 +41,14 @@ struct HostnameResolutionPolicyTests {
     }
 
     @Test
+    func keepsTheSystemsAddressWhenTheTunnelAnswersWithItToo() throws {
+        let policy = try Self.policy(resolvesNamesThroughTunnel: true)
+        let resolved = [try IPAddress("198.51.100.5"), Self.systemAddress]
+
+        #expect(policy.address(choosingFrom: resolved, insteadOf: Self.systemAddress) == Self.systemAddress)
+    }
+
+    @Test
     func keepsTheSystemsAddressWhenNoResolvedAddressFits() throws {
         let policy = try Self.policy(resolvesNamesThroughTunnel: true)
         let outsideTheTunnel = [try IPAddress("10.0.0.5"), try IPAddress("2001:db8::5")]
