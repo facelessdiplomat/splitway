@@ -1,0 +1,116 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@"
+          }
+        }
+      }
+    },
+    "Add a Tunnel…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить туннель…"
+          }
+        }
+      }
+    },
+    "No tunnels yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Туннелей пока нет"
+          }
+        }
+      }
+    },
+    "Not connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подключения"
+          }
+        }
+      }
+    },
+    "Open Splitway": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Splitway"
+          }
+        }
+      }
+    },
+    "Quit Splitway": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завершить Splitway"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки…"
+          }
+        }
+      }
+    },
+    "Splitway, connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Splitway, туннель подключён"
+          }
+        }
+      }
+    },
+    "Splitway, connecting": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Splitway, туннель подключается"
+          }
+        }
+      }
+    },
+    "Splitway, connection failed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Splitway, ошибка подключения"
+          }
+        }
+      }
+    },
+    "Splitway, disconnected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Splitway, туннель отключён"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

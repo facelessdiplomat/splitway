@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension TunnelRowStatus {
-    var title: Text {
+    public var title: Text {
         switch self {
         case .disconnected: Text("Disconnected", bundle: .module)
         case .connecting: Text("Connecting…", bundle: .module)

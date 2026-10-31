@@ -156,6 +156,10 @@ targets:
     dependencies:
       - target: NetworkSystemExtension
       - package: SplitwayKit
+        product: MenuBarPresentation
+      - package: SplitwayKit
+        product: MenuBarInfrastructure
+      - package: SplitwayKit
         product: TunnelLibraryPresentation
       - package: SplitwayKit
         product: TunnelLibraryInfrastructure
