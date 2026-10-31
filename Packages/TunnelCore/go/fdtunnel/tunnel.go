@@ -9,6 +9,7 @@ import (
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/tun"
+	"splitway/tunnelcore/servicerouting"
 )
 
 var (
@@ -32,6 +33,19 @@ func StartOnFileDescriptor(fileDescriptor int, configuration string, logger *dev
 		return nil, err
 	}
 	return Start(tunnelInterface, configuration, logger)
+}
+
+func StartOnFileDescriptorWithServiceRouting(
+	fileDescriptor int,
+	configuration string,
+	plan servicerouting.Plan,
+	logger *device.Logger,
+) (*Tunnel, error) {
+	tunnelInterface, err := openTunnelInterface(fileDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	return Start(servicerouting.NewTranslatingDevice(tunnelInterface, plan), configuration, logger)
 }
 
 func Start(tunnelInterface tun.Device, configuration string, logger *device.Logger) (*Tunnel, error) {
