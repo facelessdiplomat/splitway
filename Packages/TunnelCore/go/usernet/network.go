@@ -30,7 +30,12 @@ func Start(options Options, configuration string, logger *device.Logger) (*Netwo
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInterfaceUnavailable, err)
 	}
-	tunnel, err := fdtunnel.Start(tunnelInterface, configuration, logger)
+	coalescing, err := newCoalescingDevice(tunnelInterface)
+	if err != nil {
+		tunnelInterface.Close()
+		return nil, fmt.Errorf("%w: %w", ErrInterfaceUnavailable, err)
+	}
+	tunnel, err := fdtunnel.Start(coalescing, configuration, logger)
 	if err != nil {
 		return nil, err
 	}
