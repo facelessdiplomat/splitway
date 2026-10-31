@@ -5,10 +5,14 @@ public enum ProbeRequest: Equatable, Sendable {
     case download(URL, attempts: Int)
     case upload(URL, attempts: Int, byteCount: Int)
     case latency(URL, attempts: Int)
+    case backgroundStart(URL, delaySeconds: Int)
+    case backgroundCollect(timeoutSeconds: Int)
 
     private static let defaultTransferAttempts = 3
     private static let defaultLatencyAttempts = 10
     private static let defaultUploadByteCount = 25_000_000
+    private static let defaultBackgroundDelaySeconds = 5
+    private static let defaultCollectionTimeoutSeconds = 30
     private static let webSchemes: Set<String> = ["http", "https"]
 
     public init(arguments: [String]) throws(ProbeRequestError) {
@@ -31,6 +35,13 @@ public enum ProbeRequest: Equatable, Sendable {
             self = .latency(
                 try Self.address(in: operands),
                 attempts: try Self.count(at: 1, in: operands, otherwise: Self.defaultLatencyAttempts))
+        case "background-start":
+            self = .backgroundStart(
+                try Self.address(in: operands),
+                delaySeconds: try Self.count(at: 1, in: operands, otherwise: Self.defaultBackgroundDelaySeconds))
+        case "background-collect":
+            self = .backgroundCollect(
+                timeoutSeconds: try Self.count(at: 0, in: operands, otherwise: Self.defaultCollectionTimeoutSeconds))
         default:
             throw .unknownMode(mode)
         }

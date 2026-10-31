@@ -47,6 +47,30 @@ struct ProbeRequestTests {
     }
 
     @Test
+    func startsABackgroundDownloadFiveSecondsLaterByDefault() throws {
+        let request = try ProbeRequest(arguments: ["background-start", Self.address])
+
+        #expect(request == .backgroundStart(try #require(URL(string: Self.address)), delaySeconds: 5))
+    }
+
+    @Test
+    func takesTheBackgroundDelayFromTheArguments() throws {
+        let request = try ProbeRequest(arguments: ["background-start", Self.address, "8"])
+
+        #expect(request == .backgroundStart(try #require(URL(string: Self.address)), delaySeconds: 8))
+    }
+
+    @Test
+    func waitsThirtySecondsForABackgroundDownloadByDefault() throws {
+        #expect(try ProbeRequest(arguments: ["background-collect"]) == .backgroundCollect(timeoutSeconds: 30))
+    }
+
+    @Test
+    func takesTheCollectionTimeoutFromTheArguments() throws {
+        #expect(try ProbeRequest(arguments: ["background-collect", "45"]) == .backgroundCollect(timeoutSeconds: 45))
+    }
+
+    @Test
     func rejectsAnUnknownMode() {
         #expect(throws: ProbeRequestError.unknownMode("stream")) {
             try ProbeRequest(arguments: ["stream", Self.address])
