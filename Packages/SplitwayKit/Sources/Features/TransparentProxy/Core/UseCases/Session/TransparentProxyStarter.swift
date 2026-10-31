@@ -5,15 +5,20 @@ import TunnelConfiguration
 import TunnelEngine
 
 public struct TransparentProxyStarter: Sendable {
-    private static let standardWireGuardMTU = 1_420
     private static let readinessKeepaliveSeconds = 25
 
     private let engine: any UserspaceNetworkEngine
     private let endpointResolution: ResolveTunnelEndpointsUseCase
+    private let pathMTU: any NetworkPathMTUReader
 
-    public init(engine: any UserspaceNetworkEngine, endpointResolution: ResolveTunnelEndpointsUseCase) {
+    public init(
+        engine: any UserspaceNetworkEngine,
+        endpointResolution: ResolveTunnelEndpointsUseCase,
+        pathMTU: any NetworkPathMTUReader
+    ) {
         self.engine = engine
         self.endpointResolution = endpointResolution
+        self.pathMTU = pathMTU
     }
 
     public func start(_ tunnel: ActiveTunnel) async throws(TransparentProxyError) -> TransparentProxyRuntime {
@@ -30,7 +35,8 @@ public struct TransparentProxyStarter: Sendable {
             resolvedEndpointAddresses: endpoints.values.map(\.address)
         )
         let decider = try Self.decider(for: tunnel.routingPolicy, plan: plan)
-        let network = try startNetwork(for: configuration, endpoints: endpoints)
+        let carriesIPv6 = configuration.interface.addresses.contains { network in network.address.family == .ipv6 }
+        let network = try startNetwork(for: configuration, endpoints: endpoints, carriesIPv6: carriesIPv6)
         keepHandshakesFresh(in: network, for: configuration)
         return TransparentProxyRuntime(
             network: network,
@@ -42,7 +48,7 @@ public struct TransparentProxyStarter: Sendable {
                 resolvesNamesThroughTunnel: !configuration.interface.dns.servers.isEmpty
             ),
             answeredNames: TunnelAnsweredNames(),
-            carriesIPv6: configuration.interface.addresses.contains { network in network.address.family == .ipv6 }
+            carriesIPv6: carriesIPv6
         )
     }
 
@@ -78,12 +84,17 @@ public struct TransparentProxyStarter: Sendable {
 
     private func startNetwork(
         for configuration: TunnelConfiguration,
-        endpoints: [PublicKey: ResolvedEndpoint]
+        endpoints: [PublicKey: ResolvedEndpoint],
+        carriesIPv6: Bool
     ) throws(TransparentProxyError) -> any RunningUserspaceNetwork {
         let interface = UserspaceNetworkInterface(
             addresses: configuration.interface.addresses.map(\.address),
             dnsServers: configuration.interface.dns.servers,
-            mtu: try Self.mtu(of: configuration)
+            mtu: try ProxyInterfaceMTU.mtu(
+                configured: configuration.interface.mtu,
+                pathMTU: pathMTU.currentPathMTU(),
+                carriesIPv6: carriesIPv6
+            )
         )
         do {
             return try engine.startNetwork(
@@ -92,17 +103,6 @@ public struct TransparentProxyStarter: Sendable {
             )
         } catch {
             throw .engineFailed(error)
-        }
-    }
-
-    private static func mtu(of configuration: TunnelConfiguration) throws(TransparentProxyError) -> MTU {
-        if let mtu = configuration.interface.mtu {
-            return mtu
-        }
-        do {
-            return try MTU(standardWireGuardMTU)
-        } catch {
-            throw .invalidInterface
         }
     }
 }

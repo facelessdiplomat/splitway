@@ -50,14 +50,15 @@ struct TransparentProxyTestEnvironment {
     let attributionLog = RecordingSuspiciousAttributionLog()
     let session: TransparentProxySession
 
-    init(network: InMemoryUserspaceNetwork = InMemoryUserspaceNetwork()) {
+    init(network: InMemoryUserspaceNetwork = InMemoryUserspaceNetwork(), pathMTU: Int? = nil) {
         engine = InMemoryUserspaceNetworkEngine(network: network)
         session = TransparentProxySession(
             starter: TransparentProxyStarter(
                 engine: engine,
                 endpointResolution: ResolveTunnelEndpointsUseCase(
                     resolver: FixedEndpointResolver(address: Self.endpointAddress)
-                )
+                ),
+                pathMTU: FixedNetworkPathMTU(pathMTU)
             ),
             router: ProxiedFlowRouter(
                 sourceResolver: SourceApplicationResolver(
