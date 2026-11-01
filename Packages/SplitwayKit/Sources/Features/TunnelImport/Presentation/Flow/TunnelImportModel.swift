@@ -37,12 +37,20 @@ public final class TunnelImportModel {
     }
 
     public func importClipboard() async {
-        guard let text = await actions.clipboard.text(), !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        else {
+        let text = await actions.clipboard.text()
+        await importPastedTexts(text.map { [$0] } ?? [])
+    }
+
+    public func importPastedTexts(_ texts: [String]) async {
+        let payloads =
+            texts
+            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .map(ImportPayload.text)
+        guard !payloads.isEmpty else {
             alert = .emptyClipboard
             return
         }
-        await showPreview(of: [.text(text)])
+        await showPreview(of: payloads)
     }
 
     public func importDropped(_ payloads: [ImportPayload]) async {

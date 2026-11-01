@@ -53,6 +53,8 @@ struct SplitwayRootScene: Scene {
     private var addition: TunnelAdditionOptions {
         TunnelAdditionOptions(methods: AppComposition.additionMethods) { method in
             composition.add(method)
+        } paste: { texts in
+            composition.paste(texts)
         }
     }
 
