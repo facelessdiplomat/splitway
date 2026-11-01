@@ -2,33 +2,19 @@
 
 import PackageDescription
 
-let strictSwiftSettings: [SwiftSetting] = [
-    .enableUpcomingFeature("ExistentialAny")
-]
+let strictSwiftSettings: [SwiftSetting] = [.enableUpcomingFeature("ExistentialAny")]
 
-enum FeatureLayer {
-    case core
-    case infrastructure
-    case presentation
-
-    func targetName(for feature: String) -> String {
-        switch self {
-        case .core: feature
-        case .infrastructure: "\(feature)Infrastructure"
-        case .presentation: "\(feature)Presentation"
-        }
-    }
+enum FeatureLayer: String {
+    case core = "Core"
+    case infrastructure = "Infrastructure"
+    case presentation = "Presentation"
 
     var resources: [Resource]? {
         self == .presentation ? [.process("Resources")] : nil
     }
 
-    var directoryName: String {
-        switch self {
-        case .core: "Core"
-        case .infrastructure: "Infrastructure"
-        case .presentation: "Presentation"
-        }
+    func targetName(for feature: String) -> String {
+        self == .core ? feature : feature + rawValue
     }
 }
 
@@ -83,7 +69,7 @@ struct FeatureModule {
         let target: Target = .target(
             name: targetName,
             dependencies: dependencies(for: layer),
-            path: "Sources/Features/\(name)/\(layer.directoryName)",
+            path: "Sources/Features/\(name)/\(layer.rawValue)",
             resources: layer == .infrastructure ? infrastructureResources : layer.resources,
             swiftSettings: strictSwiftSettings
         )
@@ -93,7 +79,7 @@ struct FeatureModule {
             .testTarget(
                 name: "\(targetName)Tests",
                 dependencies: layerTestDependencies,
-                path: "Tests/Features/\(name)/\(layer.directoryName)Tests",
+                path: "Tests/Features/\(name)/\(layer.rawValue)Tests",
                 swiftSettings: strictSwiftSettings
             ),
         ]
@@ -221,8 +207,10 @@ let features: [FeatureModule] = [
     FeatureModule(
         name: "PacketTunnel",
         layers: [.core, .infrastructure],
-        coreDependencies: ["TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging"],
-        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"]
+        coreDependencies: [
+            "TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging", "ServiceCatalog",
+        ],
+        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport", "ServiceCatalogTestSupport"]
     ),
     FeatureModule(
         name: "TransparentProxy",
@@ -270,6 +258,14 @@ let features: [FeatureModule] = [
         coreDependencies: ["AppRouting", "TunnelLibrary", "TunnelEngine", "ProviderMessaging"],
         infrastructureDependencies: ["ProviderMessagingInfrastructure"],
         testDependencies: ["TunnelConfigurationTestSupport"],
+        providesTestSupport: true
+    ),
+    FeatureModule(
+        name: "ServiceCatalog",
+        layers: [.core, .infrastructure],
+        coreDependencies: ["AppRouting", "TunnelConfiguration"],
+        testDependencies: ["TunnelConfigurationTestSupport"],
+        infrastructureResources: [.process("Resources")],
         providesTestSupport: true
     ),
     FeatureModule(

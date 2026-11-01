@@ -206,7 +206,7 @@ Go-модуль разбит на пакеты по фичам:
 
 Go-пакеты документируются так же, как Swift-фичи: например, `docs/features/ServiceRouting.md` описывает `servicerouting`.
 
-C API (действующие функции описаны в [TunnelEngine](features/TunnelEngine.md) и [UserspaceNetwork](features/UserspaceNetwork.md); `tc_fd_tunnel_set_service_routing` появится в M5):
+C API (функции описаны в [TunnelEngine](features/TunnelEngine.md) и [UserspaceNetwork](features/UserspaceNetwork.md)):
 
 ```
 tc_version() -> *char

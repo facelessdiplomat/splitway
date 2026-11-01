@@ -50,6 +50,9 @@ public enum NetworkSettingsMapper {
         switch plan.scope {
         case .allDomains:
             settings.matchDomains = [everyDomain]
+        case .matchingDomains(let domains):
+            settings.matchDomains = domains.map(\.description)
+            settings.matchDomainsNoSearch = true
         }
         return settings
     }

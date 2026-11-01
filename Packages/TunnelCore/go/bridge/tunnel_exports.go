@@ -30,6 +30,15 @@ func tc_fd_tunnel_start(tunnelFileDescriptor C.int32_t, configuration *C.char, h
 	}))
 }
 
+//export tc_fd_tunnel_set_service_routing
+func tc_fd_tunnel_set_service_routing(handle C.int32_t, plan *C.char) C.TCStatus {
+	if plan == nil {
+		return C.TCStatus(statusInvalidArgument)
+	}
+	goPlan := C.GoString(plan)
+	return C.TCStatus(guarded(func() tunnelStatus { return setServiceRouting(int32(handle), goPlan) }))
+}
+
 //export tc_tunnel_update_config
 func tc_tunnel_update_config(handle C.int32_t, configuration *C.char) C.TCStatus {
 	if configuration == nil {

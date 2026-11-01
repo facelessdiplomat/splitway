@@ -1,7 +1,7 @@
 import TunnelCoreFramework
 import TunnelEngine
 
-final class TunnelCoreWireGuardDevice: RunningWireGuardDevice {
+final class TunnelCoreWireGuardDevice: RunningTunnelInterfaceDevice {
     private let handle: Int32
 
     init(handle: Int32) {
@@ -14,6 +14,12 @@ final class TunnelCoreWireGuardDevice: RunningWireGuardDevice {
 
     func apply(_ configuration: UAPIConfiguration) throws(TunnelEngineError) {
         let status = configuration.text.withCString { text in tc_tunnel_update_config(handle, text) }
+        try TunnelEngineError.check(status)
+    }
+
+    func applyServiceRouting(_ translation: ServiceRoutingTranslation) throws(TunnelEngineError) {
+        let document = try ServiceRoutingTranslationEncoder.document(for: translation)
+        let status = document.withCString { text in tc_fd_tunnel_set_service_routing(handle, text) }
         try TunnelEngineError.check(status)
     }
 

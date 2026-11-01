@@ -3,7 +3,8 @@ import DiagnosticsInfrastructure
 import Foundation
 import PacketTunnel
 import PacketTunnelInfrastructure
-import ProviderMessaging
+import ServiceCatalog
+import ServiceCatalogInfrastructure
 import TunnelCoreAdapter
 import TunnelLibrary
 
@@ -16,11 +17,11 @@ import TunnelLibrary
 struct PacketTunnelComposition: Sendable {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
     private static let logsPath = "Library/Logs/Splitway"
+    private static let storagePath = "Library/Application Support/Splitway"
     private static let fallbackSubsystem = "Splitway.PacketTunnel"
 
     let session: PacketTunnelSession
     let loadActiveTunnel: LoadActiveTunnelUseCase
-    let messageDispatcher: ProviderMessageDispatcher
     let log: LogRecorder
 
     init(bundle: Bundle = .main) {
@@ -39,10 +40,16 @@ struct PacketTunnelComposition: Sendable {
             engine: TunnelCoreWireGuardEngine(),
             interfaceLocator: UtunDescriptorLocator(),
             endpointResolver: SystemEndpointResolver(),
-            pathMonitor: NetworkPathObserver()
+            pathMonitor: NetworkPathObserver(),
+            routingPlanner: PlanTunnelRoutingUseCase(
+                serviceCatalog: LoadServiceCatalogUseCase(
+                    bundled: BundledServiceCatalogRepository.bundled,
+                    custom: FileCustomServiceRepository(
+                        directory: Self.groupDirectory(at: Self.storagePath, in: bundle))
+                )
+            )
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: Self.secretStore)
-        messageDispatcher = ProviderMessageDispatcher(handler: PacketTunnelMessageHandler(session: session))
     }
 
     private static var secretStore: any TunnelSecretStore {
@@ -54,10 +61,14 @@ struct PacketTunnelComposition: Sendable {
     }
 
     static func logDirectory(in bundle: Bundle) -> URL {
+        groupDirectory(at: logsPath, in: bundle)
+    }
+
+    private static func groupDirectory(at path: String, in bundle: Bundle) -> URL {
         let groupIdentifier = bundle.object(forInfoDictionaryKey: appGroupInfoKey) as? String
         let container = groupIdentifier.flatMap { identifier in
             FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
         }
-        return (container ?? FileManager.default.temporaryDirectory).appending(path: logsPath)
+        return (container ?? FileManager.default.temporaryDirectory).appending(path: path)
     }
 }

@@ -1,14 +1,14 @@
 import AppRouting
 import ProviderMessaging
 
-public struct TransparentProxyMessageHandler: ProviderMessageHandler {
+public struct TransparentProxyMessageHandler: ProviderMessageHandler, Sendable {
     private let session: TransparentProxySession
 
     public init(session: TransparentProxySession) {
         self.session = session
     }
 
-    public func handle(_ request: ProviderRequest) async -> ProviderResponse {
+    public nonisolated(nonsending) func handle(_ request: ProviderRequest) async -> ProviderResponse {
         switch request {
         case .runtimeStatistics:
             statisticsResponse()

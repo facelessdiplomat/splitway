@@ -1,24 +1,31 @@
 import Synchronization
 import TunnelEngine
 
-final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningWireGuardDevice {
+final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningTunnelInterfaceDevice {
     private let log: SessionEventLog
     private let startFailure: TunnelEngineError?
+    private let serviceRoutingFailure: TunnelEngineError?
     private let configurations = Mutex<[UAPIConfiguration]>([])
+    private let translations = Mutex<[ServiceRoutingTranslation]>([])
 
-    init(log: SessionEventLog, startFailure: TunnelEngineError?) {
+    init(log: SessionEventLog, startFailure: TunnelEngineError?, serviceRoutingFailure: TunnelEngineError?) {
         self.log = log
         self.startFailure = startFailure
+        self.serviceRoutingFailure = serviceRoutingFailure
     }
 
     var receivedConfigurations: [UAPIConfiguration] {
         configurations.withLock { configurations in configurations }
     }
 
+    var receivedTranslations: [ServiceRoutingTranslation] {
+        translations.withLock { translations in translations }
+    }
+
     func startDevice(
         tunnelFileDescriptor: Int32,
         configuration: UAPIConfiguration
-    ) throws(TunnelEngineError) -> any RunningWireGuardDevice {
+    ) throws(TunnelEngineError) -> any RunningTunnelInterfaceDevice {
         if let startFailure {
             throw startFailure
         }
@@ -30,6 +37,14 @@ final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningWireGuardDevice {
     func apply(_ configuration: UAPIConfiguration) throws(TunnelEngineError) {
         configurations.withLock { configurations in configurations.append(configuration) }
         log.record(.appliedConfiguration)
+    }
+
+    func applyServiceRouting(_ translation: ServiceRoutingTranslation) throws(TunnelEngineError) {
+        if let serviceRoutingFailure {
+            throw serviceRoutingFailure
+        }
+        translations.withLock { translations in translations.append(translation) }
+        log.record(.appliedServiceRouting)
     }
 
     func runtimeStatistics() throws(TunnelEngineError) -> RuntimeStatistics {

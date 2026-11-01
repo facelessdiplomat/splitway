@@ -3,6 +3,7 @@ package servicerouting
 import "time"
 
 type serviceRouter struct {
+	plan        Plan
 	interceptor *dnsInterceptor
 	translator  *addressTranslator
 }
@@ -10,6 +11,7 @@ type serviceRouter struct {
 func newServiceRouter(plan Plan, clock func() time.Time) *serviceRouter {
 	pool := newFakeAddressPool(plan.fakeNetworks(), clock, maximumFakeAddresses)
 	return &serviceRouter{
+		plan:        plan,
 		interceptor: newDNSInterceptor(plan.VirtualDNS, plan.UpstreamDNS, pool, clock),
 		translator:  newAddressTranslator(plan.fakePrefixes(), pool, clock, maximumTrackedConnections),
 	}

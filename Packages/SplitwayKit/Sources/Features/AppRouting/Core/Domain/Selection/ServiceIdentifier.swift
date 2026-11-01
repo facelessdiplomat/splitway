@@ -13,6 +13,10 @@ public struct ServiceIdentifier: Sendable, Hashable {
         self.value = value
     }
 
+    init(validatedValue value: String) {
+        self.value = value
+    }
+
     private static func isAllowed(_ character: Character) -> Bool {
         character.isASCII && (character.isLowercase || character.isNumber || character == separator)
     }

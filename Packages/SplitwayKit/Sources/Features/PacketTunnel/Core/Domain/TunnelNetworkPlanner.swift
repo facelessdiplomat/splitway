@@ -16,7 +16,7 @@ public enum TunnelNetworkPlanner {
             ipv4: try ipv4Plan(addresses: interface.addresses, routes: routes),
             ipv6: ipv6Plan(addresses: interface.addresses, routes: routes),
             dns: dnsPlan(for: interface.dns),
-            mtu: interface.mtu.map(TunnelMTU.fixed) ?? .pathMTUWithOverhead(bytes: TunnelMTU.wireGuardOverheadBytes)
+            mtu: TunnelMTU(interface: interface)
         )
     }
 

@@ -38,6 +38,10 @@ public final class RoutingSectionModel {
         policy.applicationSelection
     }
 
+    public var serviceSelection: ServiceSelection {
+        policy.serviceSelection
+    }
+
     public var offersUnavailableTunnelChoice: Bool {
         platform == .macOS
     }
@@ -57,5 +61,9 @@ public final class RoutingSectionModel {
 
     public func setApplications(_ selection: ApplicationSelection) {
         policy = policy.replacingApplicationSelection(with: selection)
+    }
+
+    public func setServices(_ selection: ServiceSelection) {
+        policy = policy.replacingServiceSelection(with: selection)
     }
 }

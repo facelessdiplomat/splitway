@@ -2,7 +2,11 @@ import TunnelConfiguration
 import TunnelEngine
 
 public struct PreparedTunnelStart: Sendable {
-    public let networkPlan: TunnelNetworkPlan
+    let routing: TunnelRouting
     let configuration: TunnelConfiguration
     let endpoints: [PublicKey: ResolvedEndpoint]
+
+    public var networkPlan: TunnelNetworkPlan {
+        routing.networkPlan
+    }
 }

@@ -17,6 +17,15 @@ extension RoutingPolicy {
         )
     }
 
+    public func replacingServiceSelection(with selection: ServiceSelection) -> RoutingPolicy {
+        RoutingPolicy(
+            modeKind: mode.kind,
+            applicationSelection: applicationSelection,
+            serviceSelection: selection,
+            whenTunnelUnavailable: whenTunnelUnavailable
+        )
+    }
+
     public func replacingTunnelUnavailableBehavior(with behavior: TunnelUnavailableBehavior) -> RoutingPolicy {
         RoutingPolicy(
             modeKind: mode.kind,

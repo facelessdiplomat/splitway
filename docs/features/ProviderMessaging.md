@@ -4,7 +4,7 @@
 |---|---|
 | Статус | завершена для M2 |
 | Платформы | shared |
-| Задачи | M2-07, M2-10 (конфигурация слота, причины остановки), M3-03 (ограничение ожидания ответа) |
+| Задачи | M2-07, M2-10 (конфигурация слота, причины остановки), M3-03 (ограничение ожидания ответа), M5-07 (обработчик в контексте провайдера) |
 | Таргеты | `ProviderMessaging`, `ProviderMessagingInfrastructure` |
 
 ## Назначение
@@ -29,7 +29,7 @@
 
 - **Конверт.** Сообщения и конфигурация слота упаковываются в `{ "protocolVersion": N, "payload": … }` общим `VersionedEnvelopeCoder`. Он сначала читает версию: чужая версия даёт явную ошибку, а не неверно прочитанные данные.
 - **Сообщения.** `ProviderRequest`: `runtimeStatistics`, `applyRoutingPolicy(policy:)`, `healthCheck`. `ProviderResponse`: `runtimeStatistics(statistics:)`, `routingPolicyApplied`, `health(isTunnelRunning:)`, `failure(reason:)`.
-- **Сторона расширения.** `ProviderMessageDispatcher` превращает любые байты в ответ. Чужую версию он отвечает `failure(.unsupportedProtocolVersion)`, мусор — `failure(.malformedRequest)`, и обработчик при этом не вызывается.
+- **Сторона расширения.** `ProviderMessageDispatcher` превращает любые байты в ответ. Чужую версию он отвечает `failure(.unsupportedProtocolVersion)`, мусор — `failure(.malformedRequest)`, и обработчик при этом не вызывается. Диспетчер обобщён по обработчику, а `ProviderMessageHandler.handle` — `nonisolated(nonsending)`: оба выполняются в контексте `handleAppMessage` провайдера. Поэтому обработчик может держать зависимости, которые не `Sendable`, например сам провайдер для `setTunnelNetworkSettings` ([PacketTunnel](PacketTunnel.md)). Диспетчер `Sendable`, если `Sendable` его обработчик: прозрачный прокси хранит его в своей композиции.
 - **Сторона приложения.** `TunnelProviderSessionMessenger` (actor над `NETunnelProviderSession`) кодирует запрос и декодирует ответ. Чужая версия ответа становится `incompatibleExtension(protocolVersion:)`. Ответ ждётся не дольше 3 с, после этого запрос завершается `noResponse`. `PendingProviderReply` пропускает только первый исход: ответ расширения или истечение срока.
 - **Слот.** `TunnelProviderConfigurationCodec` хранит в `providerConfiguration` только `TunnelProviderConfiguration` (id туннеля и снимок политики) под ключом `SplitwayTunnel`. Секретов там нет.
 - **Причина остановки.** `TunnelStopReason` — код `NSError` в домене `Splitway.TunnelStop`. Расширение передаёт его в `cancelTunnelWithError`, а приложение читает через `fetchLastDisconnectError`.
@@ -52,6 +52,7 @@
 | Конфигурация слота использует тот же конверт с ключом `protocolVersion` | Отдельный формат с `schemaVersion` | Один механизм версий для всего контракта приложения и расширения | Нет |
 | Причина остановки передаётся числом в `NSError` | Файл в App Group; сообщение перед остановкой | `cancelTunnelWithError` и `fetchLastDisconnectError` — штатный канал системы, работает и после завершения процесса расширения | Нет |
 | `TunnelProviderSessionMessenger` — actor | Структура с `@unchecked Sendable` | `NETunnelProviderSession` не `Sendable`; actor получает её через `sending` | Если Apple пометит сессию как `Sendable` |
+| Обработчик сообщений не обязан быть `Sendable` и выполняется в контексте вызывающего | Обработчик `Sendable`, а провайдер — за `@unchecked Sendable` | Пакетному туннелю нужен `setTunnelNetworkSettings` провайдера, а `NEPacketTunnelProvider` не `Sendable`. В контексте `handleAppMessage` провайдер никуда не передаётся | Если Apple пометит провайдер как `Sendable` |
 | Срок ожидания ответа — 3 с | Без срока; срок у каждого сценария | Экран статистики опрашивает расширение раз в секунду, и зависший запрос не должен останавливать опрос навсегда. Один срок для всех сообщений проще, а сообщения короткие | Если появятся долгие запросы |
 
 ## Отступления от правил разработки
@@ -83,3 +84,4 @@
 | 2026-10-29 | Протокол сообщений, диспетчер, адаптер приложения | M2-07 |
 | 2026-10-29 | Конфигурация слота, причины остановки, общий конверт | M2-10 |
 | 2026-10-29 | Срок ожидания ответа расширения | M3-03 |
+| 2026-11-01 | Диспетчер обобщён по обработчику, обработчик выполняется в контексте провайдера | M5-07 |
