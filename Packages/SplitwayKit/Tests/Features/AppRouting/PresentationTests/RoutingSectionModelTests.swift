@@ -129,6 +129,19 @@ struct RoutingSectionModelTests {
         #expect(model.policy.applicationSelection == selection)
     }
 
+    @Test
+    func replacesTheSelectedServices() throws {
+        let model = RoutingSectionModel(policy: .default, platform: .iOS)
+        model.selectMode(.selectedServices)
+        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
+
+        model.setServices(selection)
+
+        #expect(model.policy.mode == .selectedServices(selection))
+        #expect(model.serviceSelection == selection)
+        #expect(model.selectedServiceCount == 1)
+    }
+
     private static func safariSelection() throws -> ApplicationSelection {
         ApplicationSelection([
             try ApplicationIdentity(kind: .application, displayName: "Safari", path: "/Applications/Safari.app")

@@ -82,6 +82,16 @@ struct RoutingPolicyTests {
     }
 
     @Test
+    func replacesTheServicesWithoutChangingTheMode() throws {
+        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
+
+        let policy = RoutingPolicy.default.replacingServiceSelection(with: selection)
+
+        #expect(policy.mode == .allTraffic)
+        #expect(policy.serviceSelection == selection)
+    }
+
+    @Test
     func keepsTheSelectionsWhenWhatToDoWithoutTheTunnelChanges() throws {
         let selection = ApplicationSelection([try sampleApplication()])
         let policy = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)

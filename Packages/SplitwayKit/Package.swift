@@ -272,6 +272,7 @@ let features: [FeatureModule] = [
         testDependencies: ["TunnelConfigurationTestSupport"],
         providesTestSupport: true
     ),
+    FeatureModule(name: "ServiceCatalog", coreDependencies: ["AppRouting"], providesTestSupport: true),
     FeatureModule(
         name: "Shortcuts",
         coreDependencies: ["TunnelLibrary", "TunnelConnection"],
