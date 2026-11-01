@@ -8,9 +8,9 @@ struct FakeNetworkSelection {
 
     init(configuration: TunnelConfiguration) {
         let occupied = Self.occupiedNetworks(of: configuration)
-        let ipv4Choice = Self.choice(preferring: .ipv4BenchmarkingNetwork, avoiding: occupied)
+        let ipv4Choice = Self.choice(preferring: .ipv4BenchmarkingRange, avoiding: occupied)
         let carriesIPv6 = configuration.interface.addresses.contains { address in address.family == .ipv6 }
-        let ipv6Choice = carriesIPv6 ? Self.choice(preferring: .ipv6BenchmarkingNetwork, avoiding: occupied) : nil
+        let ipv6Choice = carriesIPv6 ? Self.choice(preferring: .ipv6BenchmarkingRange, avoiding: occupied) : nil
         ipv4 = ipv4Choice.network
         ipv6 = ipv6Choice?.network
         hasConflict = ipv4Choice.hasConflict || ipv6Choice?.hasConflict == true
