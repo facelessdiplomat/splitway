@@ -6,7 +6,8 @@ public struct DomainSuffixSet: Sendable, Hashable {
     public init(_ domains: some Sequence<DomainName>) {
         let uniqueDomains = Set(domains)
         let names = Set(uniqueDomains.map(\.description))
-        suffixes = uniqueDomains
+        suffixes =
+            uniqueDomains
             .filter { domain in !Self.hasListedParent(of: domain.description, in: names) }
             .sorted { first, second in first.description < second.description }
     }

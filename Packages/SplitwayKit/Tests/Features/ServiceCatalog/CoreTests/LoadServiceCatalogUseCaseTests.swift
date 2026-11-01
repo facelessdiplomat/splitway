@@ -30,7 +30,8 @@ struct LoadServiceCatalogUseCaseTests {
         )
         let catalog = try await load.execute()
 
-        let selected = catalog.services(in: ServiceSelection([youtube.id, try ServiceIdentifier("unknown"), telegram.id]))
+        let selected = catalog.services(
+            in: ServiceSelection([youtube.id, try ServiceIdentifier("unknown"), telegram.id]))
 
         #expect(selected == [telegram, youtube])
     }

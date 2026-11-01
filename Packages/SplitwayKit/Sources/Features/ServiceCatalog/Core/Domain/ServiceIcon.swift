@@ -5,7 +5,8 @@ public struct ServiceIcon: Sendable, Hashable {
     public let tint: ServiceTint
 
     public init(monogram: String, tint: ServiceTint) throws(ServiceIconError) {
-        guard (1...Self.maximumMonogramLength).contains(monogram.count), !monogram.contains(where: \.isWhitespace) else {
+        guard (1...Self.maximumMonogramLength).contains(monogram.count), !monogram.contains(where: \.isWhitespace)
+        else {
             throw .malformedMonogram
         }
         self.init(validatedMonogram: monogram, tint: tint)
