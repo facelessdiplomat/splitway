@@ -35,7 +35,10 @@ struct TunnelControlActionTests {
     func connectsTheChosenTunnel() async throws {
         let office = try ControlTestLibrary.record(named: "Office")
         let home = try ControlTestLibrary.record(named: "Home")
-        let library = ControlTestLibrary(tunnels: [office, home])
+        let library = ControlTestLibrary(
+            tunnels: [office, home],
+            controller: FakeSystemTunnelController(installed: office.id, status: .disconnected)
+        )
 
         try await library.set.execute(isOn: true, selection: home.id)
 
@@ -57,14 +60,28 @@ struct TunnelControlActionTests {
     }
 
     @Test
-    func connectsTheFirstTunnelBeforeAnyConnection() async throws {
+    func connectsTheFirstTunnelWhenTheLastOneWasDeleted() async throws {
         let office = try ControlTestLibrary.record(named: "Office")
         let home = try ControlTestLibrary.record(named: "Home")
-        let library = ControlTestLibrary(tunnels: [office, home])
+        let library = ControlTestLibrary(
+            tunnels: [office, home],
+            controller: FakeSystemTunnelController(installed: TunnelIdentifier(), status: .disconnected)
+        )
 
         try await library.set.execute(isOn: true, selection: nil)
 
         #expect(await library.controller.operations == [.install(office.id), .start])
+    }
+
+    @Test(arguments: [false, true])
+    func asksToConnectInSplitwayBeforeTheVPNConfigurationExists(isTunnelChosen: Bool) async throws {
+        let office = try ControlTestLibrary.record(named: "Office")
+        let library = ControlTestLibrary(tunnels: [office])
+
+        await #expect(throws: TunnelControlError.vpnConfigurationMissing) {
+            try await library.set.execute(isOn: true, selection: isTunnelChosen ? office.id : nil)
+        }
+        #expect(await library.controller.operations.isEmpty)
     }
 
     @Test
@@ -121,7 +138,7 @@ struct TunnelControlActionTests {
     func reportsThatThereIsNoTunnelToConnect() async {
         let library = ControlTestLibrary(tunnels: [])
 
-        await #expect(throws: TunnelShortcutError.tunnelNotFound) {
+        await #expect(throws: TunnelControlError.action(.tunnelNotFound)) {
             try await library.set.execute(isOn: true, selection: nil)
         }
     }

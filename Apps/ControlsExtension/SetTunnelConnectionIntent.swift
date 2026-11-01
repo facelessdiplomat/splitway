@@ -28,7 +28,7 @@ struct SetTunnelConnectionIntent: SetValueIntent {
             try await composition.tunnelControl().set.execute(isOn: value, selection: tunnel?.tunnelIdentifier)
         } catch {
             log.record(.error, "Control Center could not turn the tunnel \(action): \(error)")
-            throw TunnelShortcutFailure(error)
+            throw TunnelControlFailure(error)
         }
         log.record(.info, "Control Center turned the tunnel \(action)")
         return .result()

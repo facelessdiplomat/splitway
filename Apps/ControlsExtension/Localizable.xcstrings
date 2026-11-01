@@ -11,6 +11,16 @@
         }
       }
     },
+    "Connect a tunnel in Splitway once, then use this control." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Один раз подключите туннель в Splitway, затем пользуйтесь этим переключателем."
+          }
+        }
+      }
+    },
     "Connected" : {
       "localizations" : {
         "ru" : {
