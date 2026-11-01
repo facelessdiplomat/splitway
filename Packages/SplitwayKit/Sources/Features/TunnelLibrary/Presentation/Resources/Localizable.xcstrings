@@ -61,6 +61,16 @@
         }
       }
     },
+    "Connect" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключить"
+          }
+        }
+      }
+    },
     "Connected" : {
       "localizations" : {
         "ru" : {
@@ -181,6 +191,16 @@
         }
       }
     },
+    "Disconnect" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключить"
+          }
+        }
+      }
+    },
     "Disconnected" : {
       "localizations" : {
         "ru" : {
@@ -267,6 +287,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Экспортировать…"
+          }
+        }
+      }
+    },
+    "Find Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найти туннель"
           }
         }
       }
@@ -427,6 +457,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сканировать QR-код"
+          }
+        }
+      }
+    },
+    "Search Tunnels" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск туннелей"
           }
         }
       }
@@ -647,6 +687,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Этого туннеля больше нет."
+          }
+        }
+      }
+    },
+    "Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель"
           }
         }
       }

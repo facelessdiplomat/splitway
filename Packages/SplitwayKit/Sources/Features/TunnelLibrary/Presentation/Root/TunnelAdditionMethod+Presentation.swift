@@ -19,11 +19,19 @@ extension TunnelAdditionMethod {
 
     var keyboardShortcut: KeyboardShortcut? {
         switch self {
-        case .importFromFile: KeyboardShortcut("o")
+        case .importFromFile: Self.importShortcut
         case .pasteFromClipboard: KeyboardShortcut("v", modifiers: [.command, .shift])
         case .createFromScratch: KeyboardShortcut("n")
         case .scanQRCode: nil
         }
+    }
+
+    private static var importShortcut: KeyboardShortcut? {
+        #if os(iOS)
+            KeyboardShortcut("o", modifiers: [.command, .shift])
+        #else
+            KeyboardShortcut("o")
+        #endif
     }
 
     private var title: Text {
