@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Статус | в работе: код и мастер одобрения готовы, установка на чистой системе ждёт подписи Developer ID (M0-04) |
+| Статус | в работе: код и мастер одобрения готовы, установка на чистой системе ждёт сборки Developer ID (M7-08) |
 | Платформы | macOS |
 | Задачи | M2-11, M3-10 (мастер одобрения) |
 | Таргеты | `SystemExtension`, `SystemExtensionInfrastructure`, `SystemExtensionPresentation`, `SystemExtensionTestSupport` |
