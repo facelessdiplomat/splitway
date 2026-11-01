@@ -64,7 +64,9 @@ struct AppComposition {
         reportCollector.start()
         onboarding = Self.onboarding(configuration: configuration)
         settings = Self.settings(
-            version: AppVersion(marketingVersion: configuration.version, build: configuration.build))
+            version: AppVersion(marketingVersion: configuration.version, build: configuration.build),
+            uninstall: Self.uninstall(configuration: configuration, services: services)
+        )
         diagnostics.recorder(for: .application, category: "App").record(
             .info, "Splitway \(configuration.version) started")
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
@@ -128,11 +130,29 @@ struct AppComposition {
         #endif
     }
 
-    private static func settings(version: AppVersion) -> SettingsPresenter {
+    private static func settings(version: AppVersion, uninstall: UninstallModel?) -> SettingsPresenter {
         SettingsPresenter(
             version: version,
-            notices: ThirdPartyNoticesModel(loadNotices: SettingsAssembly().loadThirdPartyNotices)
+            notices: ThirdPartyNoticesModel(loadNotices: SettingsAssembly().loadThirdPartyNotices),
+            loginItem: loginItem,
+            uninstall: uninstall
         )
+    }
+
+    private static func uninstall(configuration: AppConfiguration, services: AppTunnelServices) -> UninstallModel? {
+        #if os(macOS)
+            AppUninstall.model(configuration: configuration, services: services)
+        #else
+            nil
+        #endif
+    }
+
+    private static var loginItem: LoginItemModel? {
+        #if os(macOS)
+            LoginItemModel(loginItem: MainAppLoginItem())
+        #else
+            nil
+        #endif
     }
 
     private static func tunnelList(services: AppTunnelServices) -> TunnelListModel {

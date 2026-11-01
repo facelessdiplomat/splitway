@@ -11,12 +11,62 @@
         }
       }
     },
+    "Allow Splitway to open at login in System Settings." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешите Splitway открываться при входе в Системных настройках."
+          }
+        }
+      }
+    },
     "Build" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сборка"
+          }
+        }
+      }
+    },
+    "Couldn’t Change Opening at Login" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось изменить открытие при входе"
+          }
+        }
+      }
+    },
+    "Couldn’t Move Splitway to the Trash" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось переместить Splitway в Корзину"
+          }
+        }
+      }
+    },
+    "Drag Splitway from the Applications folder to the Trash." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перетащите Splitway из папки «Программы» в Корзину."
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Основные"
           }
         }
       }
@@ -31,12 +81,82 @@
         }
       }
     },
+    "Move Splitway to the Trash to finish." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы закончить, переместите Splitway в Корзину."
+          }
+        }
+      }
+    },
+    "Move to Trash" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переместить в Корзину"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Open Login Items Settings…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть объекты входа…"
+          }
+        }
+      }
+    },
     "Open Source Licenses" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лицензии открытого ПО"
+          }
+        }
+      }
+    },
+    "Open at Login" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открывать при входе"
+          }
+        }
+      }
+    },
+    "Quit" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершить"
+          }
+        }
+      }
+    },
+    "Removes the tunnels with their keys, the VPN configurations, Splitway’s data and its network extension." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удаляет туннели с ключами, конфигурации VPN, данные Splitway и его сетевое расширение."
           }
         }
       }
@@ -51,6 +171,46 @@
         }
       }
     },
+    "Some Parts Weren’t Removed" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалено не всё"
+          }
+        }
+      }
+    },
+    "Splitway Is Uninstalled" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway удалён"
+          }
+        }
+      }
+    },
+    "Splitway disconnects and removes its tunnels with their keys, the VPN configurations, its data and the network extension. This can’t be undone." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway отключится и удалит туннели с ключами, конфигурации VPN, свои данные и сетевое расширение. Это нельзя отменить."
+          }
+        }
+      }
+    },
+    "Splitway’s data" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "данные Splitway"
+          }
+        }
+      }
+    },
     "The license texts couldn’t be read." : {
       "localizations" : {
         "ru" : {
@@ -61,12 +221,122 @@
         }
       }
     },
+    "These parts weren’t removed: %@. Move Splitway to the Trash to finish." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось удалить: %@. Чтобы закончить, переместите Splitway в Корзину."
+          }
+        }
+      }
+    },
+    "Uninstall" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить"
+          }
+        }
+      }
+    },
+    "Uninstall Splitway?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить Splitway?"
+          }
+        }
+      }
+    },
+    "Uninstall Splitway…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить Splitway…"
+          }
+        }
+      }
+    },
+    "Uninstalling…" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удаление…"
+          }
+        }
+      }
+    },
+    "VPN configurations" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "конфигурации VPN"
+          }
+        }
+      }
+    },
     "Version" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Версия"
+          }
+        }
+      }
+    },
+    "macOS didn’t accept the change. Try again in System Settings." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS не приняла изменение. Попробуйте ещё раз в Системных настройках."
+          }
+        }
+      }
+    },
+    "opening at login" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "открытие при входе"
+          }
+        }
+      }
+    },
+    "the network extension" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "сетевое расширение"
+          }
+        }
+      }
+    },
+    "the tunnel connection" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "подключение туннеля"
+          }
+        }
+      }
+    },
+    "tunnel keys" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ключи туннелей"
           }
         }
       }
