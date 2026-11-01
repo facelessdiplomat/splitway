@@ -22,6 +22,7 @@ struct TunnelDetailScreen: View {
             row: row,
             peers: model.peers,
             statisticsProblem: model.statisticsProblem,
+            hasUnansweredFirstHandshake: model.hasUnansweredFirstHandshake,
             toggleConnection: toggleConnection
         )
         .task(id: row.status.reportsStatistics) {

@@ -9,6 +9,7 @@ import TunnelLibrary
 public final class TunnelDetailModel {
     public private(set) var peers: [PeerStatisticsRow] = []
     public private(set) var statisticsProblem: RuntimeStatisticsError?
+    public private(set) var hasUnansweredFirstHandshake = false
 
     private let configuration: TunnelConfiguration
     private let polling: TunnelStatisticsPolling
@@ -48,6 +49,7 @@ public final class TunnelDetailModel {
     private func show(_ statistics: RuntimeStatistics?, problem: RuntimeStatisticsError? = nil) {
         let now = polling.clock.now()
         statisticsProblem = problem
+        hasUnansweredFirstHandshake = statistics?.hasUnansweredFirstHandshake ?? false
         peers = configuration.peers.map { peer in
             let peerStatistics = statistics?.peers.first { reported in reported.publicKey == peer.publicKey }
             return PeerStatisticsRow(peer: peer, statistics: peerStatistics, now: now)

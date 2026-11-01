@@ -311,6 +311,16 @@
         }
       }
     },
+    "No handshake since connecting. Check the server address and keys, or try another network." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "С момента подключения не было ни одного рукопожатия. Проверьте адрес сервера и ключи или попробуйте другую сеть."
+          }
+        }
+      }
+    },
     "No handshake yet" : {
       "localizations" : {
         "ru" : {
@@ -557,6 +567,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В экспортированном файле есть приватные ключи. Любой, у кого он окажется, сможет подключаться от вашего имени. Храните его в надёжном месте."
+          }
+        }
+      }
+    },
+    "The server is not responding" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервер не отвечает"
           }
         }
       }

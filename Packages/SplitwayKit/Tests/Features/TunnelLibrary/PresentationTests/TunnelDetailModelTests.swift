@@ -54,6 +54,41 @@ struct TunnelDetailModelTests {
     }
 
     @Test
+    func warnsWhenNoPeerAnswersTheFirstHandshake() async throws {
+        let environment = try TunnelDetailTestEnvironment(reporting: [
+            try TunnelDetailTestEnvironment.firstPeer(handshakeSecondsAgo: nil, sent: 444),
+            try TunnelDetailTestEnvironment.secondPeerWithoutHandshake(),
+        ])
+
+        await environment.model.refreshStatistics()
+
+        #expect(environment.model.hasUnansweredFirstHandshake)
+    }
+
+    @Test
+    func doesNotWarnOnceAPeerHasShakenHands() async throws {
+        let environment = try TunnelDetailTestEnvironment(reporting: [
+            try TunnelDetailTestEnvironment.firstPeer(handshakeSecondsAgo: 5, sent: 444)
+        ])
+
+        await environment.model.refreshStatistics()
+
+        #expect(!environment.model.hasUnansweredFirstHandshake)
+    }
+
+    @Test
+    func stopsWarningOnceTheTunnelStops() async throws {
+        let environment = try TunnelDetailTestEnvironment(reporting: [
+            try TunnelDetailTestEnvironment.firstPeer(handshakeSecondsAgo: nil, sent: 444)
+        ])
+        await environment.model.refreshStatistics()
+
+        await environment.model.trackStatistics(isTunnelRunning: false)
+
+        #expect(!environment.model.hasUnansweredFirstHandshake)
+    }
+
+    @Test
     func explainsWhyStatisticsAreUnavailable() async throws {
         let environment = try TunnelDetailTestEnvironment(outcome: .success(.failure(reason: .tunnelNotRunning)))
 

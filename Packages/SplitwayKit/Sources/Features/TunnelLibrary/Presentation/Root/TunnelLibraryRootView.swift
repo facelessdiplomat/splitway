@@ -65,7 +65,7 @@ public struct TunnelLibraryRootView: View {
                     }
                 }
             } else {
-                TunnelDetailView(row: row, peers: [], statisticsProblem: nil) {
+                TunnelDetailView(row: row, peers: [], statisticsProblem: nil, hasUnansweredFirstHandshake: false) {
                     toggleConnection(of: row)
                 }
             }
