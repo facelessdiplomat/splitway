@@ -14,4 +14,5 @@ Scripts/generate-project.sh >/dev/null
 TEST_RUNNER_SPLITWAY_LIVE_TUNNEL=YES TEST_RUNNER_SPLITWAY_LIVE_TUNNEL_NAME="${2:-cz-prg}" \
     xcodebuild test -project Splitway.xcodeproj -scheme iOSUITests -destination "id=$1" \
     -derivedDataPath build/DerivedData-signed -allowProvisioningUpdates \
-    -only-testing:iOSUITests/LiveTunnelTests -collect-test-diagnostics never -quiet
+    -only-testing:iOSUITests/LiveTunnelTests -only-testing:iOSUITests/LiveServiceRoutingTests \
+    -collect-test-diagnostics never -quiet

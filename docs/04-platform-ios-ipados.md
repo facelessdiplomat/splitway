@@ -76,7 +76,7 @@ sequenceDiagram
 | Swift, `ServiceCatalog` Core | `ServiceRoutingPlanCompiler` | Выбранные сервисы + конфиг → `ServiceRoutingPlan`: маршруты, домены, пул, DNS для пересылки; конфликты и дедупликация |
 | Swift, `ServiceCatalog` Infrastructure | `BundledServiceCatalogRepository` | Чтение и валидация JSON каталога из ресурсов |
 | Go, `servicerouting` | `FakeAddressPool` | Выдача адресов по доменам, TTL, LRU, удержание адресов с активными соединениями |
-| Go, `servicerouting` | `DNSInterceptor` | Разбор запроса, пересылка в туннель, переписывание A/AAAA-ответа, CNAME-цепочки |
+| Go, `servicerouting` | `DNSInterceptor` | Разбор запроса, пересылка в туннель, переписывание A/AAAA-ответа, разворачивание CNAME-цепочек в имя из вопроса |
 | Go, `servicerouting` | `AddressTranslator` | Таблица соединений (conntrack), DNAT/SNAT, инкрементальный пересчёт контрольных сумм |
 | Go, `servicerouting` | `TranslatingDevice` | Обёртка над `tun.Device` для wireguard-go: прогоняет каждый пакет через транслятор |
 

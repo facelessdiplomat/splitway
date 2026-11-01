@@ -17,6 +17,7 @@ final class LiveTunnelTests: XCTestCase {
         let tunnelName = ProcessInfo.processInfo.environment["SPLITWAY_LIVE_TUNNEL_NAME"] ?? Self.defaultTunnelName
         let application = SplitwayLaunch.applicationWithStoredTunnels()
         application.tapText(startingWith: tunnelName)
+        application.routeAllTraffic()
         let connectionSwitch = application.switches["Connection"].switches.firstMatch
         let connected = application.staticTexts["Connected"]
         let disconnected = application.staticTexts["Disconnected"]

@@ -36,7 +36,7 @@ func TestRewriterAnswersWithTheFakeAddressOfTheQueriedName(t *testing.T) {
 	}
 }
 
-func TestRewriterKeepsACNAMEChainAndAnswersOnceAtItsEnd(t *testing.T) {
+func TestRewriterFlattensACNAMEChainIntoTheQueriedName(t *testing.T) {
 	pool := newRewriterPool(dualStackNetworks(), maximumFakeAddresses)
 	response := dnsResponse(t, "www.example.com.", dnsmessage.TypeA, []answerSpec{
 		{name: "www.example.com.", kind: dnsmessage.TypeCNAME, ttl: 3600, target: "edge.cdn.example.net."},
@@ -49,10 +49,9 @@ func TestRewriterKeepsACNAMEChainAndAnswersOnceAtItsEnd(t *testing.T) {
 	mustBuild(t, err)
 	parsed := parseResponse(t, rewritten)
 	fake, _ := pool.fakeFor("www.example.com.", realIPv4)
-	if len(parsed.answers) != 2 || parsed.answers[0].Header.Type != dnsmessage.TypeCNAME ||
-		parsed.answers[0].Header.TTL != maximumAnswerTimeToLive || addressOf(parsed.answers[1]) != fake ||
-		parsed.answers[1].Header.Name.String() != "edge.cdn.example.net." || parsed.answers[1].Header.TTL != 20 {
-		t.Fatalf("expected the CNAME and one fake address at the end of the chain, got %+v", parsed.answers)
+	if len(parsed.answers) != 1 || addressOf(parsed.answers[0]) != fake ||
+		parsed.answers[0].Header.Name.String() != "www.example.com." || parsed.answers[0].Header.TTL != 20 {
+		t.Fatalf("expected only the fake address of the queried name, got %+v", parsed.answers)
 	}
 }
 
@@ -67,8 +66,25 @@ func TestRewriterAnswersAAAAWithNothingWithoutIPv6(t *testing.T) {
 
 	mustBuild(t, err)
 	parsed := parseResponse(t, rewritten)
-	if parsed.header.RCode != dnsmessage.RCodeSuccess || len(parsed.answers) != 1 || parsed.answers[0].Header.Type != dnsmessage.TypeCNAME {
-		t.Fatalf("expected only the CNAME and no error, got %v %+v", parsed.header.RCode, parsed.answers)
+	if parsed.header.RCode != dnsmessage.RCodeSuccess || len(parsed.answers) != 0 {
+		t.Fatalf("expected an empty answer without the CNAME and no error, got %v %+v", parsed.header.RCode, parsed.answers)
+	}
+}
+
+func TestRewriterAnswersOtherRecordsOfAChainForTheQueriedName(t *testing.T) {
+	pool := newRewriterPool(dualStackNetworks(), maximumFakeAddresses)
+	response := dnsResponse(t, "www.example.com.", dnsmessage.TypeTXT, []answerSpec{
+		{name: "www.example.com.", kind: dnsmessage.TypeCNAME, ttl: 30, target: "edge.cdn.example.net."},
+		{name: "edge.cdn.example.net.", kind: dnsmessage.TypeTXT, ttl: 30, text: "edge"},
+	})
+
+	rewritten, err := rewriteDNSResponse(response, pool)
+
+	mustBuild(t, err)
+	parsed := parseResponse(t, rewritten)
+	if len(parsed.answers) != 1 || parsed.answers[0].Header.Type != dnsmessage.TypeTXT ||
+		parsed.answers[0].Header.Name.String() != "www.example.com." {
+		t.Fatalf("expected the TXT record for the queried name without the CNAME, got %+v", parsed.answers)
 	}
 }
 
