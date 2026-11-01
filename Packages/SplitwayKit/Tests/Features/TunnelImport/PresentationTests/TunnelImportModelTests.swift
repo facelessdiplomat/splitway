@@ -43,6 +43,35 @@ struct TunnelImportModelTests {
     }
 
     @Test
+    func previewsPastedText() async throws {
+        let model = try ImportTestFlow().model()
+
+        await model.importPastedTexts([WgQuickFixtures.minimal])
+
+        #expect(model.preview?.rows.map(\.name) == [ImportTestFlow.pastedName])
+    }
+
+    @Test
+    func skipsBlankPastedItems() async throws {
+        let model = try ImportTestFlow().model()
+
+        await model.importPastedTexts([" \n", WgQuickFixtures.minimal])
+
+        #expect(model.preview?.rows.map(\.name) == [ImportTestFlow.pastedName])
+        #expect(model.preview?.failures.isEmpty == true)
+    }
+
+    @Test(arguments: [[], ["", "  \n"]])
+    func explainsThatNothingWasPasted(texts: [String]) async throws {
+        let model = try ImportTestFlow().model()
+
+        await model.importPastedTexts(texts)
+
+        #expect(model.preview == nil)
+        #expect(model.alert == .emptyClipboard)
+    }
+
+    @Test
     func previewsAScannedCodeOnceTheScannerHasClosed() async throws {
         let model = try ImportTestFlow().model()
         model.scanQRCode()

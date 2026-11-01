@@ -9,6 +9,14 @@ extension TunnelAdditionMethod {
         }
     }
 
+    var usesSystemPasteButton: Bool {
+        #if os(iOS)
+            self == .pasteFromClipboard
+        #else
+            false
+        #endif
+    }
+
     var keyboardShortcut: KeyboardShortcut? {
         switch self {
         case .importFromFile: KeyboardShortcut("o")

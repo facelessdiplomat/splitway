@@ -11,8 +11,7 @@ final class TunnelSmokeTests: XCTestCase {
         let application = SplitwayLaunch.application()
         UIPasteboard.general.string = SampleConfigurationText.make()
 
-        application.addTunnel(by: "Paste from clipboard")
-        application.allowPasteIfAsked()
+        application.addTunnel(by: "Paste")
         application.waitForText("Import Tunnels")
         application.tapButton("Import")
         application.tapButton("Done")
