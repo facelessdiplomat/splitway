@@ -1,3 +1,4 @@
+import AppIntents
 import ApplicationCatalogPresentation
 import Diagnostics
 import DiagnosticsInfrastructure
@@ -7,6 +8,7 @@ import OnboardingPresentation
 import Settings
 import SettingsInfrastructure
 import SettingsPresentation
+import Shortcuts
 import SystemExtension
 import SystemExtensionPresentation
 import TunnelConnectionInfrastructure
@@ -40,6 +42,7 @@ struct AppComposition {
     let settings: SettingsPresenter
     let onboarding: OnboardingModel
     let reportCollector: MetricKitReportCollector
+    let shortcuts: TunnelShortcutActions
 
     init(configuration: AppConfiguration) {
         let diagnostics = DiagnosticsAssembly(
@@ -51,6 +54,10 @@ struct AppComposition {
             log: diagnostics.recorder(for: .application, category: "Secrets")
         )
         let (library, connection) = (services.library, services.connection)
+        let shortcuts = TunnelShortcutActions(library: library, connection: connection)
+        self.shortcuts = shortcuts
+        AppDependencyManager.shared.add(dependency: shortcuts)
+        SplitwayShortcuts.updateAppShortcutParameters()
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
         let tunnelList = Self.tunnelList(library: library, connection: connection)
         self.tunnelList = tunnelList

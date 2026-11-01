@@ -1,0 +1,176 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
+    },
+    "%@ is disconnected." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%@» отключён."
+          }
+        }
+      }
+    },
+    "Connect ${tunnel}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключить ${tunnel}"
+          }
+        }
+      }
+    },
+    "Connect Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключить туннель"
+          }
+        }
+      }
+    },
+    "Connecting %@." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключаю «%@»."
+          }
+        }
+      }
+    },
+    "Connects a Splitway tunnel, or disconnects it if it is connected." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключает туннель Splitway или отключает его, если он подключён."
+          }
+        }
+      }
+    },
+    "Connects a Splitway tunnel." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключает туннель Splitway."
+          }
+        }
+      }
+    },
+    "Disconnect ${tunnel}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключить ${tunnel}"
+          }
+        }
+      }
+    },
+    "Disconnect Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключить туннель"
+          }
+        }
+      }
+    },
+    "Disconnects a Splitway tunnel if it is connected." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключает туннель Splitway, если он подключён."
+          }
+        }
+      }
+    },
+    "Splitway couldn’t read its tunnels." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не удалось прочитать туннели."
+          }
+        }
+      }
+    },
+    "Splitway couldn’t read this tunnel’s configuration. Open Splitway to fix it." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не удалось прочитать конфигурацию туннеля. Откройте Splitway, чтобы её исправить."
+          }
+        }
+      }
+    },
+    "The tunnel didn’t disconnect. Try again in Splitway." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель не отключился. Попробуйте ещё раз в Splitway."
+          }
+        }
+      }
+    },
+    "This tunnel is no longer in Splitway." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этого туннеля больше нет в Splitway."
+          }
+        }
+      }
+    },
+    "Toggle ${tunnel}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переключить ${tunnel}"
+          }
+        }
+      }
+    },
+    "Toggle Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переключить туннель"
+          }
+        }
+      }
+    },
+    "Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
