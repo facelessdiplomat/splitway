@@ -7,6 +7,7 @@ import SwiftUI
 struct SplitwayMacApp: App {
     private let composition: AppComposition
     private let menuBar: MenuBarModel
+    private let dockPresence = AppKitDockPresence()
 
     init() {
         let composition = AppComposition(configuration: AppConfiguration(bundle: .main))
@@ -16,6 +17,7 @@ struct SplitwayMacApp: App {
             quitConfirmation: AppKitQuitConfirmation(),
             lifecycle: AppKitApplicationLifecycle()
         )
+        dockPresence.start()
     }
 
     var body: some Scene {

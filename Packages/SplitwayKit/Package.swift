@@ -283,7 +283,7 @@ let features: [FeatureModule] = [
             "TunnelConnectionTestSupport", "TunnelConfiguration", "TunnelConfigurationTestSupport", "AppRouting",
         ],
         infrastructureResources: [.process("Resources")],
-        layersWithoutTests: [.core, .infrastructure]
+        layersWithoutTests: [.infrastructure]
     ),
 ]
 
