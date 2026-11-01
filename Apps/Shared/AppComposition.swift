@@ -55,7 +55,7 @@ struct AppComposition {
         let (library, connection) = (services.library, services.connection)
         shortcuts = Self.registeredShortcuts(library: library, connection: connection)
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
-        let tunnelList = Self.tunnelList(library: library, connection: connection)
+        let tunnelList = Self.tunnelList(services: services)
         self.tunnelList = tunnelList
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
         tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels)
@@ -68,12 +68,7 @@ struct AppComposition {
         diagnostics.recorder(for: .application, category: "App").record(
             .info, "Splitway \(configuration.version) started")
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
-        tunnelEditor = Self.tunnelEditor(
-            library: library,
-            connection: connection,
-            clipboard: importer.clipboard,
-            tunnelList: tunnelList
-        )
+        tunnelEditor = Self.tunnelEditor(services: services, clipboard: importer.clipboard, tunnelList: tunnelList)
     }
 
     func add(_ method: TunnelAdditionMethod) {
@@ -136,15 +131,15 @@ struct AppComposition {
         )
     }
 
-    private static func tunnelList(library: TunnelLibraryAssembly, connection: TunnelConnectionAssembly)
-        -> TunnelListModel
-    {
-        TunnelListModel(
+    private static func tunnelList(services: AppTunnelServices) -> TunnelListModel {
+        let (library, connection) = (services.library, services.connection)
+        return TunnelListModel(
             library: TunnelLibraryActions(
                 loadTunnels: library.loadTunnels,
                 deleteTunnel: library.deleteTunnel(stoppingActiveTunnelWith: connection.activityProbe),
                 duplicateTunnel: library.duplicateTunnel,
-                reorderTunnels: library.reorderTunnels
+                reorderTunnels: library.reorderTunnels,
+                loadServiceNames: services.serviceCatalog.loadServiceNames
             ),
             connection: TunnelConnectionActions(
                 activateTunnel: connection.activateTunnel,
@@ -170,12 +165,12 @@ struct AppComposition {
     }
 
     private static func tunnelEditor(
-        library: TunnelLibraryAssembly,
-        connection: TunnelConnectionAssembly,
+        services: AppTunnelServices,
         clipboard: SystemClipboard,
         tunnelList: TunnelListModel
     ) -> TunnelEditorFlow {
-        TunnelEditorFlow(
+        let (library, connection) = (services.library, services.connection)
+        return TunnelEditorFlow(
             actions: TunnelEditorActions(
                 createTunnel: library.createTunnel,
                 updateTunnel: library.updateTunnel,
@@ -185,7 +180,8 @@ struct AppComposition {
                 deactivateTunnel: connection.deactivateTunnel,
                 applyRoutingPolicy: connection.applyRoutingPolicy
             ),
-            applicationPicker: applicationPicker
+            applicationPicker: applicationPicker,
+            servicePicker: services.serviceCatalog.picker
         ) { text in
             clipboard.copy(text)
         } didSave: { _ in

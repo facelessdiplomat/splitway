@@ -61,7 +61,7 @@ public struct ServiceRoutingPlanCompiler: Sendable {
         if hasDomains, !allowed.contains(IPNetwork.ipv4DefaultRoute) {
             warnings.append(.allowedIPsWithoutDefaultRoute)
         }
-        if !allowed.contains(upstreamResolver) {
+        if hasDomains, !allowed.contains(upstreamResolver) {
             warnings.append(.resolverOutsideAllowedIPs(upstreamResolver))
         }
         if fakeNetworks.hasConflict {

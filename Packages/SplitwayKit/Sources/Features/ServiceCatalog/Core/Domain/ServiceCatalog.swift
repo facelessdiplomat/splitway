@@ -8,6 +8,10 @@ public struct ServiceCatalog: Sendable, Hashable {
         self.services = services.filter { service in seen.insert(service.id).inserted }
     }
 
+    public var displayNames: [ServiceIdentifier: String] {
+        Dictionary(uniqueKeysWithValues: services.map { service in (service.id, service.displayName) })
+    }
+
     public func service(_ identifier: ServiceIdentifier) -> ServiceProfile? {
         services.first { service in service.id == identifier }
     }

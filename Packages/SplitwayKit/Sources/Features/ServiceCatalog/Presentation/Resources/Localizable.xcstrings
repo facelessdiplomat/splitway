@@ -1,0 +1,556 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "AI Assistants" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ИИ-ассистенты"
+          }
+        }
+      }
+    },
+    "Add Service" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить сервис"
+          }
+        }
+      }
+    },
+    "After you turn off the VPN, apps connect directly again. Apps with their own address cache may keep using the reserved addresses for up to a minute." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "После выключения VPN приложения снова подключаются напрямую. Приложения со своим кэшем адресов могут ещё до минуты обращаться к служебным адресам."
+          }
+        }
+      }
+    },
+    "Apps that connect to built-in addresses use the tunnel only for addresses in the networks of the service." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения со встроенными адресами идут через туннель, только если эти адреса входят в сети сервиса."
+          }
+        }
+      }
+    },
+    "Apps that look up names on their own or connect to built-in addresses can bypass the domain rules." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения, которые сами ищут адреса или подключаются к встроенным адресам, могут обойти правила доменов."
+          }
+        }
+      }
+    },
+    "Apps that look up names on their own, for example over DNS over HTTPS, bypass the domain rules. Only the networks of the service reach the tunnel." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложения, которые сами ищут адреса, например через DNS over HTTPS, обходят правила доменов. В туннель попадают только сети сервиса."
+          }
+        }
+      }
+    },
+    "Calls and video chats often connect to addresses that the app learns during the call and may bypass the tunnel." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звонки и видеочаты часто подключаются к адресам, которые приложение узнаёт во время звонка, и могут идти мимо туннеля."
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить"
+          }
+        }
+      }
+    },
+    "Can’t Delete the Service" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось удалить сервис"
+          }
+        }
+      }
+    },
+    "Can’t Save the Service" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось сохранить сервис"
+          }
+        }
+      }
+    },
+    "Category" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Категория"
+          }
+        }
+      }
+    },
+    "Choose at least one service, or no traffic will use the tunnel." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите хотя бы один сервис, иначе трафик не пойдёт через туннель."
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить"
+          }
+        }
+      }
+    },
+    "Delete Service" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить сервис"
+          }
+        }
+      }
+    },
+    "Details" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подробнее"
+          }
+        }
+      }
+    },
+    "Development" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разработка"
+          }
+        }
+      }
+    },
+    "Domains" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Домены"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        }
+      }
+    },
+    "Edit" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить"
+          }
+        }
+      }
+    },
+    "Edit Service" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить сервис"
+          }
+        }
+      }
+    },
+    "How It Works" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как это работает"
+          }
+        }
+      }
+    },
+    "How It Works and Limitations" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как это работает и ограничения"
+          }
+        }
+      }
+    },
+    "Limitations" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ограничения"
+          }
+        }
+      }
+    },
+    "Messaging" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мессенджеры"
+          }
+        }
+      }
+    },
+    "Music" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музыка"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название"
+          }
+        }
+      }
+    },
+    "Networks" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сети"
+          }
+        }
+      }
+    },
+    "New Service" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новый сервис"
+          }
+        }
+      }
+    },
+    "No Results" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ничего не найдено"
+          }
+        }
+      }
+    },
+    "No service matches “%@”." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет сервисов по запросу «%@»."
+          }
+        }
+      }
+    },
+    "None" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "One per line, for example example.com. Subdomains are included." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По одному в строке, например example.com. Поддомены тоже входят."
+          }
+        }
+      }
+    },
+    "Optional. One per line, for example 203.0.113.0/24." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Необязательно. По одной в строке, например 203.0.113.0/24."
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить"
+          }
+        }
+      }
+    },
+    "Search Services" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск сервисов"
+          }
+        }
+      }
+    },
+    "Service Routing" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбор сервисов"
+          }
+        }
+      }
+    },
+    "Service name" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название сервиса"
+          }
+        }
+      }
+    },
+    "Services Through the Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервисы через туннель"
+          }
+        }
+      }
+    },
+    "Services Unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервисы недоступны"
+          }
+        }
+      }
+    },
+    "Services on shared content networks can be chosen only by domain." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервисы на общих сетях доставки контента можно выбрать только по доменам."
+          }
+        }
+      }
+    },
+    "Social" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Соцсети"
+          }
+        }
+      }
+    },
+    "Some networks of %@ are outside the tunnel’s Allowed IPs and won’t use the tunnel." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Часть сетей сервиса «%@» вне Allowed IPs туннеля и пойдёт мимо него."
+          }
+        }
+      }
+    },
+    "Splitway couldn’t change your services. Try again." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не смог изменить ваши сервисы. Попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "Splitway couldn’t read the list of services." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не смог прочитать список сервисов."
+          }
+        }
+      }
+    },
+    "Splitway sends only the DNS queries for the domains of the chosen services to the tunnel and answers them with addresses from a reserved range. Connections to those addresses go through the tunnel to the real servers. Networks that a service publishes go through the tunnel directly. Everything else uses your network as usual." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway отправляет в туннель только DNS-запросы доменов выбранных сервисов и отвечает на них адресами из служебного диапазона. Соединения с этими адресами идут через туннель к настоящим серверам. Сети, которые сервис публикует сам, идут через туннель напрямую. Остальной трафик идёт через вашу сеть как обычно."
+          }
+        }
+      }
+    },
+    "Subdomains are included." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поддомены тоже входят."
+          }
+        }
+      }
+    },
+    "The DNS server %@ is outside the tunnel’s Allowed IPs, so the domains of the chosen services won’t resolve." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DNS-сервер %@ вне Allowed IPs туннеля, поэтому адреса выбранных сервисов не найдутся."
+          }
+        }
+      }
+    },
+    "The tunnel’s Allowed IPs don’t include 0.0.0.0/0, so the server may not pass the traffic of the chosen services." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В Allowed IPs туннеля нет 0.0.0.0/0, поэтому сервер может не пропустить трафик выбранных сервисов."
+          }
+        }
+      }
+    },
+    "The tunnel’s addresses overlap the range Splitway uses for services, so some addresses may not work." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адреса туннеля пересекаются с диапазоном, который Splitway использует для сервисов, поэтому часть адресов может не работать."
+          }
+        }
+      }
+    },
+    "Video" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видео"
+          }
+        }
+      }
+    },
+    "Work" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Работа"
+          }
+        }
+      }
+    },
+    "Your Services" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваши сервисы"
+          }
+        }
+      }
+    },
+    "“%@” is not a domain name." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%@» — не доменное имя."
+          }
+        }
+      }
+    },
+    "“%@” is not a network. Use a form like 10.0.0.0/8." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«%@» — не сеть. Пишите в виде 10.0.0.0/8."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

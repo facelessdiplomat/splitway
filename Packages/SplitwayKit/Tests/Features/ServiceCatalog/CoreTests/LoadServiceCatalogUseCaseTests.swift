@@ -6,6 +6,16 @@ import Testing
 @Suite
 struct LoadServiceCatalogUseCaseTests {
     @Test
+    func namesEveryServiceOfTheCatalog() async throws {
+        let telegram = try ServiceCatalogFixtures.profile(id: "telegram", name: "Telegram")
+        let work = try await ServiceCatalogFixtures.customService(name: "Work")
+
+        let catalog = ServiceCatalog(services: [telegram, work.profile])
+
+        #expect(catalog.displayNames == [telegram.id: "Telegram", work.id: "Work"])
+    }
+
+    @Test
     func listsBundledServicesBeforeCustomOnes() async throws {
         let telegram = try ServiceCatalogFixtures.profile(id: "telegram", name: "Telegram")
         let work = try await ServiceCatalogFixtures.customService(name: "Work")

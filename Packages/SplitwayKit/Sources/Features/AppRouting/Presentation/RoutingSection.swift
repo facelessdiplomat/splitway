@@ -6,15 +6,18 @@ public struct RoutingSection: View {
     private let model: RoutingSectionModel
     private let excludesPrivateNetworks: Binding<Bool>?
     private let chooseApplications: (@MainActor () -> Void)?
+    private let chooseServices: (@MainActor () -> Void)?
 
     public init(
         model: RoutingSectionModel,
         excludesPrivateNetworks: Binding<Bool>?,
-        chooseApplications: (@MainActor () -> Void)? = nil
+        chooseApplications: (@MainActor () -> Void)? = nil,
+        chooseServices: (@MainActor () -> Void)? = nil
     ) {
         self.model = model
         self.excludesPrivateNetworks = excludesPrivateNetworks
         self.chooseApplications = chooseApplications
+        self.chooseServices = chooseServices
     }
 
     public var body: some View {
@@ -30,6 +33,11 @@ public struct RoutingSection: View {
             if let chooseApplications {
                 Button(action: chooseApplications) {
                     Text("Choose Apps…", bundle: .module)
+                }
+            }
+            if let chooseServices {
+                Button(action: chooseServices) {
+                    Text("Choose Services…", bundle: .module)
                 }
             }
             if let excludesPrivateNetworks {

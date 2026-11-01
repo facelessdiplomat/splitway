@@ -12,4 +12,13 @@ public struct CustomServiceDraft: Sendable, Hashable {
         self.domains = domains
         self.networks = networks
     }
+
+    public init(editing profile: ServiceProfile) {
+        self.init(
+            editing: profile.id,
+            name: profile.displayName,
+            domains: profile.rules.domainSuffixes.map(\.description),
+            networks: profile.rules.networks.map(\.description)
+        )
+    }
 }

@@ -70,6 +70,12 @@ targets:
       - package: SplitwayKit
         product: TunnelEditorPresentation
       - package: SplitwayKit
+        product: ServiceCatalog
+      - package: SplitwayKit
+        product: ServiceCatalogInfrastructure
+      - package: SplitwayKit
+        product: ServiceCatalogPresentation
+      - package: SplitwayKit
         product: ApplicationCatalogPresentation
       - package: SplitwayKit
         product: DiagnosticsInfrastructure
@@ -183,6 +189,8 @@ targets:
         product: TunnelImportInfrastructure
       - package: SplitwayKit
         product: TunnelEditorPresentation
+      - package: SplitwayKit
+        product: ServiceCatalogPresentation
       - package: SplitwayKit
         product: ApplicationCatalogPresentation
       - package: SplitwayKit

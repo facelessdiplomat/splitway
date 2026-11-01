@@ -2,6 +2,7 @@ import AppRouting
 import ApplicationCatalogPresentation
 import Foundation
 import ProviderMessaging
+import ServiceCatalogPresentation
 import Testing
 import TunnelConfiguration
 import TunnelConfigurationTestSupport
@@ -65,6 +66,17 @@ final class TunnelEditorTestEnvironment {
             routingPlatform: .macOS,
             actions: actions,
             applicationPicker: picker
+        ) { [weak self] tunnel in
+            self?.savedTunnels.append(tunnel)
+        }
+    }
+
+    func editor(for tunnel: Tunnel, choosingServicesWith picker: ServicePickerActions) -> TunnelEditorModel {
+        TunnelEditorModel(
+            editing: tunnel,
+            routingPlatform: .iOS,
+            actions: actions,
+            servicePicker: picker
         ) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }

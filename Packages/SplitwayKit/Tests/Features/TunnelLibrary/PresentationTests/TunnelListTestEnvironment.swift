@@ -15,7 +15,10 @@ struct TunnelListTestEnvironment {
     let controller: FakeSystemTunnelController
     let model: TunnelListModel
 
-    init(controller: FakeSystemTunnelController = FakeSystemTunnelController()) {
+    init(
+        controller: FakeSystemTunnelController = FakeSystemTunnelController(),
+        serviceNames: [ServiceIdentifier: String] = [:]
+    ) {
         self.controller = controller
         let coordinator = ConnectionCoordinator(controller: controller)
         model = TunnelListModel(
@@ -27,7 +30,8 @@ struct TunnelListTestEnvironment {
                     activityProbe: ConnectionActivityProbe(controller: controller, coordinator: coordinator)
                 ),
                 duplicateTunnel: DuplicateTunnelUseCase(records: records, secrets: secrets),
-                reorderTunnels: ReorderTunnelsUseCase(records: records)
+                reorderTunnels: ReorderTunnelsUseCase(records: records),
+                loadServiceNames: { serviceNames }
             ),
             connection: TunnelConnectionActions(
                 activateTunnel: ActivateTunnelUseCase(coordinator: coordinator),
