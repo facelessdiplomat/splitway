@@ -15,4 +15,5 @@ TEST_RUNNER_SPLITWAY_LIVE_TUNNEL=YES TEST_RUNNER_SPLITWAY_LIVE_TUNNEL_NAME="${2:
     xcodebuild test -project Splitway.xcodeproj -scheme iOSUITests -destination "id=$1" \
     -derivedDataPath build/DerivedData-signed -allowProvisioningUpdates \
     -only-testing:iOSUITests/LiveTunnelTests -only-testing:iOSUITests/LiveServiceRoutingTests \
+    -only-testing:iOSUITests/LiveControlCenterTests \
     -collect-test-diagnostics never -quiet
