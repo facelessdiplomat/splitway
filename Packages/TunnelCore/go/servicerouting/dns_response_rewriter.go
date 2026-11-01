@@ -10,6 +10,7 @@ import (
 const (
 	maximumAnswerTimeToLive                  = 60
 	rewrittenMessageCapacity                 = 512
+	delegationNameRecordType dnsmessage.Type = 39
 	serviceBindingRecordType dnsmessage.Type = 64
 	httpsRecordType          dnsmessage.Type = 65
 )
@@ -23,6 +24,7 @@ type answerAddresses interface {
 
 type responseRewrite struct {
 	addresses answerAddresses
+	question  dnsmessage.Name
 	name      string
 	hasIPv4   bool
 	hasIPv6   bool
@@ -51,6 +53,7 @@ func rewriteDNSResponse(message []byte, addresses answerAddresses) ([]byte, erro
 	}
 	rewrite := responseRewrite{addresses: addresses}
 	if len(questions) > 0 {
+		rewrite.question = questions[0].Name
 		rewrite.name = questions[0].Name.String()
 	}
 	kept, isAnswerable := rewrite.answers(answers)
@@ -70,6 +73,9 @@ func (rewrite *responseRewrite) answers(answers []dnsmessage.Resource) ([]dnsmes
 			return nil, false
 		}
 		if isKept {
+			if rewrite.question.Length > 0 {
+				answer.Header.Name = rewrite.question
+			}
 			kept = append(kept, answer)
 		}
 	}
@@ -101,9 +107,14 @@ func (rewrite *responseRewrite) answer(answer *dnsmessage.Resource) (isKept bool
 		answer.Body = &dnsmessage.AAAAResource{AAAA: fake.As16()}
 		rewrite.hasIPv6 = true
 		return true, true
+	case *dnsmessage.CNAMEResource:
+		return false, true
 	}
-	isServiceBinding := answer.Header.Type == httpsRecordType || answer.Header.Type == serviceBindingRecordType
-	return !isServiceBinding, true
+	switch answer.Header.Type {
+	case delegationNameRecordType, httpsRecordType, serviceBindingRecordType:
+		return false, true
+	}
+	return true, true
 }
 
 func recordsWithoutAddresses(records []dnsmessage.Resource) []dnsmessage.Resource {
