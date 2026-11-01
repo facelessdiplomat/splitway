@@ -53,6 +53,7 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
     dependencies:
       - target: PacketTunnelExtension
+      - target: ControlsExtension
       - package: SplitwayKit
         product: TunnelLibraryPresentation
       - package: SplitwayKit
@@ -61,6 +62,10 @@ targets:
         product: TunnelConnectionInfrastructure
       - package: SplitwayKit
         product: Shortcuts
+      - package: SplitwayKit
+        product: ControlWidgets
+      - package: SplitwayKit
+        product: ControlWidgetsInfrastructure
       - package: SplitwayKit
         product: TunnelConnectionPresentation
       - package: SplitwayKit
@@ -125,6 +130,39 @@ targets:
         product: DiagnosticsInfrastructure
       - package: TunnelCore
         product: TunnelCoreAdapter
+  ControlsExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Apps/ControlsExtension
+      - path: Apps/Shared/AppConfiguration.swift
+      - path: Apps/Shared/Shortcuts/TunnelEntity.swift
+      - path: Apps/Shared/Shortcuts/TunnelEntityQuery.swift
+      - path: Apps/Shared/Shortcuts/TunnelShortcutFailure.swift
+      - path: Apps/Shared/Shortcuts/TunnelShortcutActions+Assembly.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.controls
+        INFOPLIST_FILE: Apps/ControlsExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/ControlsExtension/ControlsExtension.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Splitway Controls
+    dependencies:
+      - package: SplitwayKit
+        product: ControlWidgets
+      - package: SplitwayKit
+        product: ControlWidgetsInfrastructure
+      - package: SplitwayKit
+        product: Shortcuts
+      - package: SplitwayKit
+        product: TunnelLibraryInfrastructure
+      - package: SplitwayKit
+        product: TunnelConnectionInfrastructure
+      - package: SplitwayKit
+        product: TunnelConnectionPresentation
+      - package: SplitwayKit
+        product: Diagnostics
+      - package: SplitwayKit
+        product: DiagnosticsInfrastructure
   iOSIntegrationTests:
     type: bundle.unit-test
     platform: iOS

@@ -17,9 +17,9 @@ iOS и iPadOS используют одно приложение (универс
 
 | Entitlement | `iOSApp` | `PacketTunnelExtension` | `ControlsExtension` |
 |---|---|---|---|
-| `com.apple.developer.networking.networkextension` = `packet-tunnel-provider` | да | да | — |
+| `com.apple.developer.networking.networkextension` = `packet-tunnel-provider` | да | да | да (intent контрола сам запускает туннель, SP-8) |
 | App Groups `group.com.facelessdiplomat.splitway` | да | да | да |
-| Keychain Sharing `8625S77CSU.com.facelessdiplomat.splitway.shared` | да | да | — |
+| Keychain Sharing `8625S77CSU.com.facelessdiplomat.splitway.shared` | да | да | да (конфигурация туннеля для записи в слот) |
 | `com.apple.developer.networking.wifi-info` (v1.x, автоподключение по SSID) | да | — | — |
 
 Network Extension доступен и индивидуальному аккаунту: ограничение 5.4 касается только публикации в App Store.
@@ -136,8 +136,8 @@ sequenceDiagram
 ## 8. Controls и Команды
 
 - `Shortcuts` (App Intents): `ConnectTunnelIntent`, `DisconnectTunnelIntent`, `ToggleTunnelIntent`, `TunnelEntity` с запросом из репозитория App Group; фразы Siri.
-- `ControlWidgets`: `ControlWidgetToggle` для Пункта управления, экрана блокировки и кнопки действия, статус через `NEVPNStatus`.
-- Спайк **SP-8**: убедиться, что intent может запустить и остановить VPN без открытия приложения (в каком процессе выполняется `perform`, доступен ли `NETunnelProviderManager` из процесса виджета). Если нет — intent выполняется в процессе приложения в фоне.
+- `ControlWidgets`: `ControlWidgetToggle` для Пункта управления, экрана блокировки и кнопки действия, статус через `NEVPNStatus`, выбор туннеля в настройках контрола ([ControlWidgets](features/ControlWidgets.md)).
+- Спайк **SP-8**: intent контрола выполняется в процессе расширения виджетов, а не приложения. Расширение само загружает `NETunnelProviderManager`, записывает туннель в слот и запускает его, приложение не открывается ([итоги](features/spikes/SP-8.md)). Новый `NETunnelProviderProtocol` из расширения система не сохраняет, поэтому запись меняет поля загруженного протокола; первую VPN-конфигурацию создаёт только приложение.
 
 ## 9. Дистрибуция
 
@@ -155,7 +155,7 @@ sequenceDiagram
 |---|---|---|---|
 | SP-4 | Прототип `servicerouting`: `matchDomains` + фиктивные адреса + трансляция на реальном устройстве; пиковая память | Telegram и YouTube работают через туннель, остальной трафик идёт мимо; память ≤ 35 МБ | Итог на iPhone 13 Pro: выбранные домены идут через туннель, остальные напрямую, пик памяти 12,2 МБ при 250–430 Мбит/с ([итоги](features/spikes/SP-4.md)); запасной режим только статических подсетей не нужен, сервисы каталога проверяются в M5-01 |
 | SP-7 | Поиск дескриптора `utun` и запуск wireguard-go в расширении iOS 26 | Рукопожатие и трафик в режиме «Весь трафик» | Итог на iPhone 13 Pro и в системном расширении macOS в тестовой ВМ: рукопожатие и трафик проходят, расширение iOS после старта занимает 5–7 МБ ([итоги](features/spikes/SP-7.md)); чтение пакетов через `packetFlow` не нужно |
-| SP-8 | Запуск VPN из Control / App Intent без открытия приложения | Переключатель работает на заблокированном экране | Intent открывает приложение (`openAppWhenRun`) |
+| SP-8 | Запуск VPN из Control / App Intent без открытия приложения | Переключатель работает на заблокированном экране | Итог на iPhone 13 Pro и в симуляторе (iOS 27.2): intent выполняется в расширении виджетов, расширение само записывает туннель в слот (меняя загруженный протокол) и запускает его ([итоги](features/spikes/SP-8.md)). Экран блокировки проверяет владелец в M6-04. Запасной вариант с `openAppWhenRun` не понадобился |
 
 ## 11. Тестирование
 

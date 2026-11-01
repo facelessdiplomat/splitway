@@ -60,7 +60,8 @@ public actor ProviderSlotController<Kind: ProviderSlotKind>: SystemTunnelControl
     }
 
     public func install(_ tunnel: Tunnel) async throws(ConnectionFailure) {
-        let tunnelProtocol = NETunnelProviderProtocol()
+        let slot = await loadedManager() ?? Kind.newSlot()
+        let tunnelProtocol = slot.protocolConfiguration as? NETunnelProviderProtocol ?? NETunnelProviderProtocol()
         tunnelProtocol.providerBundleIdentifier = providerBundleIdentifier
         tunnelProtocol.serverAddress = TunnelSlotDescription.serverAddress(for: tunnel)
         do {
@@ -70,7 +71,6 @@ public actor ProviderSlotController<Kind: ProviderSlotKind>: SystemTunnelControl
         } catch {
             throw .systemConfigurationUnavailable
         }
-        let slot = await loadedManager() ?? Kind.newSlot()
         slot.protocolConfiguration = tunnelProtocol
         slot.localizedDescription = Self.slotName
         slot.isEnabled = true

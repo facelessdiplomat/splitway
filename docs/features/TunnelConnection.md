@@ -57,16 +57,18 @@
 - **Расширение недоступно.** `ConnectionFailure.extensionUnavailable` — системное расширение macOS не ответило: не одобрено, удалено или ещё запускается. Объяснение подсказывает, где его разрешить.
 - **Объяснения.** `ConnectionFailure.explanation` (`TunnelConnectionPresentation`) даёт каждому отказу свой заголовок, текст с советом и действие `ConnectionFailureAction`: открыть Настройки, изменить туннель или ничего. Отказ движка `configurationRejected` объясняется отдельно от остальных отказов движка.
 
+- **Разовое чтение слота** (M6-04). `ReadSlotStateUseCase` возвращает `SlotState` одним запросом, без подписки на статусы: туннель в слоте и его подключение. Причины прошлого отключения разовое чтение не знает, поэтому отключённый слот — просто `disconnected`. Им пользуется контрол Пункта управления ([ControlWidgets](ControlWidgets.md)).
 - **Удаление конфигураций** (M6-02). `ProviderSlotRemoval<Kind>` удаляет из системных настроек все сохранённые конфигурации слота с идентификатором провайдера Splitway, `TunnelConnectionAssembly.removeSystemConfigurations()` — оба слота на macOS. В тестовой ВМ после удаления Splitway `scutil --nc list` пуст (2026-11-01).
 
 ## Публичный API
 
-`ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`, `SlotSelectingTunnelController`, `SlotSelectingMessenger`, `ApplyRoutingPolicyUseCase`, `RoutingPolicyApplicationError`; адаптеры `ProviderSlotController`, `ProviderSlotKind`, `PacketTunnelSlot`, `TransparentProxySlot`, `ProviderSlotMessenger`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`; экран — `ConnectionFailureExplanation`, `ConnectionFailureAction`, `ConnectionFailure.explanation`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
+`ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `ReadSlotStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`, `SlotSelectingTunnelController`, `SlotSelectingMessenger`, `ApplyRoutingPolicyUseCase`, `RoutingPolicyApplicationError`; адаптеры `ProviderSlotController`, `ProviderSlotKind`, `PacketTunnelSlot`, `TransparentProxySlot`, `ProviderSlotMessenger`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`; экран — `ConnectionFailureExplanation`, `ConnectionFailureAction`, `ConnectionFailure.explanation`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
 
 ## Решения
 
 - Правило гонок: побеждает последнее действие пользователя. Уже начатый шаг завершается, следующие шаги устаревшего намерения пропускаются, поэтому шаги разных намерений никогда не перекрываются.
 - Повторная установка того же неактивного туннеля обновляет слот: имя или политика могли измениться.
+- Установка меняет поля объекта протокола, загруженного из настроек, а новый `NETunnelProviderProtocol` создаёт только для первой конфигурации. Объект, созданный в расширении виджетов, система считает конфигурацией другого типа и не сохраняет («configuration type is wrong», [SP-8](spikes/SP-8.md)). Других свойств протокола Splitway не задаёт, поэтому для приложения это то же самое, что новый объект.
 - Статусы чужих соединений приложения (другого слота) отфильтровываются по идентичности соединения.
 - Слоты разных видов — один контроллер, обобщённый по виду, а не копия контроллера на вид: отличаются только `loadAllFromPreferences` и создание конфигурации.
 - Выбор слота — отдельный `SystemTunnelController` в `Core`, а не флаг в координаторе: координатор, наблюдение за состоянием и проба активности работают с ним так же, как с одним слотом, а сценарии проверяются на фейках.
@@ -98,7 +100,7 @@
 
 ## Тесты
 
-- 37 тестов в `TunnelConnectionTests`:
+- 39 тестов в `TunnelConnectionTests`:
   - координатор: свободный слот, активный другой туннель, повторное нажатие, повторная установка, ошибка слота, деактивация;
   - две гонки, 15 повторов без расхождений;
   - состояния и причины отключения;
@@ -108,7 +110,8 @@
   - какому туннелю принадлежит состояние слота;
   - выбор слота (10): режим «Весь трафик» и режим выбранных приложений в свои слоты, запуск слота записанного туннеля, остановка активного слота другого режима перед записью, остановка обоих слотов, туннель и статус активного слота, слот последнего записанного туннеля, статусы выбранного слота, переход к слоту, который стал активным, перенос подключения в слот другого режима через координатор. 300 повторов без сбоев;
   - изменение выбора (3): политика уходит работающему провайдеру, отказ провайдера, недоступный провайдер;
-  - отправитель выбранного слота (2): прокси, пока выбран его слот, иначе пакетный туннель.
+  - отправитель выбранного слота (2): прокси, пока выбран его слот, иначе пакетный туннель;
+  - разовое чтение слота (2): туннель и его подключение, слот без конфигурации.
 - 2 теста в `TunnelConnectionPresentationTests`: текст и действие для каждого отказа (включая недоступное расширение), разные заголовки.
 - 5 тестов в `TunnelConnectionInfrastructureTests`: все `NEVPNStatus`, дата подключения по умолчанию, ошибки сохранения и отключения.
 
@@ -126,3 +129,5 @@
 | 2026-10-30 | Слота DNS-прокси нет: DNS выбранных приложений обрабатывает прозрачный прокси (решение D-34) | M4-14 |
 | 2026-10-31 | Политика маршрутизации сообщением, отправитель сообщений выбранного слота | M4-15 |
 | 2026-11-01 | Удаление конфигураций VPN обоих слотов | M6-02 |
+| 2026-11-01 | Разовое чтение слота для контрола Пункта управления | M6-04 |
+| 2026-11-01 | Установка туннеля меняет загруженный протокол: запись в слот из расширения виджетов | M6-04 |
