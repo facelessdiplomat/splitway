@@ -91,6 +91,8 @@ flowchart LR
 - Если подключение не удалось, детали показывают объяснение отказа.
 - Кнопка с карандашом «Изменить туннель» в деталях читаемого туннеля передаёт его обработчику `TunnelLibraryNavigation.editTunnel`, который задаёт composition root (редактор — фича `TunnelEditor`).
 
+- **Стирание всех секретов** (M6-02). Порт `ErasableTunnelSecretStore` уточняет `TunnelSecretStore` удалением всех записей сервиса. `KeychainTunnelSecretStore` удаляет их запросом по имени сервиса, повторяя, пока записи не кончатся; так стираются и секреты без записей о туннелях.
+
 ## Публичный API
 
 - **Модель:** `Tunnel`, `TunnelIdentifier`, `TunnelName`, `TunnelNameError`, `TunnelRecord`, `UniqueTunnelNameResolver`, `ExportedConfigurationFile`.
@@ -189,3 +191,4 @@ flowchart LR
 | 2026-11-01 | Предупреждение «Сервер не отвечает» в деталях (D-38) | M3-03 |
 | 2026-11-01 | Сервисы через туннель в деталях | M5-08 |
 | 2026-11-01 | Вставка из буфера на iOS и iPadOS — системная кнопка `PasteButton` | M3-04 |
+| 2026-11-01 | `ErasableTunnelSecretStore`: стирание всех секретов в Keychain | M6-02 |

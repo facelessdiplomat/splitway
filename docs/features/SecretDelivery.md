@@ -22,12 +22,12 @@
 ## Принцип работы
 
 - **Требование к клиенту.** `ClientCodeRequirement(teamIdentifier:bundleIdentifier:)` строит строку для `setConnectionCodeSigningRequirement` XPC-слушателя расширения: `anchor apple generic and certificate leaf[subject.OU] = "<Team ID>" and identifier "<bundle ID>"`. Подключиться может только приложение нашей команды. Team ID — ровно 10 заглавных латинских букв или цифр. Bundle ID — сегменты из букв, цифр и дефиса через одну точку. Кавычки, пробелы и пустые сегменты отклоняются, поэтому в язык требований нельзя подставить своё условие.
-- **Сообщения.** `SecretDeliveryMessage`: `.store(tunnel:configurationText:)` и `.remove(tunnel:)`. Ответ `SecretDeliveryReply` — `.done` или `.failed(SecretDeliveryFailure)` (`storageUnavailable`, `malformedMessage`, `unsupportedSchemaVersion`). `description`, `debugDescription` и `Mirror` сообщения не показывают текст конфигурации.
+- **Сообщения.** `SecretDeliveryMessage`: `.store(tunnel:configurationText:)`, `.remove(tunnel:)` и `.removeAll` — стереть все секреты Splitway (удаление приложения, M6-02). Ответ `SecretDeliveryReply` — `.done` или `.failed(SecretDeliveryFailure)` (`storageUnavailable`, `malformedMessage`, `unsupportedSchemaVersion`). `description`, `debugDescription` и `Mirror` сообщения не показывают текст конфигурации.
 - **Кодек.** `SecretDeliveryCodec` кодирует сообщения и ответы в JSON-конверт со `schemaVersion` (сейчас 1). Сначала читается версия, и чужая версия — `unsupportedSchemaVersion`. Нехватка полей или не тот вид сообщения — `malformed`.
 - **Приложение.**
   - `MirroredTunnelSecretStore` реализует `TunnelSecretStore`: читает и пишет свою копию (Keychain пользователя) и после каждой записи или удаления передаёт то же самое в расширение через порт `ExtensionSecretChannel`. Недоступное расширение не ломает сохранение: ошибка уходит в `reportDeliveryFailure`, то есть в журнал.
   - `SecretDeliveringTunnelController` оборачивает `SystemTunnelController`: перед установкой туннеля в слот `DeliverTunnelSecretUseCase` отправляет расширению текущую копию. Если расширение недоступно — `ConnectionFailure.extensionUnavailable` и слот не меняется; нет своей копии — `configurationUnavailable`; расширение не смогло сохранить — `unknown`. Остальные вызовы проходят насквозь.
-- **Расширение.** `SecretDeliveryRequestHandler(store:)` разбирает запрос, применяет его к своему `TunnelSecretStore` и отвечает. Неразборчивый запрос и чужая версия получают отказ, а не тишину.
+- **Расширение.** `SecretDeliveryRequestHandler(store:)` разбирает запрос, применяет его к своему `ErasableTunnelSecretStore` (порт `TunnelLibrary`: `TunnelSecretStore` и удаление всех записей) и отвечает. Неразборчивый запрос и чужая версия получают отказ, а не тишину.
 
 **Адаптеры macOS** (`SecretDeliveryInfrastructure`):
 
@@ -72,6 +72,7 @@
 
 ## Тесты
 
+- Кодек разбирает `.removeAll`, обработчик расширения на него стирает все секреты (M6-02). На тестовой ВМ после удаления Splitway секрета в System Keychain нет (2026-11-01).
 25 тестов в `SecretDeliveryTests`:
 
 - требование к клиенту: строка для нашей команды и приложения, отказ для неверного Team ID (длина, регистр, кавычки, пробелы) и bundle ID, который мог бы изменить требование;
@@ -94,3 +95,4 @@
 | 2026-10-31 | Номер сборки в имени Mach-сервиса: после обновления расширение доступно без перезагрузки | M2-12 |
 | 2026-10-30 | XPC-канал и слушатель, System Keychain, доставка перед установкой в слот; туннель поднимается в системном расширении | M2-12 |
 | 2026-11-01 | Вариант B на Mac владельца с включённым SIP: после перезагрузки туннель подключается без приложения, ключа нет в настройках VPN | SP-5 |
+| 2026-11-01 | Сообщение `removeAll` и стирание всех секретов в System Keychain | M6-02 |
