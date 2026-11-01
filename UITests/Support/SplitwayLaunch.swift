@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 @MainActor
@@ -9,6 +10,11 @@ enum SplitwayLaunch {
             "-SplitwayUsesTemporaryStorage", "YES",
             "-Splitway.hasCompletedOnboarding", hasCompletedOnboarding ? "YES" : "NO",
         ])
+    }
+
+    static func copyToClipboard(_ text: String) {
+        XCUIApplication(bundleIdentifier: Bundle.main.bundleIdentifier ?? "").activate()
+        UIPasteboard.general.string = text
     }
 
     static func applicationWithStoredTunnels() -> XCUIApplication {

@@ -1,4 +1,3 @@
-import UIKit
 import XCTest
 
 final class TunnelSmokeTests: XCTestCase {
@@ -8,8 +7,8 @@ final class TunnelSmokeTests: XCTestCase {
 
     @MainActor
     func testImportsAPastedTunnelAndRenamesIt() {
+        SplitwayLaunch.copyToClipboard(SampleConfigurationText.make())
         let application = SplitwayLaunch.application()
-        UIPasteboard.general.string = SampleConfigurationText.make()
 
         application.addTunnel(by: "Paste")
         application.waitForText("Import Tunnels")
