@@ -273,6 +273,11 @@ let features: [FeatureModule] = [
         providesTestSupport: true
     ),
     FeatureModule(
+        name: "Shortcuts",
+        coreDependencies: ["TunnelLibrary", "TunnelConnection"],
+        testDependencies: ["TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "TunnelConfigurationTestSupport"]
+    ),
+    FeatureModule(
         name: "MenuBar",
         layers: [.core, .infrastructure, .presentation],
         presentationDependencies: [
