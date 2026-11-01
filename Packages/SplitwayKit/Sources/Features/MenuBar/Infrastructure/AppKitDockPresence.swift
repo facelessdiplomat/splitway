@@ -6,6 +6,7 @@
     public final class AppKitDockPresence {
         private static let windowEvents: [Notification.Name] = [
             NSWindow.didBecomeKeyNotification,
+            NSWindow.didChangeOcclusionStateNotification,
             NSWindow.didMiniaturizeNotification,
             NSWindow.didDeminiaturizeNotification,
             NSWindow.willCloseNotification,
