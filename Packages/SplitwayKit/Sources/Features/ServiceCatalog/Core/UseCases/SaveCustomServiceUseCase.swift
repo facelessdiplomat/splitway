@@ -1,6 +1,4 @@
 import AppRouting
-import Foundation
-import SharedKernel
 
 public struct SaveCustomServiceUseCase: Sendable {
     private let repository: any CustomServiceRepository
@@ -10,11 +8,10 @@ public struct SaveCustomServiceUseCase: Sendable {
     }
 
     public func execute(_ draft: CustomServiceDraft) async throws(CustomServiceError) -> CustomService {
-        let rules = try Self.rules(domains: draft.domains, networks: draft.networks)
         let service = try CustomService(
             id: draft.identifier ?? ServiceIdentifier.forCustomService(),
             name: draft.name,
-            rules: rules
+            rules: try draft.rules()
         )
         try await store(service)
         return service
@@ -32,33 +29,5 @@ public struct SaveCustomServiceUseCase: Sendable {
         } catch {
             throw .storageUnavailable
         }
-    }
-
-    private static func rules(domains: [String], networks: [String]) throws(CustomServiceError) -> ServiceRules {
-        let domainNames = try entries(domains).map { text throws(CustomServiceError) in
-            do {
-                return try DomainName(text)
-            } catch {
-                throw .invalidDomain(text)
-            }
-        }
-        let ipNetworks = try entries(networks).map { text throws(CustomServiceError) in
-            do {
-                return try IPNetwork(text)
-            } catch {
-                throw .invalidNetwork(text)
-            }
-        }
-        do {
-            return try ServiceRules(domainSuffixes: domainNames, networks: ipNetworks)
-        } catch {
-            throw .noRules
-        }
-    }
-
-    private static func entries(_ texts: [String]) -> [String] {
-        texts
-            .map { text in text.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { text in !text.isEmpty }
     }
 }

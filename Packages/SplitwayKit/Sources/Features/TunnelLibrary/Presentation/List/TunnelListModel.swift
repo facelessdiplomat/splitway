@@ -1,3 +1,4 @@
+import AppRouting
 import Foundation
 import Observation
 import TunnelConnection
@@ -15,6 +16,7 @@ public final class TunnelListModel {
     private var pendingActivation: TunnelIdentifier?
     private var entries: [TunnelLibraryEntry] = []
     private var slot = SlotState.empty
+    private var serviceNames: [ServiceIdentifier: String] = [:]
 
     private let library: TunnelLibraryActions
     private let connection: TunnelConnectionActions
@@ -49,6 +51,7 @@ public final class TunnelListModel {
         } catch {
             alert = .library(error)
         }
+        serviceNames = await library.loadServiceNames()
         hasLoaded = true
         rebuildRows()
     }
@@ -151,6 +154,8 @@ public final class TunnelListModel {
     }
 
     private func rebuildRows() {
-        rows = entries.map { entry in entry.row(in: slot, activating: pendingActivation) }
+        rows = entries.map { entry in
+            entry.row(in: slot, activating: pendingActivation, naming: serviceNames)
+        }
     }
 }

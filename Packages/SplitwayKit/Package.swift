@@ -99,11 +99,7 @@ struct FeatureModule {
 }
 
 let sharedKernelTargets: [Target] = [
-    .target(
-        name: "SharedKernel",
-        path: "Sources/SharedKernel",
-        swiftSettings: strictSwiftSettings
-    ),
+    .target(name: "SharedKernel", path: "Sources/SharedKernel", swiftSettings: strictSwiftSettings),
     .target(
         name: "SharedKernelTestSupport",
         dependencies: ["SharedKernel"],
@@ -162,11 +158,12 @@ let features: [FeatureModule] = [
         coreDependencies: ["AppRouting", "TunnelConfiguration", "TunnelLibrary"],
         presentationDependencies: [
             "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation",
-            "ApplicationCatalogPresentation", "DesignSystemPresentation",
+            "ApplicationCatalogPresentation", "ServiceCatalogPresentation", "DesignSystemPresentation",
         ],
         testDependencies: ["TunnelConfigurationTestSupport"],
         presentationTestDependencies: [
             "TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "ApplicationCatalogTestSupport",
+            "ServiceCatalog", "ServiceCatalogTestSupport",
         ]
     ),
     FeatureModule(
@@ -262,8 +259,9 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         name: "ServiceCatalog",
-        layers: [.core, .infrastructure],
+        layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["AppRouting", "TunnelConfiguration"],
+        presentationDependencies: ["AppRouting", "TunnelConfiguration", "DesignSystemPresentation"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         infrastructureResources: [.process("Resources")],
         providesTestSupport: true

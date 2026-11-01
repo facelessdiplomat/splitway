@@ -2,6 +2,7 @@ import AppRouting
 import AppRoutingPresentation
 import ApplicationCatalogPresentation
 import Observation
+import ServiceCatalogPresentation
 import TunnelConfiguration
 import TunnelEditor
 import TunnelLibrary
@@ -16,12 +17,14 @@ public final class TunnelEditorModel: Identifiable {
     public private(set) var isSaving = false
     public private(set) var isConfirmingRestart = false
     public private(set) var failure: TunnelEditorFailure?
-    public private(set) var applicationPicker: ApplicationPickerModel?
+    public internal(set) var applicationPicker: ApplicationPickerModel?
+    public internal(set) var servicePicker: ServicePickerModel?
     public let routing: RoutingSectionModel
 
     private let editedTunnel: Tunnel?
     private let actions: TunnelEditorActions
-    private let applicationPickerActions: ApplicationPickerActions?
+    let applicationPickerActions: ApplicationPickerActions?
+    let servicePickerActions: ServicePickerActions?
     private let didSave: @MainActor (Tunnel) async -> Void
 
     public init(
@@ -29,6 +32,7 @@ public final class TunnelEditorModel: Identifiable {
         routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         applicationPicker: ApplicationPickerActions? = nil,
+        servicePicker: ServicePickerActions? = nil,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         var draft = TunnelDraft(name: name, text: "")
@@ -38,6 +42,7 @@ public final class TunnelEditorModel: Identifiable {
         routing = RoutingSectionModel(policy: .default, platform: routingPlatform)
         self.actions = actions
         applicationPickerActions = applicationPicker
+        servicePickerActions = servicePicker
         self.didSave = didSave
         isPrivateKeyRevealed = true
     }
@@ -47,6 +52,7 @@ public final class TunnelEditorModel: Identifiable {
         routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         applicationPicker: ApplicationPickerActions? = nil,
+        servicePicker: ServicePickerActions? = nil,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         draft = TunnelDraft(name: tunnel.name, configuration: tunnel.configuration)
@@ -54,29 +60,12 @@ public final class TunnelEditorModel: Identifiable {
         routing = RoutingSectionModel(policy: tunnel.routingPolicy, platform: routingPlatform)
         self.actions = actions
         applicationPickerActions = applicationPicker
+        servicePickerActions = servicePicker
         self.didSave = didSave
     }
 
     public var isNewTunnel: Bool {
         editedTunnel == nil
-    }
-
-    public var canChooseApplications: Bool {
-        applicationPickerActions != nil && routing.selectedMode == .selectedApplications
-    }
-
-    public func chooseApplications() {
-        guard canChooseApplications, let applicationPickerActions else { return }
-        applicationPicker = ApplicationPickerModel(
-            selection: routing.applicationSelection,
-            actions: applicationPickerActions
-        ) { [routing] selection in
-            routing.setApplications(selection)
-        }
-    }
-
-    public func finishChoosingApplications() {
-        applicationPicker = nil
     }
 
     public var validation: TunnelDraftValidation {
@@ -171,7 +160,7 @@ public final class TunnelEditorModel: Identifiable {
         failure = nil
     }
 
-    private var currentDraft: TunnelDraft {
+    var currentDraft: TunnelDraft {
         guard mode == .text else { return draft }
         var textDraft = draft
         textDraft.replaceConfiguration(withText: rawText)

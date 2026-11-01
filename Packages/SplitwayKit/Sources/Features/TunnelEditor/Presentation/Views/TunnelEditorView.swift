@@ -17,7 +17,8 @@ struct TunnelEditorView: View {
                 RoutingSection(
                     model: model.routing,
                     excludesPrivateNetworks: excludesPrivateNetworks,
-                    chooseApplications: chooseApplications
+                    chooseApplications: chooseApplications,
+                    chooseServices: chooseServices
                 )
                 ForEach(model.draft.peers) { peer in
                     PeerSection(model: model, peer: peer)
@@ -38,7 +39,8 @@ struct TunnelEditorView: View {
                 RoutingSection(
                     model: model.routing,
                     excludesPrivateNetworks: nil,
-                    chooseApplications: chooseApplications
+                    chooseApplications: chooseApplications,
+                    chooseServices: chooseServices
                 )
             }
         }
@@ -50,11 +52,17 @@ struct TunnelEditorView: View {
         .modifier(TunnelRestartConfirmation(model: model))
         .modifier(TunnelEditorFailureAlert(model: model))
         .modifier(ApplicationPickerSheet(model: model))
+        .modifier(ServicePickerSheet(model: model))
     }
 
     private var chooseApplications: (@MainActor () -> Void)? {
         guard model.canChooseApplications else { return nil }
         return { model.chooseApplications() }
+    }
+
+    private var chooseServices: (@MainActor () -> Void)? {
+        guard model.canChooseServices else { return nil }
+        return { model.chooseServices() }
     }
 
     private var excludesPrivateNetworks: Binding<Bool>? {

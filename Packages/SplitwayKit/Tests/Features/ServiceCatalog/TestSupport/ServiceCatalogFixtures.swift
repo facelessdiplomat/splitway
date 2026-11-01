@@ -6,13 +6,14 @@ public enum ServiceCatalogFixtures {
     public static func profile(
         id: String,
         name: String,
+        category: ServiceCategory = .messaging,
         domains: [String] = ["example.org"],
         networks: [String] = []
     ) throws -> ServiceProfile {
         try ServiceProfile(
             id: ServiceIdentifier(id),
             displayName: name,
-            category: .messaging,
+            category: category,
             icon: ServiceIcon(monogram: String(name.prefix(1)), tint: ServiceTint(hexadecimal: "#229ED9")),
             rules: ServiceRules(
                 domainSuffixes: domains.map { text in try DomainName(text) },

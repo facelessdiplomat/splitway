@@ -105,6 +105,16 @@ struct ServiceRoutingPlanCompilerTests {
     }
 
     @Test
+    func staysQuietAboutTheResolverWhenNoDomainIsSelected() throws {
+        let configuration = try Self.configuration(dns: nil, allowedIPs: "10.0.0.0/8")
+
+        let plan = compiler.compile(
+            selection: ServiceSelection([]), catalog: try Self.catalog(), configuration: configuration)
+
+        #expect(plan.warnings == [.emptySelection])
+    }
+
+    @Test
     func addsAFakeIPv6NetworkOnlyWhenTheTunnelHasIPv6() throws {
         let catalog = try Self.catalog()
         let dualStack = try Self.configuration(addresses: "10.14.0.2/16, fd00::2/128", allowedIPs: "0.0.0.0/0, ::/0")

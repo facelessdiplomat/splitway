@@ -36,6 +36,7 @@
 - `OverflowScrollView` показывает содержимое как есть, а если оно не помещается по высоте — внутри `ScrollView` (`ViewThatFits`). Им пользуются пустые состояния и онбординг.
 - `LoadingButton` — кнопка, которая на время действия показывает индикатор.
 - `ExportedDataDocument` — `FileDocument` с готовыми данными для `fileExporter`: экспорт туннелей и журнала.
+- `View.plainTextInput()` — ввод без автоисправлений и, на iOS, без заглавной буквы: ключи, адреса, домены. Им пользуются редактор туннеля и редактор своего сервиса.
 - `ShapeStyle.supportingText` — цвет вспомогательного текста вместо `.secondary`. Контраст не ниже 4,5:1 и на светлом, и на тёмном фоне: светлая тема `#6C6C70`, тёмная `#AEAEB2`. Для режима «Повышенный контраст» есть более тёмный и более светлый варианты.
 
 **Доступность приложения** (M3-14):
@@ -55,7 +56,7 @@
 
 ## Публичный API
 
-`StatusBadge`, `StatusTone`, `KeyValueRow`, `IdentifierRow`, `EmptyStateView`, `OverflowScrollView`, `LoadingButton`, `ExportedDataDocument`, `ShapeStyle.supportingText`.
+`StatusBadge`, `StatusTone`, `KeyValueRow`, `IdentifierRow`, `EmptyStateView`, `OverflowScrollView`, `LoadingButton`, `ExportedDataDocument`, `ShapeStyle.supportingText`, `View.plainTextInput()`.
 
 ## Решения
 
@@ -103,3 +104,4 @@ UI-тесты `UITests/Accessibility` запускают аудит доступ
 | 2026-10-29 | `IdentifierRow` | M3-03 |
 | 2026-10-29 | `ExportedDataDocument`, пустое состояние без действий | M3-12 |
 | 2026-10-29 | Доступность: `supportingText`, `OverflowScrollView`, своё пустое состояние, строки для VoiceOver и крупного шрифта, акцент приложений, команды меню | M3-14 |
+| 2026-11-01 | `plainTextInput()` перенесён из редактора туннеля: им пользуется и редактор своего сервиса | M5-08 |
