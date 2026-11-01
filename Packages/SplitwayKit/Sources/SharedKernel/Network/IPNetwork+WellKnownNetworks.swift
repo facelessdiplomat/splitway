@@ -20,6 +20,9 @@ extension IPNetwork {
         IPNetwork(address: .ipv4(0xF000_0000), trustedPrefixLength: 4)
     ]
 
+    public static let ipv4BenchmarkingRange = IPNetwork(address: .ipv4(0xC612_0000), trustedPrefixLength: 15)
+    public static let ipv6BenchmarkingRange = IPNetwork(address: .ipv6(0x2001_0002 << 96), trustedPrefixLength: 48)
+
     public static let multicastNetworks = [
         IPNetwork(address: .ipv4(0xE000_0000), trustedPrefixLength: 4),
         IPNetwork(address: .ipv6(0xFF00 << 112), trustedPrefixLength: 8),

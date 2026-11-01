@@ -3,13 +3,21 @@ import ServiceCatalog
 import SharedKernel
 
 public enum ServiceCatalogFixtures {
-    public static func profile(id: String, name: String, domains: [String] = ["example.org"]) throws -> ServiceProfile {
+    public static func profile(
+        id: String,
+        name: String,
+        domains: [String] = ["example.org"],
+        networks: [String] = []
+    ) throws -> ServiceProfile {
         try ServiceProfile(
             id: ServiceIdentifier(id),
             displayName: name,
             category: .messaging,
             icon: ServiceIcon(monogram: String(name.prefix(1)), tint: ServiceTint(hexadecimal: "#229ED9")),
-            rules: ServiceRules(domainSuffixes: domains.map { text in try DomainName(text) }, networks: []),
+            rules: ServiceRules(
+                domainSuffixes: domains.map { text in try DomainName(text) },
+                networks: networks.map { text in try IPNetwork(text) }
+            ),
             notes: "Fixture"
         )
     }
