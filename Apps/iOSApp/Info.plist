@@ -7,6 +7,11 @@
 		<string>en</string>
 		<string>ru</string>
 	</array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Splitway uses the camera to scan QR codes with WireGuard configurations.</string>
 	<key>CFBundleDocumentTypes</key>
