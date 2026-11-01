@@ -60,6 +60,10 @@ targets:
       - package: SplitwayKit
         product: TunnelConnectionInfrastructure
       - package: SplitwayKit
+        product: Shortcuts
+      - package: SplitwayKit
+        product: TunnelConnectionPresentation
+      - package: SplitwayKit
         product: TunnelImportPresentation
       - package: SplitwayKit
         product: TunnelImportInfrastructure
@@ -165,6 +169,10 @@ targets:
         product: TunnelLibraryInfrastructure
       - package: SplitwayKit
         product: TunnelConnectionInfrastructure
+      - package: SplitwayKit
+        product: Shortcuts
+      - package: SplitwayKit
+        product: TunnelConnectionPresentation
       - package: SplitwayKit
         product: TunnelImportPresentation
       - package: SplitwayKit

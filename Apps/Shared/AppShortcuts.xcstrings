@@ -1,0 +1,66 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Connect ${tunnel} in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключи ${tunnel} в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Connect a tunnel in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключи туннель в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Disconnect ${tunnel} in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключи ${tunnel} в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Disconnect a tunnel in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключи туннель в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Toggle ${tunnel} in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переключи ${tunnel} в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Toggle a tunnel in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переключи туннель в ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
