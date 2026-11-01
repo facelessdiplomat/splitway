@@ -18,12 +18,62 @@ import (
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/tun/tuntest"
+	"splitway/tunnelcore/servicerouting"
 )
 
 const packetDeliveryTimeout = 5 * time.Second
 
+var (
+	fakeIPv4Network = netip.MustParsePrefix("198.18.0.0/15")
+	fakeAddress     = netip.MustParseAddr("198.18.1.0")
+	virtualResolver = netip.MustParseAddr("198.18.0.2")
+)
+
 func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
+}
+
+func TestDeliversTrafficForFakeAddressesUnchangedWithoutAServiceRoutingPlan(t *testing.T) {
+	first := startTestPeer(t, "10.0.0.1")
+	second := startTestPeer(t, "10.0.0.2")
+	first.connect(t, second, fakeIPv4Network)
+	second.connect(t, first)
+	ping := tuntest.Ping(fakeAddress, first.address)
+
+	first.channels.Outbound <- ping
+
+	expectDelivery(t, second, ping)
+}
+
+func TestDropsTrafficForUnknownFakeAddressesOnceAServiceRoutingPlanArrives(t *testing.T) {
+	first := startTestPeer(t, "10.0.0.1")
+	second := startTestPeer(t, "10.0.0.2")
+	first.connect(t, second, fakeIPv4Network)
+	second.connect(t, first)
+	ping := tuntest.Ping(second.address, first.address)
+
+	err := first.tunnel.RouteServices(servicerouting.Plan{
+		VirtualDNS:      virtualResolver,
+		UpstreamDNS:     second.address,
+		FakeIPv4Network: fakeIPv4Network,
+	})
+	first.channels.Outbound <- tuntest.Ping(fakeAddress, first.address)
+	first.channels.Outbound <- ping
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectDelivery(t, second, ping)
+}
+
+func TestRejectsAnInvalidServiceRoutingPlan(t *testing.T) {
+	peer := startTestPeer(t, "10.0.0.1")
+
+	err := peer.tunnel.RouteServices(servicerouting.Plan{UpstreamDNS: virtualResolver})
+
+	if !errors.Is(err, ErrConfigurationRejected) {
+		t.Fatalf("expected a rejected plan, got %v", err)
+	}
 }
 
 func TestTwoTunnelsHandshakeAndDeliverAPacket(t *testing.T) {
@@ -168,17 +218,32 @@ func startTestPeer(t *testing.T, address string) *testPeer {
 	}
 }
 
-func (peer *testPeer) connect(t *testing.T, other *testPeer) {
+func (peer *testPeer) connect(t *testing.T, other *testPeer, additionalAllowedIPs ...netip.Prefix) {
 	t.Helper()
-	configuration := strings.Join([]string{
+	lines := []string{
 		"replace_peers=true",
 		"public_key=" + hex.EncodeToString(other.publicKey[:]),
 		fmt.Sprintf("endpoint=127.0.0.1:%d", other.port),
 		"replace_allowed_ips=true",
 		"allowed_ip=" + netip.PrefixFrom(other.address, other.address.BitLen()).String(),
-	}, "\n") + "\n"
-	if err := peer.tunnel.Apply(configuration); err != nil {
+	}
+	for _, allowedIP := range additionalAllowedIPs {
+		lines = append(lines, "allowed_ip="+allowedIP.String())
+	}
+	if err := peer.tunnel.Apply(strings.Join(lines, "\n") + "\n"); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func expectDelivery(t *testing.T, to *testPeer, packet []byte) {
+	t.Helper()
+	select {
+	case delivered := <-to.channels.Inbound:
+		if !bytes.Equal(delivered, packet) {
+			t.Fatal("the first delivered packet differs from the expected one")
+		}
+	case <-time.After(packetDeliveryTimeout):
+		t.Fatal("packet was not delivered through the tunnel")
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/tun"
+	"splitway/tunnelcore/servicerouting"
 )
 
 var (
@@ -23,7 +24,8 @@ const (
 )
 
 type Tunnel struct {
-	device *device.Device
+	device      *device.Device
+	translation *servicerouting.TranslatingDevice
 }
 
 func StartOnFileDescriptor(fileDescriptor int, configuration string, logger *device.Logger) (*Tunnel, error) {
@@ -35,7 +37,8 @@ func StartOnFileDescriptor(fileDescriptor int, configuration string, logger *dev
 }
 
 func Start(tunnelInterface tun.Device, configuration string, logger *device.Logger) (*Tunnel, error) {
-	wireGuardDevice := device.NewDevice(tunnelInterface, conn.NewDefaultBind(), logger)
+	translation := servicerouting.NewTranslatingDevice(tunnelInterface)
+	wireGuardDevice := device.NewDevice(translation, conn.NewDefaultBind(), logger)
 	if err := wireGuardDevice.IpcSet(configuration); err != nil {
 		wireGuardDevice.Close()
 		return nil, fmt.Errorf("%w: %w", ErrConfigurationRejected, err)
@@ -44,11 +47,18 @@ func Start(tunnelInterface tun.Device, configuration string, logger *device.Logg
 		wireGuardDevice.Close()
 		return nil, fmt.Errorf("%w: %w", ErrDeviceUnavailable, err)
 	}
-	return &Tunnel{device: wireGuardDevice}, nil
+	return &Tunnel{device: wireGuardDevice, translation: translation}, nil
 }
 
 func (tunnel *Tunnel) Apply(configuration string) error {
 	if err := tunnel.device.IpcSet(configuration); err != nil {
+		return fmt.Errorf("%w: %w", ErrConfigurationRejected, err)
+	}
+	return nil
+}
+
+func (tunnel *Tunnel) RouteServices(plan servicerouting.Plan) error {
+	if err := tunnel.translation.Apply(plan); err != nil {
 		return fmt.Errorf("%w: %w", ErrConfigurationRejected, err)
 	}
 	return nil

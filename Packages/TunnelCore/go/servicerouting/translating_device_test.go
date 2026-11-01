@@ -33,12 +33,37 @@ type deviceFixture struct {
 
 func newDeviceFixture(t *testing.T) deviceFixture {
 	t.Helper()
-	channel := tuntest.NewChannelTUN()
-	device, err := NewTranslatingDevice(channel.TUN(), testPlan())
-	if err != nil {
+	fixture := newDeviceFixtureWithoutPlan()
+	if err := fixture.device.Apply(testPlan()); err != nil {
 		t.Fatal(err)
 	}
-	return deviceFixture{channel: channel, device: device}
+	return fixture
+}
+
+func newDeviceFixtureWithoutPlan() deviceFixture {
+	channel := tuntest.NewChannelTUN()
+	return deviceFixture{channel: channel, device: NewTranslatingDevice(channel.TUN())}
+}
+
+func (fixture deviceFixture) resolve(t *testing.T, name string) netip.Addr {
+	t.Helper()
+	client := port(deviceIPv4, testClientPort)
+	fixture.readFromSystem(t, packetFor(udpSpec(client, port(virtualDNS, dnsPort), dnsQuery(t, name, dnsmessage.TypeA))))
+	upstreamAnswer := dnsResponse(t, name, dnsmessage.TypeA, []answerSpec{
+		{name: name, kind: dnsmessage.TypeA, ttl: 300, address: realIPv4},
+	})
+	answer, _ := fixture.writeToSystem(t, packetFor(udpSpec(port(upstreamDNS, dnsPort), client, upstreamAnswer)))
+	return expectFakeAnswer(t, answer)
+}
+
+func (fixture deviceFixture) connect(t *testing.T, fake netip.Addr) (netip.Addr, bool) {
+	t.Helper()
+	syn, isForwarded := fixture.readFromSystem(t, packetFor(tcpSpec(port(deviceIPv4, 50000), port(fake, 443), tcpFlagSYN, nil)))
+	if !isForwarded {
+		return netip.Addr{}, false
+	}
+	layout, _ := layoutOf(syn)
+	return layout.destination(syn), true
 }
 
 func (fixture deviceFixture) readFromSystem(t *testing.T, packet []byte) ([]byte, bool) {
@@ -153,7 +178,7 @@ func TestDeviceLeavesAnswersWithoutAQueryAlone(t *testing.T) {
 func TestDeviceForgetsAQueryThatWasNotAnsweredInTime(t *testing.T) {
 	fixture := newDeviceFixture(t)
 	clock := &manualClock{current: time.Unix(1_800_000_000, 0)}
-	fixture.device.router = newServiceRouter(testPlan(), clock.now)
+	fixture.device.router.Store(newServiceRouter(testPlan(), clock.now))
 	client := port(deviceIPv4, testClientPort)
 	fixture.readFromSystem(t, packetFor(udpSpec(client, port(virtualDNS, dnsPort), dnsQuery(t, "api.example.com.", dnsmessage.TypeA))))
 	clock.advance(pendingQueryTimeout + time.Second)
@@ -181,6 +206,8 @@ func TestDeviceRejectsAnInvalidPlan(t *testing.T) {
 		"fake IPv4 network is IPv6":     func(plan *Plan) { plan.FakeIPv4Network = fakeIPv6s },
 		"fake IPv6 network is IPv4":     func(plan *Plan) { plan.FakeIPv6Network = netip.MustParsePrefix("10.0.0.0/8") },
 		"fake IPv6 network too small":   func(plan *Plan) { plan.FakeIPv6Network = netip.MustParsePrefix("fdc6:8b52::/121") },
+		"fake IPv4 network host bits":   func(plan *Plan) { plan.FakeIPv4Network = netip.MustParsePrefix("198.18.0.1/15") },
+		"fake IPv6 network host bits":   func(plan *Plan) { plan.FakeIPv6Network = netip.MustParsePrefix("fdc6:8b52::1/64") },
 		"fake IPv4 network not given":   func(plan *Plan) { plan.FakeIPv4Network = netip.Prefix{} },
 		"virtual resolver not given":    func(plan *Plan) { plan.VirtualDNS = netip.Addr{} },
 		"upstream resolver not given":   func(plan *Plan) { plan.UpstreamDNS = netip.Addr{} },
@@ -190,7 +217,7 @@ func TestDeviceRejectsAnInvalidPlan(t *testing.T) {
 			plan := valid
 			change(&plan)
 
-			if _, err := NewTranslatingDevice(tuntest.NewChannelTUN().TUN(), plan); err == nil {
+			if err := newDeviceFixtureWithoutPlan().device.Apply(plan); err == nil {
 				t.Fatal("expected the plan to be rejected")
 			}
 		})
@@ -201,8 +228,71 @@ func TestDeviceAcceptsAPlanWithoutIPv6(t *testing.T) {
 	plan := testPlan()
 	plan.FakeIPv6Network = netip.Prefix{}
 
-	if _, err := NewTranslatingDevice(tuntest.NewChannelTUN().TUN(), plan); err != nil {
+	if err := newDeviceFixtureWithoutPlan().device.Apply(plan); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestDevicePassesPacketsUnchangedUntilAPlanArrives(t *testing.T) {
+	fixture := newDeviceFixtureWithoutPlan()
+	client := port(deviceIPv4, testClientPort)
+	query := packetFor(udpSpec(client, port(virtualDNS, dnsPort), dnsQuery(t, "api.example.com.", dnsmessage.TypeA)))
+	answer := packetFor(udpSpec(port(upstreamDNS, dnsPort), client, dnsResponse(t, "api.example.com.", dnsmessage.TypeA, []answerSpec{
+		{name: "api.example.com.", kind: dnsmessage.TypeA, ttl: 300, address: realIPv4},
+	})))
+
+	forwarded, _ := fixture.readFromSystem(t, query)
+	delivered, _ := fixture.writeToSystem(t, answer)
+
+	if string(forwarded) != string(query) || string(delivered) != string(answer) {
+		t.Fatal("expected packets to pass unchanged before the first plan")
+	}
+}
+
+func TestDeviceKeepsItsFakeAddressesWhenTheSamePlanArrivesAgain(t *testing.T) {
+	fixture := newDeviceFixture(t)
+	fake := fixture.resolve(t, "api.example.com.")
+
+	err := fixture.device.Apply(testPlan())
+	destination, isForwarded := fixture.connect(t, fake)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isForwarded || destination != realIPv4 {
+		t.Fatalf("expected the connection to reach %v, got %v", realIPv4, destination)
+	}
+}
+
+func TestDeviceForgetsItsFakeAddressesWhenAnotherPlanArrives(t *testing.T) {
+	fixture := newDeviceFixture(t)
+	fake := fixture.resolve(t, "api.example.com.")
+	another := testPlan()
+	another.UpstreamDNS = netip.MustParseAddr("9.9.9.9")
+
+	err := fixture.device.Apply(another)
+	_, isForwarded := fixture.connect(t, fake)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isForwarded {
+		t.Fatal("expected a fake address of the previous plan to be unknown")
+	}
+}
+
+func TestDeviceKeepsTheCurrentPlanWhenAnInvalidOneArrives(t *testing.T) {
+	fixture := newDeviceFixture(t)
+	fake := fixture.resolve(t, "api.example.com.")
+
+	err := fixture.device.Apply(Plan{})
+	destination, isForwarded := fixture.connect(t, fake)
+
+	if err == nil {
+		t.Fatal("expected the empty plan to be rejected")
+	}
+	if !isForwarded || destination != realIPv4 {
+		t.Fatalf("expected the connection to reach %v, got %v", realIPv4, destination)
 	}
 }
 
