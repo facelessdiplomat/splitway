@@ -2,8 +2,9 @@ import Foundation
 import Security
 import TunnelLibrary
 
-public struct KeychainTunnelSecretStore: TunnelSecretStore {
+public struct KeychainTunnelSecretStore: ErasableTunnelSecretStore {
     public static let defaultService = "Splitway tunnel configuration"
+    private static let maximumDeletions = 10_000
 
     private let service: String
     private let accessGroup: String?
@@ -54,11 +55,28 @@ public struct KeychainTunnelSecretStore: TunnelSecretStore {
         guard status == errSecSuccess || status == errSecItemNotFound else { throw .unavailable }
     }
 
+    public func deleteAllConfigurationTexts() async throws(TunnelStorageError) {
+        let query = serviceQuery
+        for _ in 0..<Self.maximumDeletions {
+            switch SecItemDelete(query as CFDictionary) {
+            case errSecSuccess: continue
+            case errSecItemNotFound: return
+            default: throw .unavailable
+            }
+        }
+        throw .unavailable
+    }
+
     private func itemQuery(for tunnel: TunnelIdentifier) -> [CFString: Any] {
+        var query = serviceQuery
+        query[kSecAttrAccount] = tunnel.rawValue.uuidString
+        return query
+    }
+
+    private var serviceQuery: [CFString: Any] {
         var query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
-            kSecAttrAccount: tunnel.rawValue.uuidString,
             kSecAttrSynchronizable: false,
             kSecUseDataProtectionKeychain: true,
         ]

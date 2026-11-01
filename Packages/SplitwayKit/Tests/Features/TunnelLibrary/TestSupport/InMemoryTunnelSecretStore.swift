@@ -1,6 +1,6 @@
 import TunnelLibrary
 
-public actor InMemoryTunnelSecretStore: TunnelSecretStore {
+public actor InMemoryTunnelSecretStore: ErasableTunnelSecretStore {
     public private(set) var texts: [TunnelIdentifier: String]
     private var failingSaveNumbers: Set<Int> = []
     private var attemptedSaveCount = 0
@@ -26,5 +26,9 @@ public actor InMemoryTunnelSecretStore: TunnelSecretStore {
 
     public func deleteConfigurationText(for tunnel: TunnelIdentifier) async throws(TunnelStorageError) {
         texts[tunnel] = nil
+    }
+
+    public func deleteAllConfigurationTexts() async throws(TunnelStorageError) {
+        texts = [:]
     }
 }

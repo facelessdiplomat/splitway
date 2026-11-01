@@ -12,6 +12,7 @@ struct SecretDeliveryCodecTests {
     @Test(arguments: [
         SecretDeliveryMessage.store(tunnel: tunnel, configurationText: configurationText),
         SecretDeliveryMessage.remove(tunnel: tunnel),
+        SecretDeliveryMessage.removeAll,
     ])
     func decodesTheMessageItEncoded(message: SecretDeliveryMessage) throws {
         let data = SecretDeliveryCodec.data(for: message)

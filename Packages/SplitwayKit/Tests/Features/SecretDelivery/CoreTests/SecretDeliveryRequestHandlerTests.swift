@@ -30,6 +30,17 @@ struct SecretDeliveryRequestHandlerTests {
         #expect(await store.texts[Self.tunnel] == nil)
     }
 
+    @Test
+    func erasesEverySecret() async throws {
+        let store = InMemoryTunnelSecretStore(texts: [Self.tunnel: "secret", TunnelIdentifier(): "other"])
+
+        let reply = await SecretDeliveryRequestHandler(store: store).reply(
+            to: SecretDeliveryCodec.data(for: .removeAll))
+
+        #expect(try SecretDeliveryCodec.reply(from: reply) == .done)
+        #expect(await store.texts.isEmpty)
+    }
+
     @Test(arguments: [
         (#"not json"#, SecretDeliveryFailure.malformedMessage),
         (#"{"schemaVersion":7,"kind":"remove"}"#, SecretDeliveryFailure.unsupportedSchemaVersion),

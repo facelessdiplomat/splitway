@@ -4,8 +4,26 @@
     import TunnelLibrary
 
     struct SystemKeychainItem: Sendable {
+        private static let maximumDeletions = 10_000
+
         let service: String
         let account: String
+
+        static func deleteAll(service: String) throws(TunnelStorageError) {
+            let query: [CFString: Any] = [
+                kSecClass: kSecClassGenericPassword,
+                kSecAttrService: service,
+                kSecUseDataProtectionKeychain: false,
+            ]
+            for _ in 0..<maximumDeletions {
+                switch SecItemDelete(query as CFDictionary) {
+                case errSecSuccess: continue
+                case errSecItemNotFound: return
+                default: throw .unavailable
+                }
+            }
+            throw .unavailable
+        }
 
         func loadText() throws(TunnelStorageError) -> String {
             var lookup = query

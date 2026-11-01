@@ -3,7 +3,7 @@
     import Security
     import TunnelLibrary
 
-    public struct SystemKeychainSecretStore: TunnelSecretStore {
+    public struct SystemKeychainSecretStore: ErasableTunnelSecretStore {
         public static let defaultService = "Splitway tunnel configuration"
         private static let queue = DispatchQueue(label: "Splitway.SystemKeychainSecretStore", qos: .userInitiated)
 
@@ -30,6 +30,13 @@
         public func deleteConfigurationText(for tunnel: TunnelIdentifier) async throws(TunnelStorageError) {
             let item = SystemKeychainItem(service: service, account: tunnel.rawValue.uuidString)
             try await Self.perform { () throws(TunnelStorageError) in try item.delete() }
+        }
+
+        public func deleteAllConfigurationTexts() async throws(TunnelStorageError) {
+            let service = service
+            try await Self.perform { () throws(TunnelStorageError) in
+                try SystemKeychainItem.deleteAll(service: service)
+            }
         }
 
         private static func perform<Value: Sendable>(
