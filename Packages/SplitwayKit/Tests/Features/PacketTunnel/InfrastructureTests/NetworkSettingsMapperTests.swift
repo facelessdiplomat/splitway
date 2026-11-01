@@ -44,6 +44,26 @@ struct NetworkSettingsMapperTests {
     }
 
     @Test
+    func sendsOnlyTheSelectedDomainsToTheVirtualResolver() throws {
+        let plan = TunnelNetworkPlan(
+            ipv4: nil,
+            ipv6: nil,
+            dns: TunnelDNSPlan(
+                servers: [try IPAddress("198.18.0.2")],
+                searchDomains: [],
+                scope: .matchingDomains([try DomainName("t.me"), try DomainName("telegram.org")])
+            ),
+            mtu: .pathMTUWithOverhead(bytes: TunnelMTU.wireGuardOverheadBytes)
+        )
+
+        let settings = NetworkSettingsMapper.settings(for: plan)
+
+        #expect(settings.dnsSettings?.servers == ["198.18.0.2"])
+        #expect(settings.dnsSettings?.matchDomains == ["t.me", "telegram.org"])
+        #expect(settings.dnsSettings?.matchDomainsNoSearch == true)
+    }
+
+    @Test
     func usesTheFixedMTUWithAPlaceholderRemoteAddress() throws {
         let settings = NetworkSettingsMapper.settings(for: try Self.dualStackPlan())
 

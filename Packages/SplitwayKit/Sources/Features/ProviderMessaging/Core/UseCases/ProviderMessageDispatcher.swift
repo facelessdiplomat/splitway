@@ -1,14 +1,14 @@
 import Foundation
 
-public struct ProviderMessageDispatcher: Sendable {
-    private let handler: any ProviderMessageHandler
+public struct ProviderMessageDispatcher<Handler: ProviderMessageHandler> {
+    private let handler: Handler
     private let codec = ProviderMessageCodec()
 
-    public init(handler: any ProviderMessageHandler) {
+    public init(handler: Handler) {
         self.handler = handler
     }
 
-    public func response(to message: Data) async -> Data {
+    public nonisolated(nonsending) func response(to message: Data) async -> Data {
         let response: ProviderResponse
         do {
             let request = try codec.decodeRequest(from: message)
@@ -28,3 +28,5 @@ public struct ProviderMessageDispatcher: Sendable {
         return (try? codec.encode(.failure(reason: .internalFailure))) ?? Data()
     }
 }
+
+extension ProviderMessageDispatcher: Sendable where Handler: Sendable {}

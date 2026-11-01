@@ -7,8 +7,10 @@ public actor PacketTunnelSession {
     private let interfaceLocator: any TunnelInterfaceLocator
     private let endpointResolution: ResolveTunnelEndpointsUseCase
     private let pathMonitor: any NetworkPathMonitor
+    private let routingPlanner: PlanTunnelRoutingUseCase
     private var configuration: TunnelConfiguration?
-    private var device: (any RunningWireGuardDevice)?
+    private var routing: TunnelRouting?
+    private var device: (any RunningTunnelInterfaceDevice)?
     private var isStopRequested = false
     private var pathObservation: Task<Void, Never>?
 
@@ -16,12 +18,14 @@ public actor PacketTunnelSession {
         engine: any WireGuardDeviceEngine,
         interfaceLocator: any TunnelInterfaceLocator,
         endpointResolver: any EndpointResolver,
-        pathMonitor: any NetworkPathMonitor
+        pathMonitor: any NetworkPathMonitor,
+        routingPlanner: PlanTunnelRoutingUseCase
     ) {
         self.engine = engine
         self.interfaceLocator = interfaceLocator
         endpointResolution = ResolveTunnelEndpointsUseCase(resolver: endpointResolver)
         self.pathMonitor = pathMonitor
+        self.routingPlanner = routingPlanner
     }
 
     public var isRunning: Bool {
@@ -32,10 +36,10 @@ public actor PacketTunnelSession {
         configuration: TunnelConfiguration,
         routedBy policy: RoutingPolicy
     ) async throws(PacketTunnelError) -> PreparedTunnelStart {
-        let plan = try Self.networkPlan(for: configuration, routedBy: policy)
+        let routing = try await routingPlanner.execute(configuration: configuration, policy: policy)
         let endpoints = try await resolvedEndpoints(of: configuration)
         try throwIfStopRequested()
-        return PreparedTunnelStart(networkPlan: plan, configuration: configuration, endpoints: endpoints)
+        return PreparedTunnelStart(routing: routing, configuration: configuration, endpoints: endpoints)
     }
 
     public func completeStart(_ preparedStart: PreparedTunnelStart) throws(PacketTunnelError) {
@@ -43,13 +47,33 @@ public actor PacketTunnelSession {
         guard let descriptor = interfaceLocator.tunnelFileDescriptor() else { throw .tunnelInterfaceUnavailable }
         let uapi = UAPIConfigurationEncoder.encode(
             preparedStart.configuration, resolvedEndpoints: preparedStart.endpoints)
+        let startedDevice = try startedDevice(on: descriptor, configuration: uapi)
         do {
-            device = try engine.startDevice(tunnelFileDescriptor: descriptor, configuration: uapi)
+            try route(preparedStart.routing, through: startedDevice)
         } catch {
-            throw .engineFailed(error)
+            startedDevice.stop()
+            throw error
         }
+        device = startedDevice
         configuration = preparedStart.configuration
+        routing = preparedStart.routing
         observePathChanges()
+    }
+
+    public func routingChange(to policy: RoutingPolicy) async throws(PacketTunnelError) -> TunnelRoutingChange {
+        guard let configuration, let current = routing, device != nil else { throw .notRunning }
+        guard policy.mode.kind == current.mode else { throw .routingModeChangeNeedsRestart }
+        let changed = try await routingPlanner.execute(configuration: configuration, policy: policy)
+        return TunnelRoutingChange(
+            routing: changed,
+            changedNetworkPlan: changed.networkPlan == current.networkPlan ? nil : changed.networkPlan
+        )
+    }
+
+    public func complete(_ change: TunnelRoutingChange) throws(PacketTunnelError) {
+        guard let device else { throw .notRunning }
+        try route(change.routing, through: device)
+        routing = change.routing
     }
 
     public func stop() {
@@ -93,6 +117,29 @@ public actor PacketTunnelSession {
         }
     }
 
+    private func startedDevice(
+        on descriptor: Int32,
+        configuration: UAPIConfiguration
+    ) throws(PacketTunnelError) -> any RunningTunnelInterfaceDevice {
+        do {
+            return try engine.startDevice(tunnelFileDescriptor: descriptor, configuration: configuration)
+        } catch {
+            throw .engineFailed(error)
+        }
+    }
+
+    private func route(
+        _ routing: TunnelRouting,
+        through device: any RunningTunnelInterfaceDevice
+    ) throws(PacketTunnelError) {
+        guard let translation = routing.translation else { return }
+        do {
+            try device.applyServiceRouting(translation)
+        } catch {
+            throw .engineFailed(error)
+        }
+    }
+
     private func throwIfStopRequested() throws(PacketTunnelError) {
         guard !isStopRequested else { throw .cancelled }
     }
@@ -106,14 +153,4 @@ public actor PacketTunnelSession {
         }
     }
 
-    private static func networkPlan(
-        for configuration: TunnelConfiguration,
-        routedBy policy: RoutingPolicy
-    ) throws(PacketTunnelError) -> TunnelNetworkPlan {
-        do {
-            return try TunnelNetworkPlanner.plan(for: configuration, routedBy: policy)
-        } catch {
-            throw .invalidNetworkPlan(error)
-        }
-    }
 }

@@ -17,6 +17,8 @@ struct TunnelStopReasonPacketTunnelErrorTests {
         (.engineFailed(.socketsUnavailable), .engineSocketsUnavailable),
         (.engineFailed(.internalFailure), .engineFailure),
         (.notRunning, .engineFailure),
+        (.serviceCatalogUnavailable, .configurationUnavailable),
+        (.routingModeChangeNeedsRestart, .unsupportedRoutingMode),
     ])
     func tellsTheAppWhyTheTunnelStopped(error: PacketTunnelError, reason: TunnelStopReason) {
         #expect(TunnelStopReason(packetTunnelError: error) == reason)

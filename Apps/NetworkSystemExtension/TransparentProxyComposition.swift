@@ -16,7 +16,7 @@ struct TransparentProxyComposition: Sendable {
 
     let session: TransparentProxySession
     let loadActiveTunnel: LoadActiveTunnelUseCase
-    let messageDispatcher: ProviderMessageDispatcher
+    let messageDispatcher: ProviderMessageDispatcher<TransparentProxyMessageHandler>
     let log: LogRecorder
 
     init(bundle: Bundle = .main) {

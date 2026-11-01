@@ -110,6 +110,10 @@ targets:
       - package: SplitwayKit
         product: TunnelLibraryInfrastructure
       - package: SplitwayKit
+        product: ServiceCatalog
+      - package: SplitwayKit
+        product: ServiceCatalogInfrastructure
+      - package: SplitwayKit
         product: Diagnostics
       - package: SplitwayKit
         product: DiagnosticsInfrastructure
@@ -239,6 +243,10 @@ targets:
         product: TransparentProxyInfrastructure
       - package: SplitwayKit
         product: SecretDeliveryInfrastructure
+      - package: SplitwayKit
+        product: ServiceCatalog
+      - package: SplitwayKit
+        product: ServiceCatalogInfrastructure
       - package: TunnelCore
         product: TunnelCoreAdapter
 schemes:

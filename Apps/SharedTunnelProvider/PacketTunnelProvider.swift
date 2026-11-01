@@ -1,6 +1,5 @@
 import NetworkExtension
 import PacketTunnel
-import PacketTunnelInfrastructure
 import ProviderMessaging
 
 final class PacketTunnelProvider: NEPacketTunnelProvider {
@@ -24,7 +23,8 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 
     override nonisolated(nonsending) func handleAppMessage(_ messageData: Data) async -> Data? {
-        await composition.messageDispatcher.response(to: messageData)
+        let handler = PacketTunnelMessageHandler(session: composition.session, networkSettings: self)
+        return await ProviderMessageDispatcher(handler: handler).response(to: messageData)
     }
 
     override func wake() {
@@ -41,11 +41,7 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
             configuration: activeTunnel.configuration,
             routedBy: activeTunnel.routingPolicy
         )
-        do {
-            try await setTunnelNetworkSettings(NetworkSettingsMapper.settings(for: preparedStart.networkPlan))
-        } catch {
-            throw .networkSettingsRejected
-        }
+        try await apply(preparedStart.networkPlan)
         try await composition.session.completeStart(preparedStart)
         composition.log.record(.info, "Tunnel started")
     }

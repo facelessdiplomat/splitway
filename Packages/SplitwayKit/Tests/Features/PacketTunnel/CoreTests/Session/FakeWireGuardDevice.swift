@@ -4,12 +4,14 @@ import TunnelEngine
 final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningTunnelInterfaceDevice {
     private let log: SessionEventLog
     private let startFailure: TunnelEngineError?
+    private let serviceRoutingFailure: TunnelEngineError?
     private let configurations = Mutex<[UAPIConfiguration]>([])
     private let translations = Mutex<[ServiceRoutingTranslation]>([])
 
-    init(log: SessionEventLog, startFailure: TunnelEngineError?) {
+    init(log: SessionEventLog, startFailure: TunnelEngineError?, serviceRoutingFailure: TunnelEngineError?) {
         self.log = log
         self.startFailure = startFailure
+        self.serviceRoutingFailure = serviceRoutingFailure
     }
 
     var receivedConfigurations: [UAPIConfiguration] {
@@ -38,6 +40,9 @@ final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningTunnelInterfaceDe
     }
 
     func applyServiceRouting(_ translation: ServiceRoutingTranslation) throws(TunnelEngineError) {
+        if let serviceRoutingFailure {
+            throw serviceRoutingFailure
+        }
         translations.withLock { translations in translations.append(translation) }
         log.record(.appliedServiceRouting)
     }
