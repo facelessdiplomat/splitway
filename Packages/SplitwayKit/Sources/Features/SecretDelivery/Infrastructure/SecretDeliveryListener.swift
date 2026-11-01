@@ -7,7 +7,11 @@
         private let listener: NSXPCListener
         private let handler: SecretDeliveryRequestHandler
 
-        public init(listener: NSXPCListener, store: any TunnelSecretStore, clientRequirement: ClientCodeRequirement?) {
+        public init(
+            listener: NSXPCListener,
+            store: any ErasableTunnelSecretStore,
+            clientRequirement: ClientCodeRequirement?
+        ) {
             self.listener = listener
             handler = SecretDeliveryRequestHandler(store: store)
             super.init()
@@ -19,7 +23,7 @@
 
         public convenience init(
             machServiceName: String,
-            store: any TunnelSecretStore,
+            store: any ErasableTunnelSecretStore,
             clientRequirement: ClientCodeRequirement
         ) {
             self.init(
@@ -30,7 +34,7 @@
         }
 
         public static func anonymous(
-            store: any TunnelSecretStore,
+            store: any ErasableTunnelSecretStore,
             clientRequirement: ClientCodeRequirement? = nil
         ) -> SecretDeliveryListener {
             SecretDeliveryListener(listener: .anonymous(), store: store, clientRequirement: clientRequirement)

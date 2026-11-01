@@ -2,9 +2,9 @@ import Foundation
 import TunnelLibrary
 
 public struct SecretDeliveryRequestHandler: Sendable {
-    private let store: any TunnelSecretStore
+    private let store: any ErasableTunnelSecretStore
 
-    public init(store: any TunnelSecretStore) {
+    public init(store: any ErasableTunnelSecretStore) {
         self.store = store
     }
 
@@ -25,6 +25,8 @@ public struct SecretDeliveryRequestHandler: Sendable {
                 try await store.saveConfigurationText(configurationText, for: tunnel)
             case .remove(let tunnel):
                 try await store.deleteConfigurationText(for: tunnel)
+            case .removeAll:
+                try await store.deleteAllConfigurationTexts()
             }
             return .done
         } catch {

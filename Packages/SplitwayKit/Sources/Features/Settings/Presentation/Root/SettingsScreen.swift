@@ -18,17 +18,22 @@ public struct SettingsScreen: View {
 
     public var body: some View {
         NavigationStack {
-            SettingsForm(version: presenter.version, notices: presenter.notices)
-                .navigationTitle(Text("Settings", bundle: .module))
-                .toolbar {
-                    if let close {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(role: .close) {
-                                close()
-                            }
+            SettingsForm(
+                version: presenter.version,
+                notices: presenter.notices,
+                loginItem: presenter.loginItem,
+                uninstall: presenter.uninstall
+            )
+            .navigationTitle(Text("Settings", bundle: .module))
+            .toolbar {
+                if let close {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .close) {
+                            close()
                         }
                     }
                 }
+            }
         }
         #if os(macOS)
             .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)

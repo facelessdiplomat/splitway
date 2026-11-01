@@ -9,6 +9,8 @@ public enum SecretDeliveryCodec {
             encoded(SecretDeliveryEnvelope(kind: .store, tunnel: tunnel, configurationText: configurationText))
         case .remove(let tunnel):
             encoded(SecretDeliveryEnvelope(kind: .remove, tunnel: tunnel))
+        case .removeAll:
+            encoded(SecretDeliveryEnvelope(kind: .removeAll))
         }
     }
 
@@ -26,6 +28,8 @@ public enum SecretDeliveryCodec {
             return .store(tunnel: tunnel, configurationText: configurationText)
         case (.remove, .some(let tunnel), _):
             return .remove(tunnel: tunnel)
+        case (.removeAll, _, _):
+            return .removeAll
         default:
             throw .malformed
         }

@@ -57,6 +57,8 @@
 - **Расширение недоступно.** `ConnectionFailure.extensionUnavailable` — системное расширение macOS не ответило: не одобрено, удалено или ещё запускается. Объяснение подсказывает, где его разрешить.
 - **Объяснения.** `ConnectionFailure.explanation` (`TunnelConnectionPresentation`) даёт каждому отказу свой заголовок, текст с советом и действие `ConnectionFailureAction`: открыть Настройки, изменить туннель или ничего. Отказ движка `configurationRejected` объясняется отдельно от остальных отказов движка.
 
+- **Удаление конфигураций** (M6-02). `ProviderSlotRemoval<Kind>` удаляет из системных настроек все сохранённые конфигурации слота с идентификатором провайдера Splitway, `TunnelConnectionAssembly.removeSystemConfigurations()` — оба слота на macOS. В тестовой ВМ после удаления Splitway `scutil --nc list` пуст (2026-11-01).
+
 ## Публичный API
 
 `ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`, `SlotSelectingTunnelController`, `SlotSelectingMessenger`, `ApplyRoutingPolicyUseCase`, `RoutingPolicyApplicationError`; адаптеры `ProviderSlotController`, `ProviderSlotKind`, `PacketTunnelSlot`, `TransparentProxySlot`, `ProviderSlotMessenger`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`; экран — `ConnectionFailureExplanation`, `ConnectionFailureAction`, `ConnectionFailure.explanation`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
@@ -123,3 +125,4 @@
 | 2026-10-30 | Слот прозрачного прокси, общий контроллер слотов, выбор слота по режиму | M4-14 |
 | 2026-10-30 | Слота DNS-прокси нет: DNS выбранных приложений обрабатывает прозрачный прокси (решение D-34) | M4-14 |
 | 2026-10-31 | Политика маршрутизации сообщением, отправитель сообщений выбранного слота | M4-15 |
+| 2026-11-01 | Удаление конфигураций VPN обоих слотов | M6-02 |

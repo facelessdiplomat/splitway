@@ -6,7 +6,7 @@ public actor LoopbackExtensionSecretChannel: ExtensionSecretChannel {
     private let handler: SecretDeliveryRequestHandler
     private var isReachable: Bool
 
-    public init(extensionStore: any TunnelSecretStore, isReachable: Bool = true) {
+    public init(extensionStore: any ErasableTunnelSecretStore, isReachable: Bool = true) {
         handler = SecretDeliveryRequestHandler(store: extensionStore)
         self.isReachable = isReachable
     }

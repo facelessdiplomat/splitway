@@ -13,6 +13,9 @@ struct AppTunnelServices {
     let library: TunnelLibraryAssembly
     let connection: TunnelConnectionAssembly
     let serviceCatalog: AppServiceCatalog
+    #if os(macOS)
+        let secretsUninstall: TunnelSecretsUninstallAction
+    #endif
 
     init(configuration: AppConfiguration, log: LogRecorder) {
         serviceCatalog = AppServiceCatalog(storageDirectory: configuration.storageDirectory)
@@ -23,6 +26,7 @@ struct AppTunnelServices {
                 log.record(.error, "The network extension did not get the tunnel configuration: \(error)")
             }
             let deliverSecret = DeliverTunnelSecretUseCase(secrets: local, channel: channel)
+            secretsUninstall = TunnelSecretsUninstallAction(local: local, extensionChannel: channel)
             library = TunnelLibraryAssembly(storageDirectory: configuration.storageDirectory, secrets: mirrored)
             connection = TunnelConnectionAssembly(
                 providerBundleIdentifier: configuration.tunnelProviderBundleIdentifier

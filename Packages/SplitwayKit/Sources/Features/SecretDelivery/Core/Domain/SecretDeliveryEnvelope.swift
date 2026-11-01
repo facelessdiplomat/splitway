@@ -4,6 +4,7 @@ struct SecretDeliveryEnvelope: Codable {
     enum Kind: String, Codable {
         case store
         case remove
+        case removeAll
         case done
         case failed
     }
