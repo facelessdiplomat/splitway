@@ -1,3 +1,4 @@
+import AppRouting
 import Foundation
 import Testing
 import TunnelConfigurationTestSupport
@@ -142,5 +143,24 @@ struct TunnelEditorModelTests {
         await editor.save()
 
         #expect(environment.savedTunnels.map(\.routingPolicy.mode.kind) == [.selectedServices])
+    }
+
+    @Test
+    func savesTheApplicationsOfATunnelSwitchedToAllTraffic() async throws {
+        let environment = TunnelEditorTestEnvironment()
+        let selection = ApplicationSelection([
+            try ApplicationIdentity(kind: .application, displayName: "Browser", path: "/Applications/Browser.app")
+        ])
+        let browsing = try await environment.storeTunnel(
+            named: "Browsing",
+            routedBy: RoutingPolicy(mode: .selectedApplications(selection))
+        )
+        let editor = environment.macOSEditor(for: browsing)
+
+        editor.routing.selectMode(.allTraffic)
+        await editor.save()
+
+        #expect(environment.savedTunnels.map(\.routingPolicy.mode) == [.allTraffic])
+        #expect(environment.savedTunnels.map(\.routingPolicy.applicationSelection) == [selection])
     }
 }

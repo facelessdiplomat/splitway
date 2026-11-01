@@ -42,6 +42,56 @@ struct RoutingPolicyTests {
         #expect(resolved.unsupportedMode == .selectedApplications)
     }
 
+    @Test
+    func remembersTheApplicationsWhileAnotherModeIsChosen() throws {
+        let selection = ApplicationSelection([try sampleApplication()])
+
+        let allTraffic = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)
+
+        #expect(allTraffic.mode == .allTraffic)
+        #expect(allTraffic.switchingMode(to: .selectedApplications).mode == .selectedApplications(selection))
+    }
+
+    @Test
+    func remembersTheServicesWhileAnotherModeIsChosen() throws {
+        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
+
+        let allTraffic = RoutingPolicy(mode: .selectedServices(selection)).switchingMode(to: .allTraffic)
+
+        #expect(allTraffic.mode == .allTraffic)
+        #expect(allTraffic.switchingMode(to: .selectedServices).mode == .selectedServices(selection))
+    }
+
+    @Test
+    func keepsWhatToDoWithoutTheTunnelWhenTheModeChanges() {
+        let policy = RoutingPolicy(mode: .allTraffic, whenTunnelUnavailable: .bypass)
+
+        let applications = policy.switchingMode(to: .selectedApplications)
+
+        #expect(applications.whenTunnelUnavailable == .bypass)
+    }
+
+    @Test
+    func replacesTheApplicationsWithoutChangingTheMode() throws {
+        let selection = ApplicationSelection([try sampleApplication()])
+
+        let policy = RoutingPolicy.default.replacingApplicationSelection(with: selection)
+
+        #expect(policy.mode == .allTraffic)
+        #expect(policy.applicationSelection == selection)
+    }
+
+    @Test
+    func keepsTheSelectionsWhenWhatToDoWithoutTheTunnelChanges() throws {
+        let selection = ApplicationSelection([try sampleApplication()])
+        let policy = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)
+
+        let bypassing = policy.replacingTunnelUnavailableBehavior(with: .bypass)
+
+        #expect(bypassing.whenTunnelUnavailable == .bypass)
+        #expect(bypassing.applicationSelection == selection)
+    }
+
     private func sampleApplication() throws -> ApplicationIdentity {
         try ApplicationIdentity(kind: .application, displayName: "Safari", path: "/Applications/Safari.app")
     }

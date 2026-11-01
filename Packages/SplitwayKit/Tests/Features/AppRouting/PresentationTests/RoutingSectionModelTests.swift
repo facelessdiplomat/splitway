@@ -95,6 +95,40 @@ struct RoutingSectionModelTests {
         #expect(model.policy.mode == .selectedApplications(selection))
     }
 
+    @Test
+    func offersTheApplicationsOfATunnelSavedWhileRoutingAllTraffic() throws {
+        let selection = try Self.safariSelection()
+        let saved = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)
+        let model = RoutingSectionModel(policy: saved, platform: .macOS)
+
+        model.selectMode(.selectedApplications)
+
+        #expect(model.policy.mode == .selectedApplications(selection))
+        #expect(model.selectedApplicationCount == 1)
+    }
+
+    @Test
+    func keepsTheApplicationsInThePolicyWhenAllTrafficIsChosen() throws {
+        let selection = try Self.safariSelection()
+        let model = RoutingSectionModel(policy: RoutingPolicy(mode: .selectedApplications(selection)), platform: .macOS)
+
+        model.selectMode(.allTraffic)
+
+        #expect(model.policy.mode == .allTraffic)
+        #expect(model.policy.applicationSelection == selection)
+    }
+
+    @Test
+    func keepsTheApplicationsWhenWhatToDoWithoutTheTunnelChanges() throws {
+        let selection = try Self.safariSelection()
+        let saved = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)
+        let model = RoutingSectionModel(policy: saved, platform: .macOS)
+
+        model.setBlocksWhenTunnelUnavailable(false)
+
+        #expect(model.policy.applicationSelection == selection)
+    }
+
     private static func safariSelection() throws -> ApplicationSelection {
         ApplicationSelection([
             try ApplicationIdentity(kind: .application, displayName: "Safari", path: "/Applications/Safari.app")

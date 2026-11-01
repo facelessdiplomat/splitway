@@ -21,7 +21,13 @@ extension RoutingPolicy: Codable {
         }
         let modeKind = try container.decode(RoutingModeKind.self, forKey: .mode)
         self.init(
-            mode: try Self.decodeMode(of: modeKind, from: container),
+            modeKind: modeKind,
+            applicationSelection: ApplicationSelection(
+                try Self.decodeSelection(.applications, isRequired: modeKind == .selectedApplications, from: container)
+            ),
+            serviceSelection: ServiceSelection(
+                try Self.decodeSelection(.services, isRequired: modeKind == .selectedServices, from: container)
+            ),
             whenTunnelUnavailable: try container.decodeIfPresent(
                 TunnelUnavailableBehavior.self,
                 forKey: .whenTunnelUnavailable
@@ -34,30 +40,22 @@ extension RoutingPolicy: Codable {
         try container.encode(Self.currentSchemaVersion, forKey: .schemaVersion)
         try container.encode(mode.kind, forKey: .mode)
         try container.encode(whenTunnelUnavailable, forKey: .whenTunnelUnavailable)
-        switch mode {
-        case .allTraffic:
-            break
-        case .selectedApplications(let selection):
-            try container.encode(selection.applications, forKey: .applications)
-        case .selectedServices(let selection):
-            try container.encode(selection.services, forKey: .services)
+        if mode.kind == .selectedApplications || !applicationSelection.isEmpty {
+            try container.encode(applicationSelection.applications, forKey: .applications)
+        }
+        if mode.kind == .selectedServices || !serviceSelection.isEmpty {
+            try container.encode(serviceSelection.services, forKey: .services)
         }
     }
 
-    private static func decodeMode(
-        of kind: RoutingModeKind,
+    private static func decodeSelection<Element: Decodable>(
+        _ key: CodingKeys,
+        isRequired: Bool,
         from container: KeyedDecodingContainer<CodingKeys>
-    ) throws -> RoutingMode {
-        switch kind {
-        case .allTraffic:
-            return .allTraffic
-        case .selectedApplications:
-            return .selectedApplications(
-                ApplicationSelection(try container.decode([ApplicationIdentity].self, forKey: .applications))
-            )
-        case .selectedServices:
-            return .selectedServices(
-                ServiceSelection(try container.decode([ServiceIdentifier].self, forKey: .services)))
+    ) throws -> [Element] {
+        guard isRequired else {
+            return try container.decodeIfPresent([Element].self, forKey: key) ?? []
         }
+        return try container.decode([Element].self, forKey: key)
     }
 }

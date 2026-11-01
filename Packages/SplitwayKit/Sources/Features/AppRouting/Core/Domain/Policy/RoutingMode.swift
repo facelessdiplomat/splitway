@@ -10,4 +10,14 @@ public enum RoutingMode: Sendable, Hashable {
         case .selectedServices: .selectedServices
         }
     }
+
+    var applicationSelection: ApplicationSelection {
+        guard case .selectedApplications(let selection) = self else { return ApplicationSelection([]) }
+        return selection
+    }
+
+    var serviceSelection: ServiceSelection {
+        guard case .selectedServices(let selection) = self else { return ServiceSelection([]) }
+        return selection
+    }
 }
