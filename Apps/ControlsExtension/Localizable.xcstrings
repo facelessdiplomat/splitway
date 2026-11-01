@@ -1,0 +1,136 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключён"
+          }
+        }
+      }
+    },
+    "Connects or disconnects a Splitway tunnel." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключает и отключает туннель Splitway."
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выкл."
+          }
+        }
+      }
+    },
+    "On" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вкл."
+          }
+        }
+      }
+    },
+    "Splitway Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель Splitway"
+          }
+        }
+      }
+    },
+    "Splitway couldn’t read its tunnels." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не удалось прочитать туннели."
+          }
+        }
+      }
+    },
+    "Splitway couldn’t read this tunnel’s configuration. Open Splitway to fix it." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splitway не удалось прочитать конфигурацию туннеля. Откройте Splitway, чтобы её исправить."
+          }
+        }
+      }
+    },
+    "The last connected tunnel when none is chosen." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последний подключённый туннель, если другой не выбран."
+          }
+        }
+      }
+    },
+    "The tunnel didn’t disconnect. Try again in Splitway." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель не отключился. Попробуйте ещё раз в Splitway."
+          }
+        }
+      }
+    },
+    "This tunnel is no longer in Splitway." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этого туннеля больше нет в Splitway."
+          }
+        }
+      }
+    },
+    "Tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель"
+          }
+        }
+      }
+    },
+    "Turn Tunnel On or Off" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить или выключить туннель"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

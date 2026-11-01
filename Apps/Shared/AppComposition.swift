@@ -42,6 +42,9 @@ struct AppComposition {
     let onboarding: OnboardingModel
     let reportCollector: MetricKitReportCollector
     let shortcuts: TunnelShortcutActions
+    #if os(iOS)
+        let controlRefresh: Task<Void, Never>
+    #endif
 
     init(configuration: AppConfiguration) {
         let diagnostics = DiagnosticsAssembly(
@@ -54,6 +57,9 @@ struct AppComposition {
         )
         let (library, connection) = (services.library, services.connection)
         shortcuts = Self.registeredShortcuts(library: library, connection: connection)
+        #if os(iOS)
+            controlRefresh = Self.refreshingControls(connection: connection)
+        #endif
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
         let tunnelList = Self.tunnelList(services: services)
         self.tunnelList = tunnelList
