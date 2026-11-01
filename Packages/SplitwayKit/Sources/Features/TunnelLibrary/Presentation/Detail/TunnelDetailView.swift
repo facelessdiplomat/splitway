@@ -8,6 +8,7 @@ struct TunnelDetailView: View {
     let row: TunnelRow
     let peers: [PeerStatisticsRow]
     let statisticsProblem: RuntimeStatisticsError?
+    let hasUnansweredFirstHandshake: Bool
     let toggleConnection: @MainActor () -> Void
 
     var body: some View {
@@ -31,6 +32,11 @@ struct TunnelDetailView: View {
             } footer: {
                 if statisticsProblem != nil {
                     Text("Statistics are unavailable right now.", bundle: .module)
+                }
+            }
+            if hasUnansweredFirstHandshake {
+                Section {
+                    UnansweredHandshakeWarning()
                 }
             }
             if let failure = row.status.failure {
