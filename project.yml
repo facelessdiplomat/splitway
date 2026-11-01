@@ -36,6 +36,7 @@ targets:
     sources:
       - path: Apps/iOSApp
       - path: Apps/Shared
+      - path: Apps/SharedControls
     settings:
       base:
         PRODUCT_NAME: Splitway
@@ -53,6 +54,7 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
     dependencies:
       - target: PacketTunnelExtension
+      - target: ControlsExtension
       - package: SplitwayKit
         product: TunnelLibraryPresentation
       - package: SplitwayKit
@@ -125,6 +127,18 @@ targets:
         product: DiagnosticsInfrastructure
       - package: TunnelCore
         product: TunnelCoreAdapter
+  ControlsExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Apps/ControlsExtension
+      - path: Apps/SharedControls
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.controls
+        INFOPLIST_FILE: Apps/ControlsExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Apps/ControlsExtension/ControlsExtension.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Splitway Controls
   iOSIntegrationTests:
     type: bundle.unit-test
     platform: iOS
