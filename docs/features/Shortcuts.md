@@ -45,6 +45,8 @@
   - регистрирует `TunnelShortcutActions` в `AppDependencyManager`;
   - обновляет параметры фраз (`updateAppShortcutParameters()`).
 
+`TunnelEntity`, `TunnelEntityQuery`, `TunnelShortcutFailure` и сборка `TunnelShortcutActions` собираются и в расширение контролов `ControlsExtension`: настройка контрола выбирает туннель через тот же запрос, а действие контрола отвечает теми же текстами ошибок ([ControlWidgets](ControlWidgets.md)). Расширение регистрирует свои `TunnelShortcutActions` в `AppDependencyManager` при запуске.
+
 Строки лежат в двух каталогах: `Apps/Shared/Localizable.xcstrings` (названия, описания, сводки параметров, диалоги, ошибки) и `Apps/Shared/AppShortcuts.xcstrings` (фразы Siri). Их ключи сверены с метаданными сборки `Metadata.appintents`.
 
 ## Публичный API
@@ -95,3 +97,4 @@
 | Дата | Изменение | Задача |
 |---|---|---|
 | 2026-11-01 | Ядро команд, App Intents и фразы Siri на `en` и `ru` | M6-03 |
+| 2026-11-01 | Сущность туннеля, запрос и тексты ошибок общие с контролом Пункта управления | M6-04 |
