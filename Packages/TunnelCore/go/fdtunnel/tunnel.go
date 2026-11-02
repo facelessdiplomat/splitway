@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"golang.org/x/sys/unix"
-	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/device"
 	"golang.zx2c4.com/wireguard/tun"
 	"splitway/tunnelcore/servicerouting"
+	"splitway/tunnelcore/udpbind"
 )
 
 var (
@@ -38,7 +38,7 @@ func StartOnFileDescriptor(fileDescriptor int, configuration string, logger *dev
 
 func Start(tunnelInterface tun.Device, configuration string, logger *device.Logger) (*Tunnel, error) {
 	translation := servicerouting.NewTranslatingDevice(tunnelInterface)
-	wireGuardDevice := device.NewDevice(translation, conn.NewDefaultBind(), logger)
+	wireGuardDevice := device.NewDevice(translation, udpbind.New(), logger)
 	if err := wireGuardDevice.IpcSet(configuration); err != nil {
 		wireGuardDevice.Close()
 		return nil, fmt.Errorf("%w: %w", ErrConfigurationRejected, err)

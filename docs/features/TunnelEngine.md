@@ -4,8 +4,8 @@
 |---|---|
 | Статус | в работе: режимы fd и netstack готовы; проверка на устройствах — M2-08, M2-14 |
 | Платформы | shared |
-| Задачи | M2-01, M2-02, M2-03, M2-04, M2-13, M4-06, M4-10 (`TunnelEngineTestSupport`), M5-06 |
-| Таргеты | `TunnelEngine` (SplitwayKit); `TunnelCoreAdapter`, `TunnelCoreFramework` (TunnelCore); Go-пакеты `bridge`, `fdtunnel`, `logbridge`; режим netstack — в [UserspaceNetwork](UserspaceNetwork.md) |
+| Задачи | M2-01, M2-02, M2-03, M2-04, M2-13, M4-06, M4-10 (`TunnelEngineTestSupport`), M5-06, M7-03 (`udpbind`) |
+| Таргеты | `TunnelEngine` (SplitwayKit); `TunnelCoreAdapter`, `TunnelCoreFramework` (TunnelCore); Go-пакеты `bridge`, `fdtunnel`, `logbridge`, `udpbind`; режим netstack — в [UserspaceNetwork](UserspaceNetwork.md) |
 
 ## Назначение
 
@@ -27,6 +27,7 @@ flowchart LR
   Encoder --> Adapter[TunnelCoreWireGuardEngine]
   Adapter -->|C API| Bridge[bridge: таблица хэндлов]
   Bridge --> FDTunnel[fdtunnel: wireguard-go на utun]
+  FDTunnel -->|UDP| UDPBind[udpbind: по датаграмму за вызов]
   FDTunnel -->|логи| LogBridge[logbridge]
   LogBridge -->|tc_set_log_callback| Recorder[LogRecorder движка]
 ```
@@ -40,7 +41,8 @@ flowchart LR
 - **Порты.** `WireGuardDeviceEngine` запускает устройство на дескрипторе utun и отдаёт `RunningTunnelInterfaceDevice`. Общий порт `RunningWireGuardDevice` применяет конфигурацию, отдаёт статистику, пересоздаёт сокеты и останавливается. `RunningTunnelInterfaceDevice` добавляет к нему `applyServiceRouting`: выбор сервисов работает только на utun, поэтому порт режима netstack `RunningUserspaceNetwork` этого метода не получает. Порты режима netstack (`UserspaceNetworkEngine` и другие) описаны в [UserspaceNetwork](UserspaceNetwork.md).
 - **Выбор сервисов.** `ServiceRoutingTranslation` — то, что нужно движку из плана выбора сервисов: виртуальный DNS, резолвер для пересылки и фиктивные сети IPv4 и IPv6 (IPv6 необязательна). `ServiceRoutingTranslationEncoder` кодирует её в JSON с версией через `Encodable`-документ `ServiceRoutingTranslationDocument`: ключи по алфавиту, без экранирования `/`, сеть IPv6 без значения не пишется. Адаптер передаёт JSON в `tc_fd_tunnel_set_service_routing`, а Go разбирает его в `servicerouting.Plan` ([ServiceRouting](ServiceRouting.md)).
 - **Go-сторона.**
-  - `fdtunnel` дублирует дескриптор (`unix.Dup`, неблокирующий режим), создаёт `tun.CreateTUNFromFile` и `device.NewDevice` со стандартным bind, применяет UAPI и поднимает устройство.
+  - `fdtunnel` дублирует дескриптор (`unix.Dup`, неблокирующий режим), создаёт `tun.CreateTUNFromFile` и `device.NewDevice` с bind `udpbind`, применяет UAPI и поднимает устройство.
+  - `udpbind` — транспорт UDP устройства для Darwin и iOS, где пакетного ввода-вывода нет. Он слушает IPv4 и IPv6 на одном порту, ставит сокетам буферы по 7 МБ, как стандартный bind, и каждым вызовом принимает или отправляет один датаграмм через `ReadFromUDPAddrPort` и `WriteToUDPAddrPort`, без пулов сообщений и адресов. Адрес отправителя IPv4 приходит без префикса IPv6, а чужой тип endpoint отклоняется `ErrWrongEndpointType`.
   - Между utun и wireguard-go `fdtunnel` ставит `servicerouting.TranslatingDevice`. Пока плана нет, пакеты проходят без изменений; `Tunnel.RouteServices` передаёт план обёртке, а неверный план возвращает `ErrConfigurationRejected`.
   - На iOS действует `debug.SetMemoryLimit` (30 МБ) и уменьшенные очереди wireguard-go для `GOOS=ios`.
   - В режиме netstack `usernet` ставит между стеком gVisor и устройством wireguard-go обёртку `coalescingDevice`, которая прореживает исходящие подтверждения TCP ([UserspaceNetwork](UserspaceNetwork.md)).
@@ -80,6 +82,7 @@ flowchart LR
 | Решение | Альтернативы | Почему так | Когда пересмотреть |
 |---|---|---|---|
 | Сервер не отвечает, если пир без рукопожатия отправил три попытки (444 байта) | Срок от момента подключения, как 15 с у прозрачного прокси | Туннель с частью сетей без трафика не делает рукопожатий, и срок от подключения дал бы ложное предупреждение; по байтам видно, что попытки были и остались без ответа. Правило опирается на размер попытки рукопожатия из протокола WireGuard | Если wireguard-go начнёт отправлять до рукопожатия что-то ещё |
+| Свой bind `udpbind` вместо стандартного `conn.StdNetBind` | Стандартный bind; форк wireguard-go | Стандартный bind готовит пакетный ввод-вывод для Linux, а на Darwin и iOS всё равно шлёт по одному датаграмму. При этом на каждый датаграмм он берёт из пула массив на 128 сообщений и обнуляет его весь, берёт мьютекс и адрес из пула и ходит через `sendmsg` и `recvmsg`. В профиле расширения на iPhone одно обнуление (`putMessages`) заняло 4,4 % CPU. `udpbind` делает то, что делал стандартный bind до пакетной переделки 2023 года, на котором работает официальное iOS-приложение 1.0.16. Стенд из двух устройств wireguard-go в одном процессе: CPU на гигабайт −3,5 % на 150 Мбит/с и −4,7 % на максимуме, пиковая скорость 621 → 655 Мбит/с. Бенчмарк доставки датаграмма — 23,8 против 25,2 мкс, 1 аллокация вместо 4. Форк противоречит правилу о стороннем коде без изменений | Если wireguard-go перестанет готовить пакет сообщений на платформах без пакетного ввода-вывода или Splitway понадобится Linux |
 | wireguard-go закреплён на свежем `b3bc704` (2026-10-25) | Выдержанный коммит двухнедельной давности | В нём и предыдущем коммите исправления рукопожатия и разбора пакетов, источник — каноничный репозиторий | При каждом обновлении зависимостей |
 | Один файл `fdtunnel/testdata/full.uapi` для Swift-теста кодировщика и Go-теста wireguard-go | Две копии фикстуры | Так доказано, что wireguard-go принимает ровно то, что выдаёт Swift | Если пакеты разъедутся по репозиториям |
 | План выбора сервисов — те же общие фикстуры: `servicerouting/testdata/plan.json` и `plan-without-ipv6.json` | Схема JSON и проверка по ней | Swift-тест сравнивает свой JSON с файлом побайтно, Go-тест разбирает тот же файл: контракт проверяют обе стороны без третьего инструмента | Если план начнут читать другие клиенты |
@@ -109,6 +112,7 @@ flowchart LR
   - жизненный цикл хэндлов, уровни логов;
   - описание сбоя запуска: причина видна, а значения отклонённой конфигурации — нет;
   - `goleak`.
+- 15 Go-тестов `udpbind` на loopback: IPv4 и IPv6 на одном порту и на заданном порту, приём и отправка в обоих семействах, все датаграммы пакета по порядку, отправитель IPv4 без префикса IPv6, повторное открытие, отказ после закрытия и для чужого endpoint, разбор endpoint, байты для cookie, буферы сокетов. Бенчмарки `BenchmarkBindDeliversADatagram` и `BenchmarkStandardBindDeliversADatagram` сравнивают его со стандартным bind, базовая линия — в `udpbind/testdata`, проверку ведёт `Scripts/benchmark.sh`.
 - 7 тестов режима fd в `TunnelCoreAdapterTests`: закрытый дескриптор и файл не utun (дескриптор вызывающего остаётся открытым), таблица `TCStatus` → `TunnelEngineError` (с новыми статусами), маскирование строк движка, версия.
 
 Запуск: `go test ./...` в `Packages/TunnelCore/go`, `swift test --package-path Packages/TunnelCore`.
@@ -130,3 +134,4 @@ flowchart LR
 | 2026-10-31 | `UAPIConfigurationEncoder.keepaliveUpdate` | M4-15 |
 | 2026-11-01 | `RuntimeStatistics.hasUnansweredFirstHandshake` (D-38) | M3-03 |
 | 2026-11-01 | `tc_fd_tunnel_set_service_routing`, порт `RunningTunnelInterfaceDevice`, JSON плана выбора сервисов с общими фикстурами | M5-06 |
+| 2026-11-02 | Bind `udpbind` по одному датаграмму вместо стандартного: меньше CPU на гигабайт на Darwin и iOS | M7-03 |

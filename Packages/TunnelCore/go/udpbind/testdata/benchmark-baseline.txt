@@ -1,0 +1,2 @@
+BenchmarkBindDeliversADatagram 1 32 B/op 61.02 MB/s 1 allocs/op 23797 ns/op
+BenchmarkStandardBindDeliversADatagram 1 149 B/op 57.65 MB/s 4 allocs/op 25187 ns/op

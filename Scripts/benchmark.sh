@@ -3,7 +3,7 @@ set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 go_module="$repository_root/Packages/TunnelCore/go"
-benchmarked_packages=(usernet servicerouting)
+benchmarked_packages=(usernet servicerouting udpbind)
 benchmark_time=2s
 repetitions=5
 acknowledgement_tolerance=0.35
