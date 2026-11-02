@@ -18,12 +18,20 @@ Splitway Tunnel
 Split tunneling for WireGuard
 ```
 
-## Promotional text (both platforms)
+## Promotional text — iOS and iPadOS
 
-123 / 170
+157 / 170
 
 ```text
-Send only the apps and services you choose through your WireGuard tunnel. Everything else stays on your regular connection.
+Send only the services you choose through your WireGuard tunnel: messengers, video, AI or your own domains. Everything else stays on your regular connection.
+```
+
+## Promotional text — macOS
+
+137 / 170
+
+```text
+Send only the apps you choose through your WireGuard tunnel, from browsers to Terminal. Everything else stays on your regular connection.
 ```
 
 ## Keywords — iOS and iPadOS
