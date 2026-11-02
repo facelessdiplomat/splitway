@@ -35,6 +35,11 @@ extension XCUIApplication {
 
     func type(_ text: String, intoField label: String) {
         let field = textFields.matching(LocalizedLabels.predicate(label)).firstMatch
+        var scrolls = 0
+        while !field.exists, scrolls < Self.maximumScrolls {
+            swipeUp()
+            scrolls += 1
+        }
         XCTAssertTrue(field.waitForExistence(timeout: Self.elementTimeout), "No field \(label)")
         field.tap()
         field.typeText(text + XCUIKeyboardKey.return.rawValue)

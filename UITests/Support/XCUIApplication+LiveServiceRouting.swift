@@ -76,7 +76,7 @@ extension XCUIApplication {
     }
 
     func returnToTunnelList() {
-        let back = navigationBars.buttons["Tunnels"].firstMatch
+        let back = navigationBars.buttons.matching(LocalizedLabels.predicate("Tunnels")).firstMatch
         if back.waitForExistence(timeout: Self.liveElementTimeout) {
             back.tap()
         }
@@ -135,7 +135,8 @@ extension XCUIApplication {
         count == 1 ? "1 service selected" : "\(count) services selected"
     }
 
-    private func switchOnServices(_ services: [String]) -> Int {
+    @discardableResult
+    func switchOnServices(_ services: [String]) -> Int {
         var remaining = Set(services)
         var switchedOn: Set<String> = []
         var steps = 0
@@ -169,12 +170,14 @@ extension XCUIApplication {
     private func visibleServiceRows(named names: Set<String>) -> [any XCUIElementSnapshot] {
         guard let tree = try? snapshot() else { return [] }
         let nodes = Self.descendants(of: tree)
+        let titles = LocalizedLabels.matching(Self.servicePickerTitle)
         let title = nodes.first { node in
-            node.elementType == .navigationBar && node.identifier == Self.servicePickerTitle
+            node.elementType == .navigationBar && titles.contains(node.identifier)
         }
         let search = nodes.first { node in node.elementType == .searchField }
         let top = title?.frame.maxY ?? frame.minY
-        let bottom = search?.frame.minY ?? frame.maxY
+        let searchTop = search?.frame.minY ?? frame.maxY
+        let bottom = searchTop > top ? searchTop : frame.maxY
         return nodes.filter { node in
             node.elementType == .switch && names.contains(node.label)
                 && node.frame.minY >= top && node.frame.maxY <= bottom
