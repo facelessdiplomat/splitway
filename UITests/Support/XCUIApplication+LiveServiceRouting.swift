@@ -16,9 +16,22 @@ extension XCUIApplication {
     private static let scrollHoldDuration: TimeInterval = 0.3
     private static let servicePickerTitle = "Services Through the Tunnel"
     private static let tunnelEditorTitle = "Edit Tunnel"
+    private static let selectedServicesPattern = "[0-9]+ services? selected"
+    private static let summaryScrolls = 6
 
     func tunnelRows(startingWith prefix: String) -> XCUIElementQuery {
         staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", prefix))
+    }
+
+    func prepareCopy(of name: String, named copyName: String) {
+        deleteTunnels(named: copyName)
+        deleteNumberedCopies(of: name)
+        guard let copy = duplicateTunnel(named: name) else { return }
+        copy.tap()
+        tapButton("Edit Tunnel")
+        replaceText(inField: "Name", with: copyName)
+        tapButton("Save", inNavigationBar: Self.tunnelEditorTitle)
+        XCTAssertTrue(staticTexts["Routing"].waitForExistence(timeout: Self.liveElementTimeout), "No \(copyName)")
     }
 
     func duplicateTunnel(named name: String) -> XCUIElement? {
@@ -32,15 +45,25 @@ extension XCUIApplication {
     }
 
     func deleteTunnels(named name: String) {
+        deleteTunnels(matching: NSPredicate(format: "label BEGINSWITH %@", name))
+    }
+
+    private func deleteNumberedCopies(of name: String) {
+        let pattern = NSRegularExpression.escapedPattern(for: name) + " [0-9]+, .*"
+        deleteTunnels(matching: NSPredicate(format: "label MATCHES %@", pattern))
+    }
+
+    private func deleteTunnels(matching predicate: NSPredicate) {
         for _ in 0..<Self.leftoverDeletions {
-            let row = tunnelRows(startingWith: name).firstMatch
+            let row = staticTexts.matching(predicate).firstMatch
             guard row.exists else { return }
+            let label = row.label
             revealSwipeActions(of: row)
             tapButton("Delete")
             let confirmation = staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Delete “")).firstMatch
             XCTAssertTrue(confirmation.waitForExistence(timeout: Self.liveElementTimeout), "No deletion question")
             tapButton("Delete")
-            XCTAssertTrue(row.waitForNonExistence(timeout: Self.liveElementTimeout), "Tunnel \(name) stayed")
+            XCTAssertTrue(staticTexts[label].waitForNonExistence(timeout: Self.liveElementTimeout), "\(label) stayed")
         }
     }
 
@@ -70,14 +93,15 @@ extension XCUIApplication {
 
     func routeSelectedServices(_ services: [String], andOwnService name: String, domains: [String]) {
         chooseRoutingMode("Selected services")
+        let rememberedCount = selectedServiceCount()
         scrollToButton("Choose Services…")
-        switchOnServices(services)
+        let switchedOnCount = switchOnServices(services)
         tapButton("Add Service", inNavigationBar: Self.servicePickerTitle)
         replaceText(inField: "Service name", with: name)
         type(domains.joined(separator: "\n"), intoTextView: "Domains")
         tapButton("Save", inNavigationBar: "New Service")
         tapButton("Done", inNavigationBar: Self.servicePickerTitle)
-        waitForText("\(services.count + 1) services selected")
+        waitForText(Self.selectedServicesText(count: rememberedCount + switchedOnCount + 1))
         tapButton("Save", inNavigationBar: Self.tunnelEditorTitle)
     }
 
@@ -95,8 +119,25 @@ extension XCUIApplication {
         tapButton("Save", inNavigationBar: Self.tunnelEditorTitle)
     }
 
-    private func switchOnServices(_ services: [String]) {
+    private func selectedServiceCount() -> Int {
+        let countText = NSPredicate(format: "label MATCHES %@", Self.selectedServicesPattern)
+        let summary = staticTexts.matching(countText).firstMatch
+        var scrolls = 0
+        while !summary.exists, scrolls < Self.summaryScrolls {
+            swipeUp()
+            scrolls += 1
+        }
+        XCTAssertTrue(summary.waitForExistence(timeout: Self.liveElementTimeout), "No count of selected services")
+        return Int(summary.label.prefix { character in character.isNumber }) ?? 0
+    }
+
+    private static func selectedServicesText(count: Int) -> String {
+        count == 1 ? "1 service selected" : "\(count) services selected"
+    }
+
+    private func switchOnServices(_ services: [String]) -> Int {
         var remaining = Set(services)
+        var switchedOn: Set<String> = []
         var steps = 0
         while !remaining.isEmpty, steps < services.count * Self.attemptsPerService + Self.serviceListScrolls {
             steps += 1
@@ -105,12 +146,14 @@ extension XCUIApplication {
                 remaining.remove(row.label)
             }
             if let row = rows.first(where: { row in row.value as? String != "1" }) {
+                switchedOn.insert(row.label)
                 point(CGPoint(x: row.frame.maxX - Self.switchKnobInset, y: row.frame.midY)).tap()
             } else if !remaining.isEmpty {
                 scrollWithoutMomentum()
             }
         }
         XCTAssertTrue(remaining.isEmpty, "Services stayed off: \(remaining.sorted())")
+        return switchedOn.count
     }
 
     private func scrollToServiceRow(named name: String) -> (any XCUIElementSnapshot)? {

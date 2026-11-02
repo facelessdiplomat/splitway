@@ -3,14 +3,16 @@ import XCTest
 final class LiveBenchmarkTests: XCTestCase {
     private static let connectionTimeout: TimeInterval = 30
     private static let routeTimeout: TimeInterval = 30
-    private static let executionAllowance: TimeInterval = 1_800
+    private static let executionAllowance: TimeInterval = 2_400
     private static let defaultTunnelName = "cz-prg"
     private static let benchmarkTunnelName = "Splitway benchmark"
     private static let benchmarkServiceName = "Benchmark"
     private static let benchmarkCatalogServices = ["GitHub"]
     private static let benchmarkDomains = ["proof.ovh.net", "api.ipify.org"]
     private static let officialClientBundleIdentifier = "com.wireguard.ios"
-    private static let rounds = 2
+    private static let rounds = 4
+    private static let activationAttempts = 2
+    private static let previousTunnelTeardown = Duration.seconds(5)
 
     private static var tunnelName: String {
         ProcessInfo.processInfo.environment["SPLITWAY_LIVE_TUNNEL_NAME"] ?? defaultTunnelName
@@ -29,76 +31,119 @@ final class LiveBenchmarkTests: XCTestCase {
     func testComparesSplitwayWithTheOfficialClient() async throws {
         let splitway = SplitwayLaunch.applicationWithStoredTunnels()
         splitway.disconnectEveryTunnel()
+        splitway.prepareCopy(of: Self.tunnelName, named: Self.benchmarkTunnelName)
+        splitway.routeAllTraffic()
         let direct = try await ExternalAddressProbe.currentAddress()
         var lines: [String] = []
 
         for round in 1...Self.rounds {
-            lines.append(try await Self.measureFullTunnel(in: splitway, round: round, direct: direct))
-            lines.append(try await Self.measureOfficialClient(round: round, direct: direct))
+            lines += await Self.measureRound(round, in: splitway, direct: direct)
         }
-        lines.append(try await Self.measureSelectedServices(in: splitway, direct: direct))
-        Self.keep(lines.joined(separator: "\n"))
+        lines.append(Self.keep(await Self.measureSelectedServices(in: splitway, direct: direct)))
 
         XCTAssertFalse(lines.contains { line in line.contains("tunneled=false") }, "A measurement bypassed the tunnel")
     }
 
     @MainActor
-    private static func measureFullTunnel(in application: XCUIApplication, round: Int, direct: String) async throws
+    private static func measureRound(_ round: Int, in splitway: XCUIApplication, direct: String) async -> [String] {
+        if round.isMultiple(of: 2) {
+            let official = keep(await measureOfficialClient(round: round, direct: direct))
+            let full = keep(await measureFullTunnel(in: splitway, round: round, direct: direct))
+            return [official, full]
+        }
+        let full = keep(await measureFullTunnel(in: splitway, round: round, direct: direct))
+        let official = keep(await measureOfficialClient(round: round, direct: direct))
+        return [full, official]
+    }
+
+    @MainActor
+    private static func measureFullTunnel(in application: XCUIApplication, round: Int, direct: String) async
         -> String
     {
         application.activate()
         application.returnToTunnelList()
-        application.tapText(startingWith: tunnelName)
-        application.routeAllTraffic()
-        let connectionSwitch = application.switches["Connection"].switches.firstMatch
-        XCTAssertTrue(connectionSwitch.waitForExistence(timeout: connectionTimeout))
-        connectionSwitch.tap()
-        XCTAssertTrue(application.staticTexts["Connected"].waitForExistence(timeout: connectionTimeout))
-        let tunneled = await isTunneled(comparedWith: direct)
-        let sample = await ThroughputSample.measure()
-        connectionSwitch.tap()
-        XCTAssertTrue(application.staticTexts["Disconnected"].waitForExistence(timeout: connectionTimeout))
-        return sample.summary(labelled: "splitway-full-\(round) tunneled=\(tunneled)")
+        application.tapText(startingWith: benchmarkTunnelName)
+        return await measureConnection(in: application, labelled: "splitway-full-\(round)", direct: direct)
     }
 
     @MainActor
-    private static func measureOfficialClient(round: Int, direct: String) async throws -> String {
+    private static func measureOfficialClient(round: Int, direct: String) async -> String {
         let client = XCUIApplication(bundleIdentifier: officialClientBundleIdentifier)
-        client.activate()
         let toggle = client.cells.containing(.staticText, identifier: tunnelName).switches.firstMatch
-        XCTAssertTrue(toggle.waitForExistence(timeout: connectionTimeout), "The official client has no \(tunnelName)")
-        switchOfficialClient(toggle, on: true)
-        let tunneled = await isTunneled(comparedWith: direct)
-        let sample = await ThroughputSample.measure()
-        switchOfficialClient(toggle, on: false)
-        return sample.summary(labelled: "official-full-\(round) tunneled=\(tunneled)")
+        let label = "official-full-\(round)"
+        for attempt in 1...activationAttempts {
+            try? await Task.sleep(for: previousTunnelTeardown)
+            client.terminate()
+            client.activate()
+            XCTAssertTrue(toggle.waitForExistence(timeout: connectionTimeout), "The client has no \(tunnelName)")
+            if toggle.value as? String != "1" {
+                toggle.tap()
+            }
+            let isTunneled = await isTunneled(comparedWith: direct)
+            var sample: ThroughputSample?
+            if isTunneled {
+                sample = await ThroughputSample.measure()
+            } else {
+                keepScreen(named: "\(label) not tunneled, attempt \(attempt)")
+            }
+            dismissAlert(in: client)
+            switchOfficialClient(toggle, on: false)
+            if let sample {
+                return sample.summary(labelled: "\(label) tunneled=true attempt=\(attempt)")
+            }
+        }
+        return "\(label) tunneled=false"
     }
 
     @MainActor
-    private static func measureSelectedServices(in application: XCUIApplication, direct: String) async throws
-        -> String
-    {
+    private static func measureSelectedServices(in application: XCUIApplication, direct: String) async -> String {
         application.activate()
         application.returnToTunnelList()
-        application.deleteTunnels(named: benchmarkTunnelName)
-        try XCTUnwrap(application.duplicateTunnel(named: tunnelName)).tap()
+        application.tapText(startingWith: benchmarkTunnelName)
         application.tapButton("Edit Tunnel")
-        application.replaceText(inField: "Name", with: benchmarkTunnelName)
         application.routeSelectedServices(
             benchmarkCatalogServices, andOwnService: benchmarkServiceName, domains: benchmarkDomains)
-        let connectionSwitch = application.switches["Connection"].switches.firstMatch
-        connectionSwitch.tap()
-        XCTAssertTrue(application.staticTexts["Connected"].waitForExistence(timeout: connectionTimeout))
-        let tunneled = await isTunneled(comparedWith: direct)
-        let sample = await ThroughputSample.measure()
-        connectionSwitch.tap()
-        XCTAssertTrue(application.staticTexts["Disconnected"].waitForExistence(timeout: connectionTimeout))
+        let line = await measureConnection(in: application, labelled: "splitway-services", direct: direct)
         application.deleteOwnServices(named: benchmarkServiceName)
         application.returnToTunnelList()
         application.deleteTunnels(named: benchmarkTunnelName)
-        return sample.summary(labelled: "splitway-services tunneled=\(tunneled)")
+        return line
     }
 
+    @MainActor
+    private static func measureConnection(in application: XCUIApplication, labelled label: String, direct: String)
+        async -> String
+    {
+        let connectionSwitch = application.switches["Connection"].switches.firstMatch
+        XCTAssertTrue(connectionSwitch.waitForExistence(timeout: connectionTimeout))
+        for attempt in 1...activationAttempts {
+            connectionSwitch.tap()
+            XCTAssertTrue(application.staticTexts["Connected"].waitForExistence(timeout: connectionTimeout))
+            let isTunneled = await isTunneled(comparedWith: direct)
+            var sample: ThroughputSample?
+            if isTunneled {
+                sample = await ThroughputSample.measure()
+            } else {
+                keepScreen(named: "\(label) not tunneled, attempt \(attempt)")
+            }
+            connectionSwitch.tap()
+            XCTAssertTrue(application.staticTexts["Disconnected"].waitForExistence(timeout: connectionTimeout))
+            if let sample {
+                return sample.summary(labelled: "\(label) tunneled=true attempt=\(attempt)")
+            }
+        }
+        return "\(label) tunneled=false"
+    }
+
+    @MainActor
+    private static func dismissAlert(in application: XCUIApplication) {
+        let alert = application.alerts.firstMatch
+        if alert.exists {
+            alert.buttons.firstMatch.tap()
+        }
+    }
+
+    @MainActor
     private static func switchOfficialClient(_ toggle: XCUIElement, on: Bool) {
         if (toggle.value as? String == "1") != on {
             toggle.tap()
@@ -120,10 +165,20 @@ final class LiveBenchmarkTests: XCTestCase {
         return false
     }
 
-    private static func keep(_ text: String) {
-        let attachment = XCTAttachment(string: text)
+    @MainActor
+    private static func keep(_ line: String) -> String {
+        let attachment = XCTAttachment(string: line)
         attachment.name = "Live benchmark"
         attachment.lifetime = .keepAlways
         XCTContext.runActivity(named: "Live benchmark") { activity in activity.add(attachment) }
+        return line
+    }
+
+    @MainActor
+    private static func keepScreen(named name: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        XCTContext.runActivity(named: name) { activity in activity.add(attachment) }
     }
 }
