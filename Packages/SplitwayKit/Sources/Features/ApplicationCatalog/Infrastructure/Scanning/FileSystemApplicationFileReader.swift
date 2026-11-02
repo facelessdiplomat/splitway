@@ -5,6 +5,7 @@
     public struct FileSystemApplicationFileReader: ApplicationFileReader {
         private static let queue = DispatchQueue(label: "Splitway.ApplicationFileReader", qos: .userInitiated)
         private static let bundleExtension = "app"
+        private static let anyExecutePermission = 0o111
 
         public init() {}
 
@@ -33,8 +34,11 @@
         }
 
         private static func isExecutableRegularFile(_ file: URL) -> Bool {
-            let values = try? file.resourceValues(forKeys: [.isRegularFileKey, .isExecutableKey])
-            return values?.isRegularFile == true && values?.isExecutable == true
+            guard let attributes = try? FileManager.default.attributesOfItem(atPath: file.path(percentEncoded: false)),
+                attributes[.type] as? FileAttributeType == .typeRegular,
+                let permissions = attributes[.posixPermissions] as? Int
+            else { return false }
+            return permissions & anyExecutePermission != 0
         }
     }
 #endif

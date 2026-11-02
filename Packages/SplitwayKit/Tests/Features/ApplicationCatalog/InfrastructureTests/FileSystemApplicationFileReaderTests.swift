@@ -53,6 +53,17 @@
         }
 
         @Test
+        func readsAnExecutableThatThisProcessMayNotRunAsACommandLineTool() async throws {
+            try fixture.makeExecutable("bin/sandboxed")
+            try fixture.denyExecutionToEveryone("bin/sandboxed")
+
+            let application = await reader.application(at: fixture.path("bin/sandboxed"))
+
+            #expect(application?.kind == .commandLineTool)
+            #expect(application?.name == "sandboxed")
+        }
+
+        @Test
         func rejectsAFileThatIsNeitherAnApplicationNorAnExecutable() async throws {
             try fixture.makeDirectory("Documents")
             try Data("notes".utf8).write(to: fixture.root.appending(path: "notes.txt"))
