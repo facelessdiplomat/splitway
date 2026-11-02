@@ -27,7 +27,7 @@ enum ConnectionEndpointProbe {
         return bytes.first == fakeIPv4FirstOctet && bytes.dropFirst().first.map(fakeIPv4SecondOctets.contains) == true
     }
 
-    private static func isReady(_ connection: NWConnection) async -> Bool {
+    static func isReady(_ connection: NWConnection) async -> Bool {
         await withCheckedContinuation { continuation in
             let outcome = OneTimeOutcome(continuation)
             connection.stateUpdateHandler = { state in
