@@ -16,7 +16,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разрешите Splitway открываться при входе в Системных настройках."
+            "value" : "Разрешите в Системных настройках открывать Splitway при входе."
           }
         }
       }
@@ -106,7 +106,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "ОК"
           }
         }
       }

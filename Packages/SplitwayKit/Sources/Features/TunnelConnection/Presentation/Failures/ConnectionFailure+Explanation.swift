@@ -53,7 +53,7 @@ extension ConnectionFailure {
                 title: .moduleResource("Network extension unavailable"),
                 message: .moduleResource(
                     """
-                    Splitway’s network extension isn’t running. Allow it in System Settings → General → \
+                    Splitway’s network extension isn’t running. Allow it in System Settings › General › \
                     Login Items & Extensions, then try again.
                     """
                 ),

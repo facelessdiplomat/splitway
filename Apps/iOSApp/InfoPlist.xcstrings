@@ -6,7 +6,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Splitway uses the camera to scan QR codes with WireGuard configurations."
           }
         },
