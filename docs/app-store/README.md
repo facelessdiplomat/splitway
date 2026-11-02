@@ -39,11 +39,20 @@
 
 | Устройство | Размер | Откуда |
 |---|---|---|
-| iPhone 6,9″ | 1320 × 2868 | `Scripts/capture-materials.sh` ([localization.md](../localization.md)) |
+| iPhone 6,9″ | 1320 × 2868 | экраны `Scripts/capture-materials.sh` ([localization.md](../localization.md)) на синем фоне с подписью |
 | iPad 13″ | 2064 × 2752 | то же |
-| Mac | 2560 × 1600 | окна Splitway из тестовой ВМ на синем фоне |
+| Mac | 2560 × 1600 | окна Splitway из тестовой ВМ на синем фоне с подписью |
 
 На каждое устройство и язык — `build/app-store/screenshots/<устройство>/<en|ru>`. Демо-туннели — со случайными ключами и адресами `*.example.net`.
+
+iPhone и iPad (2026-11-03) собраны из экранов M7-07: интерфейс iOS с тех пор не менялся. Экран занимает одинаковое место на всех слайдах, а под заголовок оставлено до двух строк. На iPhone четыре слайда, на iPad три: на планшете список туннелей и экран туннеля видны одновременно, поэтому отдельный слайд со списком повторял бы второй.
+
+| Файл | Экран | English | Русский |
+|---|---|---|---|
+| `01-services` | выбор сервисов | Choose which services use the tunnel / Everything else stays on your regular connection. | Выберите сервисы для туннеля / Всё остальное идёт обычным путём. |
+| `02-details` | туннель «Прага» с его сервисами | See what goes through the tunnel / Each tunnel keeps its own routing and services. | Видно, что идёт через туннель / У каждого туннеля свой режим и свои сервисы. |
+| `03-tunnels` (только iPhone) | список туннелей | All your WireGuard tunnels in one place / Import a file, paste a configuration or scan a QR code. | Все туннели WireGuard в одном месте / Импорт из файла, буфера обмена или по QR-коду. |
+| `04-editor` на iPhone, `03-editor` на iPad | редактор | Edit tunnels right on your iPhone (iPad) / Keys, addresses, DNS and routing. | Правьте туннели прямо на iPhone (iPad) / Ключи, адреса, DNS и маршрутизация. |
 
 Mac-снимки сняты 2026-11-02 в тестовой ВМ со сборкой в песочнице. Окно (около 960 × 575 точек) уложено на холст 2560 × 1600 — один из размеров, которые принимает Mac App Store, — с заголовком и подзаголовком над ним:
 
