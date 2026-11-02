@@ -9,15 +9,15 @@
 | Primary Category | Utilities |
 | Secondary Category | Productivity |
 | Content Rights: содержит или показывает чужой контент | No |
-| Copyright | `2026 <название организации>` — после перевода аккаунта (D-03) |
-| Privacy Policy URL | `https://<ваш сайт>/en/privacy.html`, для русской локализации — `/ru/privacy.html` ([Site](../../Site)) |
+| Copyright | `2026 <имя владельца>`, пока аккаунт личный; после перевода (D-03) — `2026 <название организации>` |
+| Privacy Policy URL | `https://facelessdiplomat.github.io/en/privacy.html`, для русской локализации — `https://facelessdiplomat.github.io/ru/privacy.html` |
 
 ## Версия (для каждой платформы)
 
 | Поле | Ответ |
 |---|---|
-| Support URL | `https://<ваш сайт>/en/support.html`, для русской локализации — `/ru/support.html` |
-| Marketing URL | можно оставить пустым или указать главную страницу сайта |
+| Support URL | `https://facelessdiplomat.github.io/en/support.html`, для русской локализации — `https://facelessdiplomat.github.io/ru/support.html` |
+| Marketing URL | можно оставить пустым или указать `https://facelessdiplomat.github.io/` |
 | Тексты | [listing.en.md](listing.en.md), [listing.ru.md](listing.ru.md) |
 | Скриншоты | [README.md](README.md), раздел «Скриншоты» |
 | App Review Information | [review-notes.md](review-notes.md); Sign-in required — No; контакт — ваши имя, телефон и почта |
