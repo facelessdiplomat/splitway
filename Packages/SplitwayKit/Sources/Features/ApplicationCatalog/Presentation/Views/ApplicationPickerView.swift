@@ -20,32 +20,24 @@ public struct ApplicationPickerView: View {
     public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker(selection: $model.filter) {
-                    ForEach(ApplicationCatalogFilter.allCases, id: \.self) { filter in
-                        filter.title.tag(filter)
+                HStack {
+                    Picker(selection: $model.filter) {
+                        ForEach(ApplicationCatalogFilter.allCases, id: \.self) { filter in
+                            filter.title.tag(filter)
+                        }
+                    } label: {
+                        Text("Show", bundle: .module)
                     }
-                } label: {
-                    Text("Show", bundle: .module)
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    addButton
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
                 .padding()
                 applicationList
             }
             .navigationTitle(Text("Apps Through the Tunnel", bundle: .module))
             .searchable(text: $model.searchText, prompt: Text("Search Apps", bundle: .module))
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isAddingFiles = true
-                    } label: {
-                        Label {
-                            Text("Add Tool…", bundle: .module)
-                        } icon: {
-                            Image(systemName: "plus")
-                        }
-                    }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: done) {
                         Text("Done", bundle: .module)
@@ -74,6 +66,18 @@ public struct ApplicationPickerView: View {
         }
         .task {
             await model.load()
+        }
+    }
+
+    private var addButton: some View {
+        Button {
+            isAddingFiles = true
+        } label: {
+            Label {
+                Text("Add Tool…", bundle: .module)
+            } icon: {
+                Image(systemName: "plus")
+            }
         }
     }
 
@@ -111,7 +115,6 @@ public struct ApplicationPickerView: View {
     }
 
     private func add(_ files: [URL]) {
-        let paths = files.map { file in file.path(percentEncoded: false) }
-        Task.immediate { await model.addApplications(at: paths) }
+        Task.immediate { await model.addApplications(files) }
     }
 }

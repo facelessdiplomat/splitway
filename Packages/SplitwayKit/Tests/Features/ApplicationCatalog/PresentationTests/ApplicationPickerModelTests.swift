@@ -2,6 +2,7 @@ import AppRouting
 import ApplicationCatalog
 import ApplicationCatalogPresentation
 import ApplicationCatalogTestSupport
+import Foundation
 import Testing
 
 @MainActor
@@ -118,6 +119,30 @@ struct ApplicationPickerModelTests {
     }
 
     @Test
+    func keepsAccessToAChosenFileUntilItIsAddedAndThenClosesIt() async {
+        let homemade = InstalledApplication(
+            kind: .application,
+            name: "Homemade",
+            bundleIdentifier: "com.example.homemade",
+            path: "/Users/someone/Desktop/Homemade.app",
+            version: "1.0"
+        )
+        let signatures = BundleCodeSignatures(
+            main: CodeSignature(signingIdentifier: "com.example.homemade", teamIdentifier: Self.developerTeam),
+            nested: []
+        )
+        let access = InMemoryChosenFileAccess()
+        let model = picker(
+            installed: [editor], signatures: [homemade.path: signatures], files: [homemade], access: access)
+        await model.load()
+
+        await model.addApplications([URL(filePath: homemade.path)])
+
+        #expect(model.selection.applications.map(\.path) == [homemade.path])
+        #expect(access.openPaths.isEmpty)
+    }
+
+    @Test
     func marksAppleApplicationsAndApplicationsMatchedByPath() async {
         let homemade = InstalledApplication.fixture(named: "Homemade")
         let adHocSignature = BundleCodeSignatures(
@@ -146,14 +171,16 @@ struct ApplicationPickerModelTests {
         installed: [InstalledApplication],
         selection: ApplicationSelection = ApplicationSelection([]),
         signatures: [String: BundleCodeSignatures] = [:],
-        files: [InstalledApplication] = []
+        files: [InstalledApplication] = [],
+        access: InMemoryChosenFileAccess? = nil
     ) -> ApplicationPickerModel {
         let actions = ApplicationPickerActions(
             loadApplications: LoadInstalledApplicationsUseCase(
                 scanner: InMemoryApplicationBundleScanner(applications: installed)),
             resolveIdentity: ResolveApplicationIdentityUseCase(
-                signatures: InMemoryCodeSignatureReader(signaturesByPath: signatures)),
-            fileReader: InMemoryApplicationFileReader(applications: files),
+                signatures: InMemoryCodeSignatureReader(signaturesByPath: signatures, readableWhileOpenIn: access)),
+            fileReader: InMemoryApplicationFileReader(applications: files, readableWhileOpenIn: access),
+            fileAccess: access ?? InMemoryChosenFileAccess(),
             iconLoader: InMemoryApplicationIconLoader()
         )
         return ApplicationPickerModel(selection: selection, actions: actions) { [reports] selection in

@@ -17,16 +17,29 @@ struct LogViewerView: View {
                 LogViewerEmptyStateView(state: emptyState)
             }
         }
+        #if os(macOS)
+            .safeAreaInset(edge: .top) {
+                HStack {
+                    LogViewerActionButton(action: .export, model: model, confirmClearing: confirmClearing)
+                    LogViewerActionButton(action: .sendReport, model: model, confirmClearing: confirmClearing)
+                    Spacer()
+                    LogViewerActionButton(action: .clear, model: model, confirmClearing: confirmClearing)
+                }
+                .padding()
+            }
+        #endif
         .searchable(text: searchText)
         .navigationTitle(Text("Log", bundle: .module))
         .toolbar {
-            LogViewerToolbar(model: model, close: close) {
-                isConfirmingClearing = true
-            }
+            LogViewerToolbar(model: model, close: close, confirmClearing: confirmClearing)
         }
         .task { await model.followUpdates() }
         .modifier(LogViewerDialogs(model: model, isConfirmingClearing: $isConfirmingClearing))
         .modifier(CrashReportPresenter(model: model))
+    }
+
+    private func confirmClearing() {
+        isConfirmingClearing = true
     }
 
     private var searchText: Binding<String> {

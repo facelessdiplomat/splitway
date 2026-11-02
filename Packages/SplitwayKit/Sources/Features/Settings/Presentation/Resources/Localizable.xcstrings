@@ -41,26 +41,6 @@
         }
       }
     },
-    "Couldn’t Move Splitway to the Trash" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось переместить Splitway в Корзину"
-          }
-        }
-      }
-    },
-    "Drag Splitway from the Applications folder to the Trash." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перетащите Splitway из папки «Программы» в Корзину."
-          }
-        }
-      }
-    },
     "General" : {
       "localizations" : {
         "ru" : {
@@ -87,16 +67,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Чтобы закончить, переместите Splitway в Корзину."
-          }
-        }
-      }
-    },
-    "Move to Trash" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переместить в Корзину"
           }
         }
       }
@@ -167,6 +137,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Настройки"
+          }
+        }
+      }
+    },
+    "Show in Finder" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать в Finder"
           }
         }
       }

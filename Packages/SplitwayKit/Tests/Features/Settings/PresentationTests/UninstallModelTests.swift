@@ -46,25 +46,14 @@ struct UninstallModelTests {
     }
 
     @Test
-    func movesTheApplicationToTheTrashOrQuits() async {
+    func showsTheApplicationInFinderOrQuits() async {
         let application = FakeApplicationRemoval()
         let model = makeModel(application: application)
 
-        await model.moveToTrash()
+        await model.showInFinder()
         await model.quit()
 
-        #expect(application.performedRequests == ["trash", "quit"])
-    }
-
-    @Test
-    func explainsWhenTheApplicationCannotBeMovedToTheTrash() async {
-        let model = makeModel(application: FakeApplicationRemoval(refusesTrash: true))
-
-        await model.moveToTrash()
-
-        #expect(model.trashFailure == .notMovedToTrash)
-        model.dismissTrashFailure()
-        #expect(model.trashFailure == nil)
+        #expect(application.performedRequests == ["show in Finder", "quit"])
     }
 
     private func makeModel(

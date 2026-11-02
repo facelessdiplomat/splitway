@@ -1,4 +1,4 @@
 public protocol ApplicationRemoval: Sendable {
-    func moveToTrashAndQuit() async throws(ApplicationRemovalError)
+    func showInFinderAndQuit() async
     func quit() async
 }

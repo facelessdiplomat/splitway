@@ -5,7 +5,6 @@ import Settings
 @Observable
 public final class UninstallModel {
     public private(set) var phase: UninstallPhase = .idle
-    public private(set) var trashFailure: ApplicationRemovalError?
 
     private let uninstall: UninstallUseCase
     private let application: any ApplicationRemoval
@@ -31,19 +30,11 @@ public final class UninstallModel {
         phase = .finished(await uninstall.execute())
     }
 
-    public func moveToTrash() async {
-        do {
-            try await application.moveToTrashAndQuit()
-        } catch {
-            trashFailure = error
-        }
+    public func showInFinder() async {
+        await application.showInFinderAndQuit()
     }
 
     public func quit() async {
         await application.quit()
-    }
-
-    public func dismissTrashFailure() {
-        trashFailure = nil
     }
 }

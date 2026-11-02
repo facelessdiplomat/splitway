@@ -6,7 +6,7 @@
 |---|---|
 | Минимальная ОС | macOS 26 (решение D-04) |
 | Дистрибуция | Только Mac App Store: беты — через TestFlight, обновления — через App Store (решение D-39, ADR-15) |
-| Приложение | `macOSApp`: окно + `MenuBarExtra` + `Settings` (решение D-12). Пока без App Sandbox; Mac App Store требует песочницу, переход — SP-10. Hardened Runtime включён |
+| Приложение | `macOSApp`: окно + `MenuBarExtra` + `Settings` (решение D-12). В App Sandbox, как требует Mac App Store (SP-10): вне своих контейнеров читает системные папки приложений и файлы, которые выбрал человек. Hardened Runtime включён |
 | Расширение | `NetworkSystemExtension` — одно системное расширение с двумя провайдерами: `PacketTunnelProvider` и `TransparentProxyProvider` |
 | Режим «Весь трафик» | `NETunnelProviderManager` → `PacketTunnelProvider` → `fdtunnel` (wireguard-go поверх `utun`) |
 | Режим «Только выбранные приложения» | `NETransparentProxyManager` → `TransparentProxyProvider` → `usernet` (wireguard-go поверх gVisor netstack) |
@@ -42,10 +42,11 @@ SplitwayAppGroupIdentifier → App Group для журнала
 | Entitlement | Приложение | Расширение |
 |---|---|---|
 | `com.apple.developer.system-extension.install` | да | — |
-| `com.apple.developer.networking.networkextension` | `packet-tunnel-provider`, `app-proxy-provider` — так их ждут профили разработки и App Store. Release пока добавляет суффикс `-systemextension` (настройка `SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX` в `project.yml`): он нужен только подписи Developer ID и уходит в SP-10 | то же |
+| `com.apple.developer.networking.networkextension` | `packet-tunnel-provider`, `app-proxy-provider` — так их ждут профили разработки и App Store. Суффикс `-systemextension` нужен только подписи Developer ID: с решением D-39 его и настройку, которая добавляла его в Release, убрал SP-10 | то же |
 | `com.apple.security.application-groups` | `8625S77CSU.com.facelessdiplomat.splitway` | то же |
 | `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
-| `com.apple.security.app-sandbox` | пока нет; Mac App Store требует (SP-10) | да, сетевые расширения обязаны быть в песочнице |
+| `com.apple.security.app-sandbox` | да, как требует Mac App Store (SP-10) | да, сетевые расширения обязаны быть в песочнице |
+| `com.apple.security.files.user-selected.read-write` | да: импорт, экспорт туннелей и журнала, «Добавить утилиту…» работают с файлами, которые выбрал человек | — |
 | `com.apple.security.network.client`, `com.apple.security.network.server` | — | да: без них песочница не даёт wireguard-go открыть сокет маршрутизации и UDP-сокет (`operation not permitted`), как и сетевому расширению официального WireGuard |
 
 У приложения и системного расширения есть `PrivacyInfo.xcprivacy` (в `Contents/Resources`): без отслеживания и сбора данных, с причинами для API, которые использует бинарник. На macOS Apple эти причины не проверяет, манифесты — для отчёта о приватности и на будущее ([security.md](security.md), раздел 6).
@@ -171,10 +172,10 @@ sequenceDiagram
 
 ## 7. Каталог приложений (фича `ApplicationCatalog`)
 
-- Источники: `/Applications`, `/Applications/Utilities`, `/System/Applications`, `~/Applications`, `/Applications/Setapp`, запущенные приложения (`NSWorkspace.runningApplications`), Spotlight (`NSMetadataQuery` по `com.apple.application-bundle`).
+- Источники: `/Applications`, `/Applications/Utilities`, `/System/Applications`, `/Applications/Setapp`, запущенные приложения (`NSWorkspace.runningApplications`). `~/Applications`, `/opt/homebrew/bin` и `/usr/local/bin` песочница не читает (SP-10): приложения и утилиты оттуда человек добавляет сам.
 - Для каждого: отображаемое имя, иконка (`NSWorkspace.icon(forFile:)`), bundle ID, signing identifier и Team ID (`SecStaticCodeCreateWithPath` + `SecCodeCopySigningInformation`), вложенный код.
-- Ручное добавление: drag & drop `.app` и выбор любого исполняемого файла через `NSOpenPanel` (CLI).
-- Сканирование асинхронное, с кэшем по `(путь, дата изменения, версия)`; иконки грузятся лениво.
+- Ручное добавление: drag & drop `.app` и выбор приложения или исполняемого файла кнопкой «Добавить утилиту…» (панель открытия); доступ к выбранному файлу открыт, пока собирается его идентичность.
+- Сканирование асинхронное, с кэшем по пути и поколению `Info.plist` (`generationIdentifierKey`); иконки грузятся лениво.
 - Приложения с пометками: «Apple-приложение — ограниченная поддержка», «Не подписано — сопоставление по пути».
 
 ## 8. Интерфейс
@@ -205,7 +206,7 @@ sequenceDiagram
 | SP-3 | Скорость ретрансляции TCP через netstack | Замер скорости и задержки против режима «Весь трафик»; профиль CPU | Итог в ВМ: 70–90 % скорости «Весь трафик» одним потоком при 1,3–1,5 × CPU на гигабайт; буферы и насосы скорость не ограничивают, цель M4-16 — в [SP-3](features/spikes/SP-3.md) |
 | SP-5 | Доставка секретов в системное расширение (варианты A/B/C) | Работающий вариант, ADR в документе фичи | Итог: вариант B — XPC и System Keychain (решение D-33), проверен в ВМ и на Mac владельца с включённым SIP ([SP-5](features/spikes/SP-5.md)) |
 | SP-6 | UDP/QUIC через `handleNewUDPFlow` | HTTP/3 в Chrome и голосовой звонок в Discord через туннель | Итог: UDP выбранных приложений идёт через перехват — HTTP/3 Safari и URLSession в ВМ, звонок на Mac владельца; QUIC в Chrome при включённом прокси не работает из-за ядра, и Chrome открывает страницы по HTTP/2 ([SP-6](features/spikes/SP-6.md)) |
-| SP-10 | Mac-приложение в App Sandbox: каталог приложений и утилит, подписи чужих приложений, импорт и экспорт, вход при запуске, установка расширения, XPC к расширению; подпись App Store у требования к клиенту XPC и у ACL System Keychain | Все функции Mac-версии работают в песочнице в ВМ; сборка из TestFlight ставит расширение и подключает туннель | Временные исключения песочницы с обоснованием для ревью; если ревью не пропустит системное расширение — app extension с новой записью в журнале решений |
+| SP-10 | Mac-приложение в App Sandbox: каталог приложений и утилит, подписи чужих приложений, импорт и экспорт, вход при запуске, установка расширения, XPC к расширению; подпись App Store у требования к клиенту XPC и у ACL System Keychain | Все функции Mac-версии работают в песочнице в ВМ; сборка из TestFlight ставит расширение и подключает туннель | Итог в ВМ: все функции работают в песочнице без временных исключений. Найдено и исправлено: требование к клиенту XPC не принимало подпись App Store, утилиту с Рабочего стола и приложения вне системных папок нельзя было добавить, «Move to Trash» не работает в песочнице (теперь «Show in Finder»), на Mac не было видно «Добавить утилиту…» и действий журнала ([SP-10](features/spikes/SP-10.md)). Сборка из TestFlight — M7-09; если ревью не пропустит системное расширение — app extension с новой записью в журнале решений |
 
 Прочие риски: ревью Mac App Store может не пропустить системное расширение с прозрачным прокси — по ответам DTS Apple на форуме разработчиков такие расширения в App Store допустимы, но подтвердит это только первая отправка (M7-11); изменения поведения Network Extension в новых macOS (регресс-прогон на бета-версиях каждое лето); пользователь не одобрил расширение (мастер и понятный статус); конфликт с другими VPN (раздел 6.8); на пути с потерями TCP netstack отправляет медленнее TCP macOS; на Mac владельца отправка через прокси в пределах цели (M4-16).
 

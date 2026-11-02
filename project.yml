@@ -19,11 +19,6 @@ settings:
     GENERATE_INFOPLIST_FILE: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
-  configs:
-    Debug:
-      SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX: ""
-    Release:
-      SPLITWAY_NETWORK_EXTENSION_ENTITLEMENT_SUFFIX: -systemextension
 packages:
   SplitwayKit:
     path: Packages/SplitwayKit

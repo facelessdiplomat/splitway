@@ -15,40 +15,16 @@ struct LogViewerToolbar: ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
             LogViewerFilterMenu(model: model)
         }
-        ToolbarItem(placement: .secondaryAction) {
-            Button {
-                Task.immediate { await model.prepareExport() }
-            } label: {
-                Label {
-                    Text("Export Log", bundle: .module)
-                } icon: {
-                    Image(systemName: "square.and.arrow.up")
-                }
+        #if os(iOS)
+            ToolbarItem(placement: .secondaryAction) {
+                LogViewerActionButton(action: .export, model: model, confirmClearing: confirmClearing)
             }
-            .disabled(model.isLogEmpty)
-        }
-        ToolbarItem(placement: .secondaryAction) {
-            Button {
-                model.showCrashReport()
-            } label: {
-                Label {
-                    Text("Send Report…", bundle: .module)
-                } icon: {
-                    Image(systemName: "paperplane")
-                }
+            ToolbarItem(placement: .secondaryAction) {
+                LogViewerActionButton(action: .sendReport, model: model, confirmClearing: confirmClearing)
             }
-        }
-        ToolbarItem(placement: .secondaryAction) {
-            Button(role: .destructive) {
-                confirmClearing()
-            } label: {
-                Label {
-                    Text("Clear Log", bundle: .module)
-                } icon: {
-                    Image(systemName: "trash")
-                }
+            ToolbarItem(placement: .secondaryAction) {
+                LogViewerActionButton(action: .clear, model: model, confirmClearing: confirmClearing)
             }
-            .disabled(model.isLogEmpty)
-        }
+        #endif
     }
 }

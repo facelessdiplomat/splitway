@@ -9,8 +9,11 @@
             self.applicationURL = applicationURL
         }
 
-        public func moveToTrashAndQuit() async throws(ApplicationRemovalError) {
-            guard await Self.recycle(applicationURL) else { throw .notMovedToTrash }
+        public func showInFinderAndQuit() async {
+            let applicationURL = applicationURL
+            await MainActor.run {
+                NSWorkspace.shared.activateFileViewerSelecting([applicationURL])
+            }
             await quit()
         }
 
@@ -18,11 +21,6 @@
             await MainActor.run {
                 NSApplication.shared.terminate(nil)
             }
-        }
-
-        @MainActor
-        private static func recycle(_ url: URL) async -> Bool {
-            (try? await NSWorkspace.shared.recycle([url])) != nil
         }
     }
 #endif

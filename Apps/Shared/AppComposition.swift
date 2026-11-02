@@ -227,6 +227,7 @@ struct AppComposition {
                 loadApplications: catalog.loadInstalledApplications,
                 resolveIdentity: catalog.resolveApplicationIdentity,
                 fileReader: catalog.fileReader,
+                fileAccess: catalog.fileAccess,
                 iconLoader: catalog.iconLoader
             )
         #else

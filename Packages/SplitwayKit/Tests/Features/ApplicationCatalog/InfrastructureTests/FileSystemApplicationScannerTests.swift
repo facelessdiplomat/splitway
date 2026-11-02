@@ -49,6 +49,29 @@
         }
 
         @Test
+        func rereadsAnApplicationWhoseInfoChangedSinceTheLastScan() async throws {
+            try fixture.makeApplication("Editor.app", bundleIdentifier: "com.example.editor", version: "3.1")
+            let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)
+            _ = await scanner.installedApplications()
+            try fixture.makeApplication("Editor.app", bundleIdentifier: "com.example.editor", version: "3.2")
+
+            let applications = await scanner.installedApplications()
+
+            #expect(applications.map(\.version) == ["3.2"])
+        }
+
+        @Test
+        func scansNoFolderInsideTheHomeFolderThatTheSandboxHides() {
+            let home = FileManager.default.homeDirectoryForCurrentUser.path(percentEncoded: false)
+
+            let foldersInHome = FileSystemApplicationScanner.standardDirectories.filter { directory in
+                directory.path(percentEncoded: false).hasPrefix(home)
+            }
+
+            #expect(foldersInHome.isEmpty)
+        }
+
+        @Test
         func skipsApplicationsWhoseNamesStartWithADot() async throws {
             try fixture.makeApplication(".Draft.app", bundleIdentifier: "com.example.draft", version: "1.0")
             let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)
