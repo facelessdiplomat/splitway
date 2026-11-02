@@ -1,4 +1,5 @@
 import Diagnostics
+import Foundation
 import Observation
 import SharedKernel
 
@@ -16,6 +17,7 @@ public final class LogViewerModel {
     private var allEntries: [LogEntry] = []
 
     private let actions: LogViewerActions
+    private let abandonedCopies: any AbandonedExportCopies
     private let ticker: any Ticker
 
     public var isLogEmpty: Bool {
@@ -29,8 +31,13 @@ public final class LogViewerModel {
         return isLogEmpty ? .noEntries : .noMatchingEntries
     }
 
-    public init(actions: LogViewerActions, ticker: any Ticker = RepeatingTicker(interval: refreshInterval)) {
+    public init(
+        actions: LogViewerActions,
+        abandonedCopies: any AbandonedExportCopies,
+        ticker: any Ticker = RepeatingTicker(interval: refreshInterval)
+    ) {
         self.actions = actions
+        self.abandonedCopies = abandonedCopies
         self.ticker = ticker
     }
 
@@ -84,8 +91,11 @@ public final class LogViewerModel {
         }
     }
 
-    public func finishExport() {
+    public func finishExport(succeeded: Bool) async {
+        let exportedContents = exportedText.map { text in Data(text.utf8) }
         exportedText = nil
+        guard !succeeded, let exportedContents else { return }
+        await abandonedCopies.removeCopies(of: exportedContents)
     }
 
     public func dismissProblem() {

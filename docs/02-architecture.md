@@ -179,7 +179,7 @@ RoutingPolicy
 | Конфиг wg-quick целиком, с ключами | Keychain, общая access group. На iOS — `AfterFirstUnlockThisDeviceOnly`. Для системного расширения macOS — см. [03-platform-macos.md](03-platform-macos.md), раздел 5 | приложение, расширение |
 | Системная конфигурация VPN | По одному «слоту» на тип провайдера: `NETunnelProviderManager`, на macOS ещё `NETransparentProxyManager`. В `providerConfiguration` лежит только id активного туннеля и снимок политики маршрутизации, без секретов | система, расширение |
 | Журнал | Кольцевой файл в App Group (до 2 МБ) + OSLog | приложение, расширение |
-| Настройки приложения | `UserDefaults` с suite App Group | приложение |
+| Настройки приложения | `UserDefaults` приложения (флаг пройденного онбординга) | приложение |
 
 Модель угроз, границы доверия и итоги аудита хранения секретов — в [security.md](security.md).
 

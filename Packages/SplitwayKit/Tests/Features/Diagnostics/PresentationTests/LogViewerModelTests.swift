@@ -79,8 +79,32 @@ struct LogViewerModelTests {
         let text = try #require(model.exportedText)
         #expect(text.contains("Tunnel saved"))
         #expect(text.contains("Handshake failed"))
-        model.finishExport()
+        await model.finishExport(succeeded: true)
         #expect(model.exportedText == nil)
+    }
+
+    @Test
+    func removesTheCopiesOfALogExportThatWasNotSaved() async throws {
+        let abandonedCopies = RecordingAbandonedExportCopies()
+        let model = viewer(InMemoryLogHistory(entries: [Self.earlier]), abandonedCopies: abandonedCopies)
+        await model.prepareExport()
+        let text = try #require(model.exportedText)
+
+        await model.finishExport(succeeded: false)
+
+        #expect(model.exportedText == nil)
+        #expect(await abandonedCopies.removedContents == [Data(text.utf8)])
+    }
+
+    @Test
+    func leavesTheCopiesOfASavedLogExportToTheSystem() async {
+        let abandonedCopies = RecordingAbandonedExportCopies()
+        let model = viewer(InMemoryLogHistory(entries: [Self.earlier]), abandonedCopies: abandonedCopies)
+        await model.prepareExport()
+
+        await model.finishExport(succeeded: true)
+
+        #expect(await abandonedCopies.removedContents.isEmpty)
     }
 
     @Test
@@ -125,7 +149,10 @@ struct LogViewerModelTests {
         #expect(model.entries.isEmpty)
     }
 
-    private func viewer(_ history: InMemoryLogHistory) -> LogViewerModel {
+    private func viewer(
+        _ history: InMemoryLogHistory,
+        abandonedCopies: RecordingAbandonedExportCopies = RecordingAbandonedExportCopies()
+    ) -> LogViewerModel {
         LogViewerModel(
             actions: LogViewerActions(
                 loadEntries: LoadLogEntriesUseCase(history: history),
@@ -139,6 +166,7 @@ struct LogViewerModelTests {
                     environment: CrashReportEnvironment(application: "Splitway", system: "iOS")
                 )
             ),
+            abandonedCopies: abandonedCopies,
             ticker: ticker
         )
     }

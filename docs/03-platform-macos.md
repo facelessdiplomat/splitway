@@ -49,6 +49,8 @@ SplitwayAppGroupIdentifier → App Group для журнала
 | `com.apple.security.app-sandbox` | нет (Developer ID) | да, сетевые расширения обязаны быть в песочнице |
 | `com.apple.security.network.client`, `com.apple.security.network.server` | — | да: без них песочница не даёт wireguard-go открыть сокет маршрутизации и UDP-сокет (`operation not permitted`), как и сетевому расширению официального WireGuard |
 
+У приложения и системного расширения есть `PrivacyInfo.xcprivacy` (в `Contents/Resources`): без отслеживания и сбора данных, с причинами для API, которые использует бинарник. На macOS Apple эти причины не проверяет, манифесты — для отчёта о приватности и на будущее ([security.md](security.md), раздел 6).
+
 Provisioning-профили выпуска — Developer ID с возможностями Network Extensions и System Extension. Отладочные сборки подписываются автоматически профилями разработки: Mac зарегистрирован в аккаунте, а профиль разработки разрешает значения Network Extension только без суффикса `-systemextension`. Системное расширение активируется, только когда приложение лежит в `/Applications`.
 
 ## 3. Установка и обновление системного расширения (фича `SystemExtension`)

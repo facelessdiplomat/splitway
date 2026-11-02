@@ -81,7 +81,7 @@ flowchart LR
 - `TunnelExportModel` экспортирует один туннель («Экспортировать…» в контекстном меню строки) или все («Экспортировать все туннели» в меню панели). Перед каждым экспортом показывается предупреждение о приватных ключах.
 - Файл предлагается под именем туннеля (`Office.conf`), архив — «Туннели Splitway.zip». Сохраняет его системный `fileExporter` с документом `ExportedDataDocument` из `DesignSystemPresentation`: на iOS и iPadOS — выбор места в Файлах, на macOS — `NSSavePanel`.
 - Если в архив попали не все туннели, после сохранения модель называет пропущенные.
-- **Копии отменённого экспорта.** SwiftUI `fileExporter` записывает файл во временную папку приложения ещё до окна выбора места. После сохранения система копию убирает, после отмены — нет. Поэтому, если экспорт закончился без сохранения, модель передаёт его содержимое порту `AbandonedExportCopies`. `TemporaryExportCopies` удаляет во временной папке файлы ровно с этим содержимым и опустевшие папки от них ([security.md](../security.md)).
+- **Копии отменённого экспорта.** SwiftUI `fileExporter` записывает файл во временную папку приложения ещё до окна выбора места. После сохранения система копию убирает, после отмены — нет. Поэтому, если экспорт закончился без сохранения, модель передаёт его содержимое порту `AbandonedExportCopies` из `SharedKernel`. `TemporaryExportCopies` удаляет во временной папке файлы ровно с этим содержимым и опустевшие папки от них ([security.md](../security.md)).
 
 **Детали туннеля.**
 
@@ -99,7 +99,7 @@ flowchart LR
 ## Публичный API
 
 - **Модель:** `Tunnel`, `TunnelIdentifier`, `TunnelName`, `TunnelNameError`, `TunnelRecord`, `UniqueTunnelNameResolver`, `ExportedConfigurationFile`.
-- **Порты:** `TunnelRecordRepository`, `TunnelSecretStore`, `TunnelActivityProbe`, `ArchiveWriter`, `AbandonedExportCopies` и их ошибки `TunnelStorageError`, `TunnelActivityError`, `ArchiveWritingError`.
+- **Порты:** `TunnelRecordRepository`, `TunnelSecretStore`, `TunnelActivityProbe`, `ArchiveWriter` и их ошибки `TunnelStorageError`, `TunnelActivityError`, `ArchiveWritingError`.
 - **Сценарии:** `LoadTunnelsUseCase` (`TunnelLibrarySnapshot`, `TunnelLibraryEntry`), `CreateTunnelUseCase`, `ImportTunnelsUseCase` (`ImportCandidate`, `ImportReport`, `ImportFailure`), `UpdateTunnelUseCase`, `RenameTunnelUseCase`, `DeleteTunnelUseCase`, `DuplicateTunnelUseCase`, `ReorderTunnelsUseCase`, `ExportTunnelsUseCase`, ошибка `TunnelLibraryError`.
 - **Адаптеры:** `FileTunnelRecordRepository`, `JSONDocumentMigrator`, `JSONDocumentMigrationError`, `KeychainTunnelSecretStore`, `ZIPArchiveWriter`, `TemporaryExportCopies`, сборка `TunnelLibraryAssembly`.
 - **Экспорт:** `ExportedArchive`; экран — `TunnelExportModel`, `TunnelExportRequest`, `ExportedDocument`, `ExportedDocumentKind`, `TunnelExportProblem`.
@@ -208,3 +208,4 @@ flowchart LR
 | 2026-11-01 | `ErasableTunnelSecretStore`: стирание всех секретов в Keychain | M6-02 |
 | 2026-11-02 | Меню «Туннель» и поиск туннелей, ⇧⌘O для импорта на iPad, одно окно на iPad, минимальный размер окна на Mac | M6-05 |
 | 2026-11-02 | Копии экспорта без сохранения удаляются из временной папки | M7-01 |
+| 2026-11-02 | Порт `AbandonedExportCopies` переехал в `SharedKernel`: им пользуется и экспорт журнала | M7-02 |

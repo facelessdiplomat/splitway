@@ -12,8 +12,9 @@ struct LogExportPresenter: ViewModifier {
             document: model.exportedText.map { text in ExportedDataDocument(contents: Data(text.utf8)) },
             contentType: .plainText,
             defaultFilename: String(localized: "Splitway Log", bundle: .module)
-        ) { _ in
-            model.finishExport()
+        ) { result in
+            let succeeded = (try? result.get()) != nil
+            Task.immediate { await model.finishExport(succeeded: succeeded) }
         }
     }
 
@@ -22,7 +23,7 @@ struct LogExportPresenter: ViewModifier {
             model.exportedText != nil
         } set: { isPresented in
             if !isPresented {
-                model.finishExport()
+                Task.immediate { await model.finishExport(succeeded: false) }
             }
         }
     }

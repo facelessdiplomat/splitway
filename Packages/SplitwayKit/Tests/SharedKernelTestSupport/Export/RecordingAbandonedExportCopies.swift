@@ -1,5 +1,5 @@
 import Foundation
-import TunnelLibrary
+import SharedKernel
 
 public actor RecordingAbandonedExportCopies: AbandonedExportCopies {
     public private(set) var removedContents: [Data] = []
