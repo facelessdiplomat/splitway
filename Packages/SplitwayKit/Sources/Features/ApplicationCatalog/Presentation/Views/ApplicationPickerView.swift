@@ -50,6 +50,7 @@ public struct ApplicationPickerView: View {
                     Button(action: done) {
                         Text("Done", bundle: .module)
                     }
+                    .keyboardShortcut(.cancelAction)
                 }
             }
         }

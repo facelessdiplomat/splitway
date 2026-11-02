@@ -13,6 +13,7 @@ struct ImportPreviewToolbar: ToolbarContent {
                 } label: {
                     Text("Cancel", bundle: .module)
                 }
+                .keyboardShortcut(.cancelAction)
             }
             ToolbarItem(placement: .confirmationAction) {
                 LoadingButton(isLoading: model.isImporting) {
@@ -20,6 +21,7 @@ struct ImportPreviewToolbar: ToolbarContent {
                 } label: {
                     Text("Import", bundle: .module)
                 }
+                .keyboardShortcut(.defaultAction)
                 .disabled(!model.canImport)
             }
         } else {
@@ -29,6 +31,7 @@ struct ImportPreviewToolbar: ToolbarContent {
                 } label: {
                     Text("Done", bundle: .module)
                 }
+                .keyboardShortcut(.cancelAction)
             }
         }
     }

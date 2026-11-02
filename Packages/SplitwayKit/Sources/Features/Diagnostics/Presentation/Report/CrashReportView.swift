@@ -13,6 +13,7 @@ struct CrashReportView: View {
                     Button(role: .close) {
                         close()
                     }
+                    .keyboardShortcut(.cancelAction)
                 }
             }
             .task { await model.prepare() }

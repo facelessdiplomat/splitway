@@ -17,6 +17,7 @@
                         Button(role: .close) {
                             close()
                         }
+                        .keyboardShortcut(.cancelAction)
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
