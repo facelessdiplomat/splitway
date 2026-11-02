@@ -49,6 +49,18 @@
         }
 
         @Test
+        func rereadsAnApplicationWhoseInfoChangedSinceTheLastScan() async throws {
+            try fixture.makeApplication("Editor.app", bundleIdentifier: "com.example.editor", version: "3.1")
+            let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)
+            _ = await scanner.installedApplications()
+            try fixture.makeApplication("Editor.app", bundleIdentifier: "com.example.editor", version: "3.2")
+
+            let applications = await scanner.installedApplications()
+
+            #expect(applications.map(\.version) == ["3.2"])
+        }
+
+        @Test
         func skipsApplicationsWhoseNamesStartWithADot() async throws {
             try fixture.makeApplication(".Draft.app", bundleIdentifier: "com.example.draft", version: "1.0")
             let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)

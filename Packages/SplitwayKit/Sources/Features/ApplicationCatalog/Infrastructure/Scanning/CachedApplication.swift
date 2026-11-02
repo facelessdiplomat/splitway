@@ -4,6 +4,6 @@
 
     struct CachedApplication: Sendable {
         let application: InstalledApplication
-        let infoModificationDate: Date?
+        let infoGeneration: Data?
     }
 #endif

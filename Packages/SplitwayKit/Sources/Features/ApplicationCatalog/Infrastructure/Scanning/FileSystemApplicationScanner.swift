@@ -55,18 +55,25 @@
         }
 
         private func cachedApplication(at path: String) -> InstalledApplication? {
-            let modificationDate = try? ApplicationBundleReader.infoFile(ofBundleAt: path)
-                .resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
-            if let cached = cache.withLock({ entries in entries[path] }),
-                cached.infoModificationDate == modificationDate
+            let infoGeneration = Self.infoGeneration(ofBundleAt: path)
+            if let infoGeneration, let cached = cache.withLock({ entries in entries[path] }),
+                cached.infoGeneration == infoGeneration
             {
                 return cached.application
             }
             guard let application = ApplicationBundleReader.application(at: path) else { return nil }
             cache.withLock { entries in
-                entries[path] = CachedApplication(application: application, infoModificationDate: modificationDate)
+                entries[path] = CachedApplication(application: application, infoGeneration: infoGeneration)
             }
             return application
+        }
+
+        private static func infoGeneration(ofBundleAt path: String) -> Data? {
+            let identifier = try? ApplicationBundleReader.infoFile(ofBundleAt: path)
+                .resourceValues(forKeys: [.generationIdentifierKey]).generationIdentifier
+            return identifier.flatMap { identifier in
+                try? NSKeyedArchiver.archivedData(withRootObject: identifier, requiringSecureCoding: true)
+            }
         }
 
         private static func bundles(in directory: URL, descendingOneLevel: Bool) -> [URL] {
