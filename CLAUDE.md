@@ -25,4 +25,5 @@
 - Платформы: `docs/03-platform-macos.md`, `docs/04-platform-ios-ipados.md`
 - Модель угроз и аудит безопасности: `docs/security.md`
 - Локализация, словарь терминов и материалы для сайта и стора: `docs/localization.md`
+- Тексты, анкеты и скриншоты для App Store: `docs/app-store/`; страницы политики и поддержки: `Site/`; выпуск: `Scripts/release.sh`
 - План задач с ID (`M1-07`, `SP-3`): `docs/05-tasks/`
