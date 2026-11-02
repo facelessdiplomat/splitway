@@ -9,6 +9,7 @@ import TunnelLibraryTestSupport
 struct TunnelExportTestEnvironment {
     let records = InMemoryTunnelRecordRepository()
     let secrets = InMemoryTunnelSecretStore()
+    let abandonedCopies = RecordingAbandonedExportCopies()
     let model: TunnelExportModel
 
     init() {
@@ -17,7 +18,8 @@ struct TunnelExportTestEnvironment {
                 records: records,
                 secrets: secrets,
                 archiveWriter: ListingArchiveWriter()
-            )
+            ),
+            abandonedCopies: abandonedCopies
         )
     }
 

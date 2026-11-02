@@ -11,9 +11,11 @@ public final class TunnelExportModel {
     private var skippedTunnels: [TunnelName] = []
 
     private let exportTunnels: ExportTunnelsUseCase
+    private let abandonedCopies: any AbandonedExportCopies
 
-    public init(exportTunnels: ExportTunnelsUseCase) {
+    public init(exportTunnels: ExportTunnelsUseCase, abandonedCopies: any AbandonedExportCopies) {
         self.exportTunnels = exportTunnels
+        self.abandonedCopies = abandonedCopies
     }
 
     public func requestExport(of id: TunnelIdentifier, named name: String) {
@@ -51,9 +53,15 @@ public final class TunnelExportModel {
         }
     }
 
-    public func finishExport(succeeded: Bool) {
+    public func finishExport(succeeded: Bool) async {
+        let exportedContents = document?.contents
         document = nil
-        guard succeeded else { return }
+        guard succeeded else {
+            if let exportedContents {
+                await abandonedCopies.removeCopies(of: exportedContents)
+            }
+            return
+        }
         if !skippedTunnels.isEmpty {
             problem = .skippedTunnels(skippedTunnels.map(\.description))
         }

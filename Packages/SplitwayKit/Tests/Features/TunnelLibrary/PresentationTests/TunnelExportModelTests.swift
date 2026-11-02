@@ -69,10 +69,49 @@ struct TunnelExportModelTests {
         await environment.model.confirmExport()
         #expect(environment.model.problem == nil)
 
-        environment.model.finishExport(succeeded: true)
+        await environment.model.finishExport(succeeded: true)
 
         #expect(environment.model.document == nil)
         #expect(environment.model.problem == .skippedTunnels(["Broken"]))
+    }
+
+    @Test
+    func removesTheCopiesOfAnExportThatWasNotSaved() async throws {
+        let environment = TunnelExportTestEnvironment()
+        let office = try await environment.storeTunnel(named: "Office")
+        environment.model.requestExport(of: office.id, named: "Office")
+        await environment.model.confirmExport()
+        let contents = try #require(environment.model.document?.contents)
+
+        await environment.model.finishExport(succeeded: false)
+
+        #expect(environment.model.document == nil)
+        #expect(await environment.abandonedCopies.removedContents == [contents])
+    }
+
+    @Test
+    func leavesTheCopiesOfASavedExportToTheSystem() async throws {
+        let environment = TunnelExportTestEnvironment()
+        let office = try await environment.storeTunnel(named: "Office")
+        environment.model.requestExport(of: office.id, named: "Office")
+        await environment.model.confirmExport()
+
+        await environment.model.finishExport(succeeded: true)
+
+        #expect(await environment.abandonedCopies.removedContents.isEmpty)
+    }
+
+    @Test
+    func removesCopiesOnceWhenTheExporterReportsTheCancellationTwice() async throws {
+        let environment = TunnelExportTestEnvironment()
+        let office = try await environment.storeTunnel(named: "Office")
+        environment.model.requestExport(of: office.id, named: "Office")
+        await environment.model.confirmExport()
+
+        await environment.model.finishExport(succeeded: false)
+        await environment.model.finishExport(succeeded: false)
+
+        #expect(await environment.abandonedCopies.removedContents.count == 1)
     }
 
     @Test
