@@ -39,7 +39,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Apps/iOSApp/iOSApp.entitlements
         INFOPLIST_FILE: Apps/iOSApp/Info.plist
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -208,7 +208,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Apps/macOSApp/macOSApp.entitlements
         INFOPLIST_FILE: Apps/macOSApp/Info.plist
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
