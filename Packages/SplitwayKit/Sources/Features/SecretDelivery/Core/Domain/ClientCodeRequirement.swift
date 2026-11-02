@@ -1,16 +1,18 @@
 public struct ClientCodeRequirement: Sendable, Hashable {
     private static let teamIdentifierLength = 10
     private static let bundleIdentifierSeparator: Character = "."
+    private static let appStoreSignature = "certificate leaf[field.1.2.840.113635.100.6.1.9] exists"
 
     public let text: String
 
     public init(teamIdentifier: String, bundleIdentifier: String) throws(ClientCodeRequirementError) {
         guard Self.isValidTeamIdentifier(teamIdentifier) else { throw .invalidTeamIdentifier }
         guard Self.isValidBundleIdentifier(bundleIdentifier) else { throw .invalidBundleIdentifier }
+        let teamSignature = #"certificate leaf[subject.OU] = "\#(teamIdentifier)""#
         text = [
             "anchor apple generic",
-            #"certificate leaf[subject.OU] = "\#(teamIdentifier)""#,
             #"identifier "\#(bundleIdentifier)""#,
+            "(\(Self.appStoreSignature) or \(teamSignature))",
         ].joined(separator: " and ")
     }
 

@@ -4,13 +4,14 @@ import Testing
 @Suite
 struct ClientCodeRequirementTests {
     @Test
-    func acceptsOnlyTheAppOfOurTeam() throws {
+    func acceptsOurAppSignedByOurTeamOrByTheAppStore() throws {
         let requirement = try ClientCodeRequirement(
             teamIdentifier: "AB12CD34EF", bundleIdentifier: "com.example.splitway")
 
         let expected =
-            #"anchor apple generic and certificate leaf[subject.OU] = "AB12CD34EF""#
-            + #" and identifier "com.example.splitway""#
+            #"anchor apple generic and identifier "com.example.splitway""#
+            + #" and (certificate leaf[field.1.2.840.113635.100.6.1.9] exists"#
+            + #" or certificate leaf[subject.OU] = "AB12CD34EF")"#
         #expect(requirement.text == expected)
     }
 
