@@ -6,7 +6,7 @@ extension XCUIApplication {
     private static let insideTrailingEdge = CGVector(dx: -1, dy: 0)
 
     func replaceText(inField label: String, with text: String) {
-        let field = textFields[label].firstMatch
+        let field = textFields.matching(LocalizedLabels.predicate(label)).firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: Self.fieldTimeout), "No field \(label)")
         field.coordinate(withNormalizedOffset: Self.trailingEdge).withOffset(Self.insideTrailingEdge).tap()
         let currentText = field.value as? String ?? ""
@@ -16,7 +16,7 @@ extension XCUIApplication {
     }
 
     func waitForText(startingWith prefix: String) {
-        let text = staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", prefix)).firstMatch
+        let text = staticTexts.matching(LocalizedLabels.prefixPredicate(prefix)).firstMatch
         XCTAssertTrue(text.waitForExistence(timeout: Self.fieldTimeout), "No text starting with \(prefix)")
     }
 }

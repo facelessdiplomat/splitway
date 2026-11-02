@@ -20,5 +20,17 @@ extension XCUIApplication {
             XCTFail("\(issue.compactDescription): \(description). \(issue.detailedDescription)", file: file, line: line)
             return true
         }
+        try failOnUntranslatedText(file: file, line: line)
+    }
+
+    private func failOnUntranslatedText(file: StaticString, line: UInt) throws {
+        let labels = Self.labels(in: try snapshot())
+        for label in Set(labels) where LocalizedLabels.isUntranslatedEnglish(label) {
+            XCTFail("Untranslated text \"\(label)\" in \(LocalizedLabels.language)", file: file, line: line)
+        }
+    }
+
+    private static func labels(in node: any XCUIElementSnapshot) -> [String] {
+        [node.label] + node.children.flatMap(labels)
     }
 }
