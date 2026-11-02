@@ -10,6 +10,7 @@ struct LogViewerToolbar: ToolbarContent {
             Button(role: .close) {
                 close()
             }
+            .keyboardShortcut(.cancelAction)
         }
         ToolbarItem(placement: .primaryAction) {
             LogViewerFilterMenu(model: model)

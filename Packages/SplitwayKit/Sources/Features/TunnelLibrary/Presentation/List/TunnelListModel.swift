@@ -11,6 +11,7 @@ public final class TunnelListModel {
     public private(set) var pendingDeletion: TunnelDeletionRequest?
     public private(set) var alert: TunnelListAlert?
     public private(set) var tunnelAwaitingSystemPrompt: TunnelIdentifier?
+    public var searchText = ""
     private var hasLoaded = false
     private var hasExplainedSystemPrompt = false
     private var pendingActivation: TunnelIdentifier?
@@ -28,6 +29,24 @@ public final class TunnelListModel {
 
     public var isEmpty: Bool {
         hasLoaded && rows.isEmpty
+    }
+
+    public var visibleRows: [TunnelRow] {
+        guard let searchQuery else { return rows }
+        return rows.filter { row in row.name.localizedStandardContains(searchQuery) }
+    }
+
+    public var canReorder: Bool {
+        searchQuery == nil
+    }
+
+    public var hasNoSearchResults: Bool {
+        searchQuery != nil && !rows.isEmpty && visibleRows.isEmpty
+    }
+
+    private var searchQuery: String? {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return query.isEmpty ? nil : query
     }
 
     public func row(withID id: TunnelIdentifier) -> TunnelRow? {

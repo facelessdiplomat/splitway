@@ -69,6 +69,7 @@ public struct ServicePickerView: View {
                     Button(action: done) {
                         Text("Done", bundle: .module)
                     }
+                    .keyboardShortcut(.cancelAction)
                 }
             }
             .navigationDestination(item: $detailedService) { service in

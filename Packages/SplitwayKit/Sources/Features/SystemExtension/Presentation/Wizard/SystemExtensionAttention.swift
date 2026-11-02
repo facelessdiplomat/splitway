@@ -18,6 +18,7 @@ struct SystemExtensionAttention: ViewModifier {
                             } label: {
                                 Text("Later", bundle: .module)
                             }
+                            .keyboardShortcut(.cancelAction)
                         }
                     }
             }

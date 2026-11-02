@@ -2,15 +2,16 @@ import SwiftUI
 import TunnelLibrary
 
 struct TunnelListView: View {
-    let model: TunnelListModel
+    @Bindable var model: TunnelListModel
     @Binding var selection: TunnelIdentifier?
+    @Binding var isSearching: Bool
     let addition: TunnelAdditionOptions
     let export: TunnelExportModel
     let navigation: TunnelLibraryNavigation
 
     var body: some View {
         List(selection: $selection) {
-            ForEach(model.rows) { row in
+            ForEach(model.visibleRows) { row in
                 TunnelRowView(row: row) {
                     Task.immediate { await model.toggleConnection(of: row) }
                 }
@@ -26,13 +27,18 @@ struct TunnelListView: View {
                 }
                 .modifier(TunnelDeletionConfirmation(model: model, row: row))
             }
-            .onMove { source, destination in
-                Task.immediate { await model.move(fromOffsets: source, toOffset: destination) }
-            }
+            .onMove(perform: reorderAction)
         }
+        .searchable(
+            text: $model.searchText,
+            isPresented: $isSearching,
+            prompt: Text("Search Tunnels", bundle: .module)
+        )
         .overlay {
             if model.isEmpty {
                 TunnelListEmptyStateView(addition: addition)
+            } else if model.hasNoSearchResults {
+                ContentUnavailableView.search(text: model.searchText)
             }
         }
         .navigationTitle(Text("Tunnels", bundle: .module))
@@ -47,6 +53,13 @@ struct TunnelListView: View {
                 }
             }
         #endif
+    }
+
+    private var reorderAction: ((IndexSet, Int) -> Void)? {
+        guard model.canReorder else { return nil }
+        return { source, destination in
+            Task.immediate { await model.move(fromOffsets: source, toOffset: destination) }
+        }
     }
 
     private func duplicateButton(for row: TunnelRow) -> some View {

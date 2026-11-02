@@ -59,6 +59,7 @@ struct ServiceRoutingExplanationView: View {
                     Button(action: done) {
                         Text("Done", bundle: .module)
                     }
+                    .keyboardShortcut(.cancelAction)
                 }
             }
         }

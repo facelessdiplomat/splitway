@@ -45,6 +45,7 @@ struct CustomServiceEditorView: View {
                     Button(action: done) {
                         Text("Cancel", bundle: .module)
                     }
+                    .keyboardShortcut(.cancelAction)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -52,6 +53,7 @@ struct CustomServiceEditorView: View {
                     } label: {
                         Text("Save", bundle: .module)
                     }
+                    .keyboardShortcut("s")
                     .disabled(!model.canSave)
                 }
             }

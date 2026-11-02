@@ -31,6 +31,7 @@ public struct SettingsScreen: View {
                         Button(role: .close) {
                             close()
                         }
+                        .keyboardShortcut(.cancelAction)
                     }
                 }
             }
