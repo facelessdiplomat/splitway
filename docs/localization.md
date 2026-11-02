@@ -48,6 +48,16 @@ Splitway говорит по-русски и по-английски (решен
 
 Имена выбранных приложений (macOS) сохраняются на языке, на котором их выбрали. Если сменить язык системы, в деталях туннеля останется старое имя, например «Терминал» в английском интерфейсе, пока приложение не выбрать заново. В самом выборе приложений имена всегда свежие.
 
+## Иконка
+
+Иконка — щит, разделённый изгибом S на защищённую половину и прямую (решение D-40). Изгиб — первая буква Splitway и раздел трафика, щит — тот же образ, что у значка в строке меню.
+
+- Файл — `Apps/Shared/AppIcon.icon` из Icon Composer, общий для iOS, iPadOS и macOS (`ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` в `project.yml`). XcodeGen кладёт его в ресурсы обоих приложений одним файлом, а при сборке из него получаются `Assets.car` и `AppIcon.icns`.
+- Слои — два векторных SVG в `Assets`: `Protected` (правая половина, сплошная) и `Direct` (левая, непрозрачность 0,45). Зазор между половинами постоянной ширины, 38 из 1024 точек, вдоль изгиба. Фон — автоматический градиент от синего `#0B6BDC`.
+- Светлый вариант — белые половины на синем. В тёмном половины синие (`#4DA3FF`) на тёмном фоне. Тонированный и прозрачный варианты система строит сама, Liquid Glass добавляет блики и прозрачность.
+- Изменения — в Icon Composer (Xcode › Open Developer Tool › Icon Composer). Проверка без интерфейса: `ictool Apps/Shared/AppIcon.icon --export-image --output-file icon.png --platform iOS --rendition Dark --width 1024 --height 1024 --scale 1`; варианты — `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight`, `ClearDark`. `ictool` лежит в `Icon Composer.app/Contents/Executables`.
+- Проверено 2026-11-02: `ictool` рисует все варианты для iOS и macOS, иконка видна на домашнем экране симуляторов iPhone и iPad и в Finder тестовой ВМ, в 16 точках остаётся двухцветным щитом.
+
 ## Материалы для сайта и стора
 
 `Scripts/capture-materials.sh [iphone] [ipad]` гонит пропускаемый по умолчанию тест `StoreMaterialsTests` с `SPLITWAY_MATERIALS=YES` на симуляторах iPhone 18 Pro Max и iPad Pro 13″ в обеих локалях и складывает результат в `build/materials` (каталог вне git):
