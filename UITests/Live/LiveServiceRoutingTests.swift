@@ -65,11 +65,8 @@ final class LiveServiceRoutingTests: XCTestCase {
     @MainActor
     private static func prepareCheckTunnel(in application: XCUIApplication) {
         let tunnelName = ProcessInfo.processInfo.environment["SPLITWAY_LIVE_TUNNEL_NAME"] ?? defaultTunnelName
-        application.deleteTunnels(named: checkTunnelName)
-        guard let copy = application.duplicateTunnel(named: tunnelName) else { return }
-        copy.tap()
+        application.prepareCopy(of: tunnelName, named: checkTunnelName)
         application.tapButton("Edit Tunnel")
-        application.replaceText(inField: "Name", with: checkTunnelName)
         application.routeSelectedServices(
             catalogServices,
             andOwnService: checkServiceName,
