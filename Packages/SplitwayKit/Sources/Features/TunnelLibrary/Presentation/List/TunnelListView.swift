@@ -42,6 +42,9 @@ struct TunnelListView: View {
             }
         }
         .navigationTitle(Text("Tunnels", bundle: .module))
+        #if os(iOS)
+            .navigationBarTitleDisplayMode(.large)
+        #endif
         .toolbar {
             TunnelListToolbar(
                 addition: addition, export: export, hasTunnels: !model.rows.isEmpty, navigation: navigation)
