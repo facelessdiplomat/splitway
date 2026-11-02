@@ -111,7 +111,8 @@ struct AppComposition {
                             system: configuration.systemDescription
                         )
                     )
-                )
+                ),
+                abandonedCopies: TemporaryExportCopies()
             )
         )
     }
