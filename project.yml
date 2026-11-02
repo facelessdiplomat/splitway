@@ -170,7 +170,21 @@ targets:
     dependencies:
       - target: iOSApp
       - package: SplitwayKit
+        product: TunnelLibrary
+      - package: SplitwayKit
         product: TunnelLibraryInfrastructure
+      - package: SplitwayKit
+        product: TunnelImport
+      - package: SplitwayKit
+        product: TunnelImportInfrastructure
+      - package: SplitwayKit
+        product: TunnelConnection
+      - package: SplitwayKit
+        product: ProviderMessaging
+      - package: SplitwayKit
+        product: Diagnostics
+      - package: SplitwayKit
+        product: DiagnosticsInfrastructure
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
