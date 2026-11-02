@@ -1,3 +1,4 @@
+import SharedKernelTestSupport
 import Testing
 import TunnelConfiguration
 import TunnelConfigurationTestSupport

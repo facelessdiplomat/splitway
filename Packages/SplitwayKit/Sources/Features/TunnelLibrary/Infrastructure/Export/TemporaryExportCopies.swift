@@ -1,5 +1,5 @@
 import Foundation
-import TunnelLibrary
+import SharedKernel
 
 public struct TemporaryExportCopies: AbandonedExportCopies {
     private static let removalQueue = DispatchQueue(label: "Splitway.ExportCopyRemoval", qos: .utility)
