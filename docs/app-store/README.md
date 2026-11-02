@@ -13,10 +13,18 @@
 
 ## Что заполнить перед публикацией
 
-- `SUPPORT_EMAIL` в `Site/en/support.html` и `Site/ru/support.html` — адрес почты поддержки.
+- Адрес почты поддержки: пока связь — через GitHub Issues сайта, адрес добавится на обе страницы поддержки.
 - `[TEST CONFIGURATION]` в [review-notes.md](review-notes.md) — ссылка на конфиг для ревьюера или файл во вложении.
 - Copyright в [questionnaires.md](questionnaires.md) — название организации после перевода аккаунта (D-03).
-- Адрес сайта в ссылках на политику и поддержку — когда страницы будут опубликованы.
+
+## Сайт
+
+Страницы опубликованы 2026-11-02 через GitHub Pages из публичного репозитория [facelessdiplomat/facelessdiplomat.github.io](https://github.com/facelessdiplomat/facelessdiplomat.github.io):
+
+- поддержка — https://facelessdiplomat.github.io/en/support.html и https://facelessdiplomat.github.io/ru/support.html;
+- политика конфиденциальности — https://facelessdiplomat.github.io/en/privacy.html и https://facelessdiplomat.github.io/ru/privacy.html.
+
+Источник страниц — папка [Site](../../Site) этого репозитория. Чтобы обновить сайт, скопируйте её содержимое в репозиторий сайта (там же лежит пустой `.nojekyll`) и отправьте в `main`: GitHub Pages пересоберёт сайт за минуту. Политика собирается из `docs/privacy-policy.*.md`: при её изменении обновите и страницы. Пока нет почты поддержки, связь — через Issues репозитория сайта, и страница просит не выкладывать туда конфигурации, ключи и отчёты.
 
 ## Сборка выпуска
 
