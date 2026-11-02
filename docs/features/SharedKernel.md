@@ -4,7 +4,7 @@
 |---|---|
 | Статус | изменена: сеть одного адреса и диапазон `2000::/3` (M2-05), `Ticker` (M3-12), байты адреса и `AwaitableState` (M4-10) |
 | Платформы | shared |
-| Задачи | M0-05, M1-01, M1-02, M1-03, M1-05, M2-05 (сети для полного туннеля), M3-12 (`Ticker`), M4-10 (байты адреса, `AwaitableState`) |
+| Задачи | M0-05, M1-01, M1-02, M1-03, M1-05, M2-05 (сети для полного туннеля), M3-12 (`Ticker`), M4-10 (байты адреса, `AwaitableState`), M7-02 (`AbandonedExportCopies`) |
 | Таргеты | `SharedKernel`, `SharedKernelTestSupport` |
 
 ## Назначение
@@ -30,9 +30,11 @@
 - `AwaitableState` в `SharedKernelTestSupport` — состояние фейка за `Mutex`, которого тест может дождаться (`wait(until:)`): так проверяются асинхронные насосы без задержек и опроса.
 - `Ticker` — поток тиков для периодической работы моделей (опрос статистики, обновление журнала). `RepeatingTicker` даёт первый тик сразу, затем раз в заданный интервал, пока поток не отменят. `ManualTicker` в `SharedKernelTestSupport` даёт тики по команде теста и сообщает, идёт ли подписка, а `ManualWallClock` там же — часы, которые тест передвигает сам.
 
+- `AbandonedExportCopies` — порт удаления копий экспорта, который закончился без сохранения: SwiftUI `fileExporter` пишет файл во временную папку заранее и после отмены его не убирает. Порт общий для экспорта туннелей и журнала, реализация `TemporaryExportCopies` лежит в `TunnelLibraryInfrastructure`, а связывает их composition root. Фейк `RecordingAbandonedExportCopies` в `SharedKernelTestSupport` запоминает содержимое, которое просили удалить.
+
 ## Публичный API
 
-`IPAddress`, `IPAddressFamily`, `IPAddressParsingError`, `IPNetwork` (с `init(host:)` и `ipv6GlobalUnicast`), `IPNetworkParsingError`, `IPNetworkSet`, `NetworkPort`, `NetworkPortValidationError`, `DomainName`, `DomainNameValidationError`, `CanonicalDecimalText`, `WallClock`, `SystemWallClock`, `Ticker`, `RepeatingTicker`.
+`IPAddress`, `IPAddressFamily`, `IPAddressParsingError`, `IPNetwork` (с `init(host:)` и `ipv6GlobalUnicast`), `IPNetworkParsingError`, `IPNetworkSet`, `NetworkPort`, `NetworkPortValidationError`, `DomainName`, `DomainNameValidationError`, `CanonicalDecimalText`, `WallClock`, `SystemWallClock`, `Ticker`, `RepeatingTicker`, `AbandonedExportCopies`.
 
 ## Решения
 
@@ -89,3 +91,4 @@
 | 2026-10-30 | `IPAddress.networkOrderBytes`, `AwaitableState` | M4-10 |
 | 2026-10-30 | `IPAddress.isUnspecified` | M4-11 |
 | 2026-10-31 | `ManualWallClock` в `SharedKernelTestSupport` | M4-15 |
+| 2026-11-02 | Порт `AbandonedExportCopies` и фейк `RecordingAbandonedExportCopies` переехали из `TunnelLibrary` | M7-02 |

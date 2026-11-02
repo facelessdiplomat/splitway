@@ -24,6 +24,8 @@ iOS и iPadOS используют одно приложение (универс
 
 Network Extension доступен и индивидуальному аккаунту: ограничение 5.4 касается только публикации в App Store.
 
+У каждого таргета есть `PrivacyInfo.xcprivacy`: без отслеживания и сбора данных, с причинами для API, которые использует его бинарник. Без них App Store Connect не примет сборку ([security.md](security.md), раздел 6).
+
 ## 3. Режим «Весь трафик»
 
 - Провайдер общий с macOS (фича `PacketTunnel`): `TunnelNetworkPlan` → `NEPacketTunnelNetworkSettings`, поиск дескриптора `utun`, `tc_fd_tunnel_start`.
