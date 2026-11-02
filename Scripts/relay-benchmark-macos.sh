@@ -5,8 +5,10 @@ probe="${ROUTING_PROBE:-/Applications/RoutingProbe.app/Contents/MacOS/RoutingPro
 download_address="${RELAY_BENCHMARK_DOWNLOAD:-https://proof.ovh.net/files/100Mb.dat}"
 latency_address="${RELAY_BENCHMARK_LATENCY:-https://proof.ovh.net/}"
 echo_address="https://api.ipify.org"
+ping_address="${RELAY_BENCHMARK_PING:-1.1.1.1}"
 extension_process="network-extension.systemextension/Contents/MacOS"
 download_attempts=3
+ping_attempts=20
 parallel_streams=2
 latency_attempts=10
 dns_attempts=5
@@ -16,7 +18,7 @@ results="$(mktemp -d)"
 trap 'rm -rf "$results"' EXIT
 
 usage() {
-    printf 'usage: Scripts/relay-benchmark-macos.sh <label>\n' >&2
+    printf 'usage: Scripts/relay-benchmark-macos.sh <label> [process]\n' >&2
     exit 2
 }
 
@@ -86,6 +88,13 @@ check_route() {
     fi
 }
 
+measure_ping() {
+    /sbin/ping -q -c "$ping_attempts" -i 0.2 "$ping_address" | awk '
+        /packets transmitted/ { loss = $(NF - 2) }
+        /round-trip/ { split($4, values, "/"); average = values[2]; maximum = values[3] }
+        END { printf "ping address=%s average-ms=%s max-ms=%s loss=%s\n", "'"$ping_address"'", average, maximum, loss }'
+}
+
 measure_latency() {
     "$probe" latency "$latency_address" "$latency_attempts" | awk '$1 == "latency" && $2 == "median" { $1 = "latency"; $2 = ""; sub("  ", " "); print }'
 }
@@ -142,13 +151,17 @@ measure_packets() {
     }'
 }
 
-if [[ $# -ne 1 ]]; then
+if [[ $# -lt 1 || $# -gt 2 ]]; then
     usage
+fi
+if [[ $# -eq 2 ]]; then
+    extension_process="$2"
 fi
 extension_pid="$(pgrep -f "$extension_process" | head -1 || true)"
 printf 'label %s\n' "$1"
 measure_idle
 check_route
+measure_ping
 measure_latency
 measure_dns
 measure_single_stream
