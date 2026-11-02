@@ -1,3 +1,4 @@
+import Foundation
 import TunnelImport
 import TunnelLibrary
 
@@ -15,7 +16,11 @@ public struct TunnelImportAssembly: Sendable {
     }
 
     public var fileReader: SecurityScopedFileReader {
-        SecurityScopedFileReader()
+        #if os(iOS)
+            SecurityScopedFileReader(inbox: ReceivedFileInbox(applicationContainer: URL(filePath: NSHomeDirectory())))
+        #else
+            SecurityScopedFileReader()
+        #endif
     }
 
     public var clipboard: SystemClipboard {
