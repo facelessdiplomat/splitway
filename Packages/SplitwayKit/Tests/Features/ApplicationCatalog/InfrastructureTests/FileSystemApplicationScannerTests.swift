@@ -61,6 +61,17 @@
         }
 
         @Test
+        func scansNoFolderInsideTheHomeFolderThatTheSandboxHides() {
+            let home = FileManager.default.homeDirectoryForCurrentUser.path(percentEncoded: false)
+
+            let foldersInHome = FileSystemApplicationScanner.standardDirectories.filter { directory in
+                directory.path(percentEncoded: false).hasPrefix(home)
+            }
+
+            #expect(foldersInHome.isEmpty)
+        }
+
+        @Test
         func skipsApplicationsWhoseNamesStartWithADot() async throws {
             try fixture.makeApplication(".Draft.app", bundleIdentifier: "com.example.draft", version: "1.0")
             let scanner = FileSystemApplicationScanner(directories: [fixture.root], includesRunningApplications: false)

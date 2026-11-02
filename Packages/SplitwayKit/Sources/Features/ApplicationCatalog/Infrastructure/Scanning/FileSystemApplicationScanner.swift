@@ -11,7 +11,6 @@
             URL(filePath: "/Applications/Setapp"),
             URL(filePath: "/System/Applications"),
             URL(filePath: "/System/Applications/Utilities"),
-            FileManager.default.homeDirectoryForCurrentUser.appending(path: "Applications"),
         ]
         private static let queue = DispatchQueue(label: "Splitway.ApplicationScanner", qos: .userInitiated)
         private static let bundleExtension = "app"
