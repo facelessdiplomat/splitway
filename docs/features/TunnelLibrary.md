@@ -4,7 +4,7 @@
 |---|---|
 | Статус | в работе: Core, хранилища, список и детали готовы на всех платформах, передача секрета в системное расширение готова (M2-12); тесты Keychain на macOS ждут хост-таргета и места для тестов macOS (M1-14) |
 | Платформы | shared |
-| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03, M3-04 (`TunnelName.untitled`), M3-07 (кнопка «Изменить»), M3-09 (подключение и ошибки), M3-11 (экспорт), M3-12 (пункт «Журнал»), M3-13 (пункт «Настройки»), M3-14 (доступность, команды меню), M4-04 (приложения через туннель в деталях), M5-08 (сервисы через туннель в деталях), M6-05 (меню «Туннель», поиск, одно окно на iPad) |
+| Задачи | M1-11, M1-12, M1-13, M1-14, M1-15 (экспорт в ZIP), M3-02, M3-03, M3-04 (`TunnelName.untitled`), M3-07 (кнопка «Изменить»), M3-09 (подключение и ошибки), M3-11 (экспорт), M3-12 (пункт «Журнал»), M3-13 (пункт «Настройки»), M3-14 (доступность, команды меню), M4-04 (приложения через туннель в деталях), M5-08 (сервисы через туннель в деталях), M6-05 (меню «Туннель», поиск, одно окно на iPad), M7-01 (копии отменённого экспорта) |
 | Таргеты | `TunnelLibrary`, `TunnelLibraryInfrastructure`, `TunnelLibraryPresentation`, `TunnelLibraryTestSupport` |
 
 ## Назначение
@@ -81,6 +81,7 @@ flowchart LR
 - `TunnelExportModel` экспортирует один туннель («Экспортировать…» в контекстном меню строки) или все («Экспортировать все туннели» в меню панели). Перед каждым экспортом показывается предупреждение о приватных ключах.
 - Файл предлагается под именем туннеля (`Office.conf`), архив — «Туннели Splitway.zip». Сохраняет его системный `fileExporter` с документом `ExportedDataDocument` из `DesignSystemPresentation`: на iOS и iPadOS — выбор места в Файлах, на macOS — `NSSavePanel`.
 - Если в архив попали не все туннели, после сохранения модель называет пропущенные.
+- **Копии отменённого экспорта.** SwiftUI `fileExporter` записывает файл во временную папку приложения ещё до окна выбора места. После сохранения система копию убирает, после отмены — нет. Поэтому, если экспорт закончился без сохранения, модель передаёт его содержимое порту `AbandonedExportCopies`. `TemporaryExportCopies` удаляет во временной папке файлы ровно с этим содержимым и опустевшие папки от них ([security.md](../security.md)).
 
 **Детали туннеля.**
 
@@ -98,9 +99,9 @@ flowchart LR
 ## Публичный API
 
 - **Модель:** `Tunnel`, `TunnelIdentifier`, `TunnelName`, `TunnelNameError`, `TunnelRecord`, `UniqueTunnelNameResolver`, `ExportedConfigurationFile`.
-- **Порты:** `TunnelRecordRepository`, `TunnelSecretStore`, `TunnelActivityProbe`, `ArchiveWriter` и их ошибки `TunnelStorageError`, `TunnelActivityError`, `ArchiveWritingError`.
+- **Порты:** `TunnelRecordRepository`, `TunnelSecretStore`, `TunnelActivityProbe`, `ArchiveWriter`, `AbandonedExportCopies` и их ошибки `TunnelStorageError`, `TunnelActivityError`, `ArchiveWritingError`.
 - **Сценарии:** `LoadTunnelsUseCase` (`TunnelLibrarySnapshot`, `TunnelLibraryEntry`), `CreateTunnelUseCase`, `ImportTunnelsUseCase` (`ImportCandidate`, `ImportReport`, `ImportFailure`), `UpdateTunnelUseCase`, `RenameTunnelUseCase`, `DeleteTunnelUseCase`, `DuplicateTunnelUseCase`, `ReorderTunnelsUseCase`, `ExportTunnelsUseCase`, ошибка `TunnelLibraryError`.
-- **Адаптеры:** `FileTunnelRecordRepository`, `JSONDocumentMigrator`, `JSONDocumentMigrationError`, `KeychainTunnelSecretStore`, `ZIPArchiveWriter`, сборка `TunnelLibraryAssembly`.
+- **Адаптеры:** `FileTunnelRecordRepository`, `JSONDocumentMigrator`, `JSONDocumentMigrationError`, `KeychainTunnelSecretStore`, `ZIPArchiveWriter`, `TemporaryExportCopies`, сборка `TunnelLibraryAssembly`.
 - **Экспорт:** `ExportedArchive`; экран — `TunnelExportModel`, `TunnelExportRequest`, `ExportedDocument`, `ExportedDocumentKind`, `TunnelExportProblem`.
 - **Экран:** `TunnelListModel`, `TunnelRow`, `TunnelRowStatus`, `TunnelDeletionRequest`, `TunnelListAlert`, `TunnelLibraryActions`, `TunnelConnectionActions`, `TunnelAdditionMethod`, `TunnelAdditionOptions`, `TunnelLibraryNavigation`, `TunnelLibraryCommands`, `TunnelLibraryRootView`; детали — `TunnelDetailModel`, `PeerStatisticsRow`, `PeerActivity`, `HandshakeRecency`, `TunnelStatisticsPolling`.
 
@@ -161,20 +162,21 @@ flowchart LR
 ## Тесты
 
 - 36 тестов в `TunnelLibraryTests`: каждый сценарий с фейками из `TunnelLibraryTestSupport`, откаты при сбоях хранилищ, импорт с частичными неудачами и конфликтами имён, удаление активного туннеля, экспорт, пропуск нечитаемых туннелей при экспорте, порядок нечитаемых записей.
-- 20 тестов в `TunnelLibraryInfrastructureTests`:
+- 24 теста в `TunnelLibraryInfrastructureTests`:
   - репозиторий во временной директории;
   - эталонный документ версии 1 читается и записывается;
   - повреждённый документ, новая версия схемы, ошибки доступа;
   - мигратор;
-  - ZIP-экспорт с именами в UTF-8 и правами `0600`.
+  - ZIP-экспорт с именами в UTF-8 и правами `0600`;
+  - копии отменённого экспорта: удаляется копия и её папка, копия прямо во временной папке; файлы с другим содержимым и соседние файлы остаются.
 - 7 интеграционных тестов Keychain в `iOSIntegrationTests` на симуляторе iPhone: запись, перезапись, удаление, чтение отсутствующего, атрибуты доступности и синхронизации.
-- 49 тестов в `TunnelLibraryPresentationTests`:
+- 52 теста в `TunnelLibraryPresentationTests`:
   - модель списка: строки и состояние слота, нечитаемые записи на своих местах, пустое состояние только после загрузки, конфигурация только читаемого туннеля, имена приложений через туннель по алфавиту и пустой список для всего трафика, имена сервисов через туннель без сервисов, которых нет в каталоге;
   - поиск: отбор по имени без учёта регистра, пустой и пробельный запрос, «ничего не найдено» отдельно от пустой библиотеки, перестановка выключена во время поиска;
   - подтверждение удаления, в том числе для подключённого туннеля, отмена, привязка к строке;
   - перестановка через `ReorderTunnelsUseCase`, дублирование;
   - подключение: переключение, ошибка, «Подключение…» сразу после нажатия, отключение повторным нажатием, объяснение системного запроса и отказ от него;
-  - экспорт: предупреждение каждый раз, имя файла туннеля и архива, пропущенные туннели после сохранения, неудачный экспорт;
+  - экспорт: предупреждение каждый раз, имя файла туннеля и архива, пропущенные туннели после сохранения, неудачный экспорт; копии экспорта без сохранения удаляются один раз, копии сохранённого — нет;
   - статусы строк: каждое `ConnectionState`, тон, активность, наличие статистики, время подключения;
   - модель деталей: пиры до статистики, давность рукопожатия по `FixedWallClock`, рукопожатие «из будущего», трафик, причина недоступности, опрос до ухода с экрана, нет опроса у отключённого туннеля, поздний ответ, предупреждение «Сервер не отвечает», его отсутствие после рукопожатия и снятие после остановки туннеля.
 
@@ -205,3 +207,4 @@ flowchart LR
 | 2026-11-01 | Вставка из буфера на iOS и iPadOS — системная кнопка `PasteButton` | M3-04 |
 | 2026-11-01 | `ErasableTunnelSecretStore`: стирание всех секретов в Keychain | M6-02 |
 | 2026-11-02 | Меню «Туннель» и поиск туннелей, ⇧⌘O для импорта на iPad, одно окно на iPad, минимальный размер окна на Mac | M6-05 |
+| 2026-11-02 | Копии экспорта без сохранения удаляются из временной папки | M7-01 |

@@ -23,4 +23,5 @@
 - Продукт и ограничения платформ: `docs/01-product.md`
 - Архитектура, фичи, слои, ADR: `docs/02-architecture.md`
 - Платформы: `docs/03-platform-macos.md`, `docs/04-platform-ios-ipados.md`
+- Модель угроз и аудит безопасности: `docs/security.md`
 - План задач с ID (`M1-07`, `SP-3`): `docs/05-tasks/`

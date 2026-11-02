@@ -29,7 +29,8 @@ struct TunnelExportPresenter: ViewModifier {
                 contentType: model.document?.kind.contentType ?? .data,
                 defaultFilename: model.document?.fileName
             ) { result in
-                model.finishExport(succeeded: (try? result.get()) != nil)
+                let succeeded = (try? result.get()) != nil
+                Task.immediate { await model.finishExport(succeeded: succeeded) }
             }
             .modifier(TunnelExportProblemAlert(model: model))
     }
@@ -46,7 +47,7 @@ struct TunnelExportPresenter: ViewModifier {
             model.document != nil
         } set: { isPresented in
             if !isPresented {
-                model.finishExport(succeeded: false)
+                Task.immediate { await model.finishExport(succeeded: false) }
             }
         }
     }

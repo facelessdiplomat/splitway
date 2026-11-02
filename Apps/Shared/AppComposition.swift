@@ -64,7 +64,7 @@ struct AppComposition {
         let tunnelList = Self.tunnelList(services: services)
         self.tunnelList = tunnelList
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
-        tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels)
+        tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels, abandonedCopies: TemporaryExportCopies())
         logViewer = Self.logViewer(diagnostics: diagnostics, configuration: configuration)
         reportCollector = diagnostics.reportCollector
         reportCollector.start()
