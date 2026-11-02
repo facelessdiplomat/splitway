@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splitway Support</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header>
+<a class="brand" href="../index.html">Splitway</a>
+<nav>
+<a href="support.html" aria-current="page">Support</a>
+<a href="privacy.html">Privacy</a>
+<a href="../ru/support.html" lang="ru">Русский</a>
+</nav>
+</header>
+<main>
+<h1>Splitway Support</h1>
+<p>Splitway is a WireGuard client for iPhone, iPad and Mac. Only what you choose goes through the tunnel: chosen apps on a Mac, chosen services on iPhone and iPad.</p>
+<h2>Contact</h2>
+<p>Write to <a href="mailto:SUPPORT_EMAIL">SUPPORT_EMAIL</a>. Please include your device, its system version, the Splitway version from Settings and what you did before the problem. If Splitway crashed or a tunnel misbehaves, attach a report from Log › Send Report…: it contains no keys.</p>
+<h2>Questions</h2>
+<h3>Where do I get a configuration?</h3>
+<p>From your VPN provider or your own WireGuard server. Splitway does not offer VPN servers: it connects to the ones you add.</p>
+<h3>How do I add a tunnel?</h3>
+<p>Import a .conf or .zip file, paste a configuration from the clipboard, scan a QR code on iPhone or iPad, or create a tunnel from scratch.</p>
+<h3>My Mac asks me to allow a network extension</h3>
+<p>Splitway sends the traffic of the chosen apps through its network extension. Turn on Splitway in System Settings › General › Login Items &amp; Extensions › Network Extensions. On first launch Splitway guides you through it.</p>
+<h3>Part of an Apple app's traffic bypasses the tunnel</h3>
+<p>System services make some network requests on behalf of Apple apps, so part of their traffic may go around the tunnel. Splitway marks such apps in the list.</p>
+<h3>An app or a command-line tool is missing from the list on a Mac</h3>
+<p>Splitway lists the apps in the Applications folders. Add any other app or tool with Add Tool… or drag it onto the list.</p>
+<h3>How do chosen services work on iPhone and iPad?</h3>
+<p>The domains and subnets of the services you choose go through the tunnel, and everything else goes directly. You can add your own services with their domains and subnets.</p>
+<h3>The server is not responding</h3>
+<p>The tunnel is connected, but the server has never answered. Check the configuration: the endpoint, the keys, and whether the server is running.</p>
+<h3>How do I uninstall Splitway from a Mac?</h3>
+<p>In Settings, choose Uninstall Splitway…: it removes the tunnels with their keys, the VPN configurations, the app's data and the network extension. Then drag Splitway from the Applications folder to the Trash.</p>
+<h2>Privacy</h2>
+<p>Splitway collects no data. Read the <a href="privacy.html">privacy policy</a>.</p>
+</main>
+</body>
+</html>
