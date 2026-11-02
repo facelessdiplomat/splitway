@@ -56,7 +56,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "У пира нет AllowedIPs."
+            "value" : "У пира нет разрешённых IP (AllowedIPs)."
           }
         }
       }

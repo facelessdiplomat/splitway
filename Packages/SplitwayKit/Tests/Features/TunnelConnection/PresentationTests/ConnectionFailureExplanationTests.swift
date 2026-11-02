@@ -40,7 +40,7 @@ struct ConnectionFailureExplanationTests {
         Expectation(
             failure: .extensionUnavailable,
             message:
-                "Splitway’s network extension isn’t running. Allow it in System Settings → General → "
+                "Splitway’s network extension isn’t running. Allow it in System Settings › General › "
                 + "Login Items & Extensions, then try again.",
             action: .none
         ),

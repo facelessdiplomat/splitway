@@ -101,12 +101,12 @@
         }
       }
     },
-    "Splitway’s network extension isn’t running. Allow it in System Settings → General → Login Items & Extensions, then try again." : {
+    "Splitway’s network extension isn’t running. Allow it in System Settings › General › Login Items & Extensions, then try again." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сетевое расширение Splitway не запущено. Разрешите его в Системных настройках → Основные → Объекты входа и расширения и попробуйте снова."
+            "value" : "Сетевое расширение Splitway не запущено. Разрешите его в Системных настройках › Основные › Объекты входа и расширения и попробуйте ещё раз."
           }
         }
       }
@@ -116,7 +116,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сервер из Endpoint не найден. Проверьте endpoint и подключение к интернету."
+            "value" : "Не удалось найти сервер из поля «Конечная точка». Проверьте адрес и подключение к интернету."
           }
         }
       }
@@ -126,7 +126,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Не удалось прочитать или сохранить системную конфигурацию VPN. Попробуйте ещё раз или перезапустите устройство."
+            "value" : "Не удалось прочитать или сохранить системную конфигурацию VPN. Попробуйте ещё раз или перезагрузите устройство."
           }
         }
       }

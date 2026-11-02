@@ -1,56 +1,56 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "Cancel": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отменить"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Cancel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отменить"
           }
         }
       }
     },
-    "Disconnect and Quit": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отключить и выйти"
+    "Disconnect and Quit" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключить и завершить"
           }
         }
       }
     },
-    "Disconnect “%@” before quitting?": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Отключить «%@» перед выходом?"
+    "Disconnect “%@” before quitting?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отключить «%@» перед завершением?"
           }
         }
       }
     },
-    "Quit": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Выйти"
+    "Quit" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершить"
           }
         }
       }
     },
-    "The tunnel keeps working after Splitway quits.": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Туннель продолжит работать после выхода из Splitway."
+    "The tunnel keeps working after Splitway quits." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Туннель продолжит работать после завершения Splitway."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

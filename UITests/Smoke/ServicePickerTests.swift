@@ -17,19 +17,19 @@ final class ServicePickerTests: XCTestCase {
         try application.auditAccessibility(ofSheet: true)
         application.switchOn("Telegram")
         application.tapButton("Add Service", inNavigationBar: "Services Through the Tunnel")
-        application.replaceText(inField: "Service name", with: "Work")
+        application.replaceText(inField: "Service name", with: "Office")
         application.type("corp.example", intoTextView: "Domains")
         try application.auditAccessibility(ofSheet: true)
         application.tapButton("Save", inNavigationBar: "New Service")
         application.tapButton("Done", inNavigationBar: "Services Through the Tunnel")
 
-        application.waitForText("2 services selected")
+        application.waitForText(counting: 2, in: "%lld services selected")
         application.scrollToButton("Add peer")
         application.type(RandomKeyText.make(), intoField: "Public key")
         application.tapButton("Save", inNavigationBar: "New Tunnel")
         application.tapText(startingWith: "Phone")
         application.waitForText("Services through the tunnel")
         application.waitForText("Telegram")
-        application.waitForText("Work")
+        application.waitForText("Office")
     }
 }

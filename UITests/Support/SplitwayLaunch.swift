@@ -23,7 +23,7 @@ enum SplitwayLaunch {
 
     private static func launch(arguments: [String]) -> XCUIApplication {
         let application = XCUIApplication()
-        application.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"] + arguments
+        application.launchArguments = LocalizedLabels.launchArguments + arguments
         application.launch()
         XCTAssertTrue(application.wait(for: .runningForeground, timeout: launchTimeout))
         return application

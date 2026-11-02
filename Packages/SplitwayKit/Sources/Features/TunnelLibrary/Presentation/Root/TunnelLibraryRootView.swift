@@ -5,6 +5,8 @@ public struct TunnelLibraryRootView: View {
     #if os(macOS)
         private static let minimumWindowWidth: CGFloat = 640
         private static let minimumWindowHeight: CGFloat = 440
+        private static let minimumSidebarWidth: CGFloat = 250
+        private static let idealSidebarWidth: CGFloat = 280
     #endif
 
     private let model: TunnelListModel
@@ -39,6 +41,9 @@ public struct TunnelLibraryRootView: View {
                 export: export,
                 navigation: navigation
             )
+            #if os(macOS)
+                .navigationSplitViewColumnWidth(min: Self.minimumSidebarWidth, ideal: Self.idealSidebarWidth)
+            #endif
         } detail: {
             detail
         }

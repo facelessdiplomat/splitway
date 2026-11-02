@@ -35,6 +35,7 @@ struct DraftFieldRow: View {
         TextField(text: text, prompt: Text(verbatim: example)) {
             title
         }
+        .labelsHidden()
         .accessibilityLabel(title)
         .plainTextInput()
     }

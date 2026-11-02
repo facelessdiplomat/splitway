@@ -20,6 +20,7 @@ done
 
 derived_data="$repository_root/build/DerivedData"
 ui_test_time_allowance=180
+ui_test_languages=(en ru)
 go_modules=(Packages/TunnelCore/go Scripts/go-comment-check Scripts/benchmark-check)
 started_at=$SECONDS
 
@@ -46,9 +47,13 @@ run_ui_tests() {
         exit 1
     fi
     xcrun simctl bootstatus "$simulator" -b >/dev/null
-    xcodebuild -project Splitway.xcodeproj -scheme iOSUITests -destination "id=$simulator" \
-        -derivedDataPath "$derived_data" -collect-test-diagnostics never \
-        -test-timeouts-enabled YES -default-test-execution-time-allowance "$ui_test_time_allowance" test -quiet
+    for language in "${ui_test_languages[@]}"; do
+        printf 'UI tests in %s\n' "$language"
+        TEST_RUNNER_SPLITWAY_UI_TEST_LANGUAGE="$language" \
+            xcodebuild -project Splitway.xcodeproj -scheme iOSUITests -destination "id=$simulator" \
+            -derivedDataPath "$derived_data" -collect-test-diagnostics never \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance "$ui_test_time_allowance" test -quiet
+    done
 }
 
 build_scheme() {

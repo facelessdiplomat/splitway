@@ -6,7 +6,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Splitway uses this network extension to run your WireGuard tunnels and to route the apps you choose through them."
           }
         },

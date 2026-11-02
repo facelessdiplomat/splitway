@@ -7,7 +7,7 @@ extension XCUIApplication {
     private static let routingModeLabel = "Through the tunnel"
 
     func chooseRoutingMode(_ mode: String) {
-        let picker = buttons.matching(NSPredicate(format: "label BEGINSWITH %@", Self.routingModeLabel)).firstMatch
+        let picker = buttons.matching(LocalizedLabels.prefixPredicate(Self.routingModeLabel)).firstMatch
         var scrolls = 0
         while !picker.isHittable, scrolls < Self.maximumScrolls {
             swipeUp()
@@ -19,21 +19,22 @@ extension XCUIApplication {
     }
 
     func switchOn(_ label: String) {
-        let toggle = switches[label].firstMatch
+        let toggle = switches.matching(LocalizedLabels.predicate(label)).firstMatch
         XCTAssertTrue(toggle.waitForExistence(timeout: Self.elementTimeout), "No switch \(label)")
         toggle.coordinate(withNormalizedOffset: Self.switchKnob).tap()
         XCTAssertEqual(toggle.value as? String, "1", "Switch \(label) stayed off")
     }
 
     func type(_ text: String, intoTextView label: String) {
-        let view = textViews[label].firstMatch
+        let view = textViews.matching(LocalizedLabels.predicate(label)).firstMatch
         XCTAssertTrue(view.waitForExistence(timeout: Self.elementTimeout), "No text view \(label)")
         view.tap()
         view.typeText(text)
     }
 
     func tapButton(_ label: String, inNavigationBar title: String) {
-        let button = navigationBars[title].buttons[label]
+        let bar = navigationBars.matching(LocalizedLabels.predicate(title)).firstMatch
+        let button = bar.buttons.matching(LocalizedLabels.predicate(label)).firstMatch
         XCTAssertTrue(button.waitForExistence(timeout: Self.elementTimeout), "No button \(label) in \(title)")
         button.tap()
     }
