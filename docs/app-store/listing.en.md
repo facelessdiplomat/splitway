@@ -1,13 +1,13 @@
 # App Store listing — English
 
-Copy each block into App Store Connect as is. Name and subtitle are shared by iOS and macOS; promotional text, keywords and description belong to each platform's version page.
+Copy each block into App Store Connect as is. Name and subtitle are shared by iOS and macOS; promotional text, keywords and description belong to each platform's version page. The App Store name is Splitway Tunnel (D-43); on the device the app stays Splitway.
 
 ## Name
 
-8 / 30
+15 / 30
 
 ```text
-Splitway
+Splitway Tunnel
 ```
 
 ## Subtitle
@@ -28,18 +28,18 @@ Send only the apps and services you choose through your WireGuard tunnel. Everyt
 
 ## Keywords — iOS and iPadOS
 
-95 / 100
+96 / 100
 
 ```text
-vpn,per app vpn,selective,services,routing,tunnel,privacy,network,client,config,qr code,domains
+vpn,per app vpn,selective,services,routing,privacy,network,client,config,qr code,domains,subnets
 ```
 
 ## Keywords — macOS
 
-93 / 100
+96 / 100
 
 ```text
-vpn,per app vpn,selective,apps,routing,tunnel,privacy,network,client,config,terminal,menu bar
+vpn,per app vpn,selective,apps,routing,privacy,network,client,config,terminal,menu bar,developer
 ```
 
 ## Description — iOS and iPadOS
