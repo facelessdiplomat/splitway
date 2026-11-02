@@ -115,7 +115,6 @@ public struct ApplicationPickerView: View {
     }
 
     private func add(_ files: [URL]) {
-        let paths = files.map { file in file.path(percentEncoded: false) }
-        Task.immediate { await model.addApplications(at: paths) }
+        Task.immediate { await model.addApplications(files) }
     }
 }

@@ -75,10 +75,12 @@ public final class ApplicationPickerModel: Identifiable {
         await select(application)
     }
 
-    public func addApplications(at paths: [String]) async {
-        for path in paths {
-            await addApplication(at: path)
+    public func addApplications(_ files: [URL]) async {
+        let accessedFiles = actions.fileAccess.beginAccess(to: files)
+        for file in files {
+            await addApplication(at: file.path(percentEncoded: false))
         }
+        actions.fileAccess.endAccess(to: accessedFiles)
     }
 
     public func dismissRejectedFile() {

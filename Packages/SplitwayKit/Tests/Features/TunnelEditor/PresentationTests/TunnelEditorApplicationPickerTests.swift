@@ -80,6 +80,7 @@ struct TunnelEditorApplicationPickerTests {
             resolveIdentity: ResolveApplicationIdentityUseCase(
                 signatures: InMemoryCodeSignatureReader(signaturesByPath: [:])),
             fileReader: InMemoryApplicationFileReader(),
+            fileAccess: InMemoryChosenFileAccess(),
             iconLoader: InMemoryApplicationIconLoader()
         )
     }
