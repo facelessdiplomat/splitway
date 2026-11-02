@@ -45,9 +45,9 @@ struct UninstallSection: View {
         }
         .alert(finishedTitle, isPresented: isFinished, presenting: report) { _ in
             Button {
-                Task.immediate { await model.moveToTrash() }
+                Task.immediate { await model.showInFinder() }
             } label: {
-                Text("Move to Trash", bundle: .module)
+                Text("Show in Finder", bundle: .module)
             }
             Button(role: .cancel) {
                 Task.immediate { await model.quit() }
@@ -56,15 +56,6 @@ struct UninstallSection: View {
             }
         } message: { report in
             UninstallReportMessage(report: report)
-        }
-        .alert(Text("Couldn’t Move Splitway to the Trash", bundle: .module), isPresented: isShowingTrashFailure) {
-            Button(role: .cancel) {
-                model.dismissTrashFailure()
-            } label: {
-                Text("OK", bundle: .module)
-            }
-        } message: {
-            Text("Drag Splitway from the Applications folder to the Trash.", bundle: .module)
         }
     }
 
@@ -90,18 +81,8 @@ struct UninstallSection: View {
 
     private var isFinished: Binding<Bool> {
         Binding {
-            report != nil && model.trashFailure == nil
+            report != nil
         } set: { _ in
-        }
-    }
-
-    private var isShowingTrashFailure: Binding<Bool> {
-        Binding {
-            model.trashFailure != nil
-        } set: { isShowing in
-            if !isShowing {
-                model.dismissTrashFailure()
-            }
         }
     }
 }

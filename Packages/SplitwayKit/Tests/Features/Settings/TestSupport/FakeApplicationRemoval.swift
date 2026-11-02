@@ -3,19 +3,15 @@ import Synchronization
 
 public final class FakeApplicationRemoval: ApplicationRemoval {
     private let requests = Mutex<[String]>([])
-    private let refusesTrash: Bool
 
-    public init(refusesTrash: Bool = false) {
-        self.refusesTrash = refusesTrash
-    }
+    public init() {}
 
     public var performedRequests: [String] {
         requests.withLock { requests in requests }
     }
 
-    public func moveToTrashAndQuit() async throws(ApplicationRemovalError) {
-        guard !refusesTrash else { throw .notMovedToTrash }
-        requests.withLock { requests in requests.append("trash") }
+    public func showInFinderAndQuit() async {
+        requests.withLock { requests in requests.append("show in Finder") }
     }
 
     public func quit() async {
