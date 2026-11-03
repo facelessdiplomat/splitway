@@ -5,14 +5,14 @@
 | Параметр | Значение |
 |---|---|
 | Минимальная ОС | macOS 26 (решение D-04) |
-| Дистрибуция | Только Mac App Store: беты — через TestFlight, обновления — через App Store (решение D-39, ADR-15) |
-| Приложение | `macOSApp`: окно + `MenuBarExtra` + `Settings` (решение D-12). В App Sandbox, как требует Mac App Store (SP-10): вне своих контейнеров читает системные папки приложений и файлы, которые выбрал человек. Hardened Runtime включён |
+| Дистрибуция | Образ DMG с подписью Developer ID и нотаризацией в GitHub Releases и на сайте (решения D-48, D-49, ADR-16); обновление — новой версией из релизов |
+| Приложение | `macOSApp`: окно + `MenuBarExtra` + `Settings` (решение D-12). В App Sandbox со времени SP-10: вне своих контейнеров читает системные папки приложений и файлы, которые выбрал человек. Hardened Runtime включён |
 | Расширение | `NetworkSystemExtension` — одно системное расширение с двумя провайдерами: `PacketTunnelProvider` и `TransparentProxyProvider` |
 | Режим «Весь трафик» | `NETunnelProviderManager` → `PacketTunnelProvider` → `fdtunnel` (wireguard-go поверх `utun`) |
 | Режим «Только выбранные приложения» | `NETransparentProxyManager` → `TransparentProxyProvider` → `usernet` (wireguard-go поверх gVisor netstack) |
 | DNS выбранных приложений | `TransparentProxyProvider`: запрос к порту 53 уходит через `usernet` на DNS туннеля (решения D-09 и D-34) |
 
-Почему системное расширение, а не app extension: по [TN3134](https://developer.apple.com/documentation/technotes/tn3134-network-extension-provider-deployment) app extension для packet tunnel и transparent proxy на macOS — «App Store only», а Developer ID допускает только system extension. Выпуск теперь только через App Store (решение D-39), где годятся оба, но системное расширение остаётся (ADR-15): оно работает в глобальном контексте и не завершается, когда пользователь выходит из системы, а доставка секретов (D-33), мастер одобрения и замена при обновлении под него уже проверены. App extension — запасной вариант, если ревью не пропустит системное расширение (SP-10).
+Почему системное расширение, а не app extension: по [TN3134](https://developer.apple.com/documentation/technotes/tn3134-network-extension-provider-deployment) app extension для packet tunnel и transparent proxy на macOS — «App Store only», а Developer ID допускает только system extension. Splitway выходит с подписью Developer ID (решение D-48, ADR-16), поэтому системное расширение — единственный вариант. Оно и так подходит лучше: работает в глобальном контексте, не завершается, когда пользователь выходит из системы, а доставка секретов (D-33), мастер одобрения и замена при обновлении под него проверены.
 
 ## 2. Состав бандла и entitlements
 
@@ -42,16 +42,16 @@ SplitwayAppGroupIdentifier → App Group для журнала
 | Entitlement | Приложение | Расширение |
 |---|---|---|
 | `com.apple.developer.system-extension.install` | да | — |
-| `com.apple.developer.networking.networkextension` | `packet-tunnel-provider`, `app-proxy-provider` — так их ждут профили разработки и App Store. Суффикс `-systemextension` нужен только подписи Developer ID: с решением D-39 его и настройку, которая добавляла его в Release, убрал SP-10 | то же |
+| `com.apple.developer.networking.networkextension` | `packet-tunnel-provider`, `app-proxy-provider` — так их ждут профили разработки. Подписи Developer ID нужны значения с суффиксом `-systemextension`: их подставляет сам Xcode, когда экспортирует архив способом `developer-id` (проверено 2026-11-03 на приложении и расширении) | то же |
 | `com.apple.security.application-groups` | `8625S77CSU.com.facelessdiplomat.splitway` | то же |
 | `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
-| `com.apple.security.app-sandbox` | да, как требует Mac App Store (SP-10) | да, сетевые расширения обязаны быть в песочнице |
+| `com.apple.security.app-sandbox` | да, со времени SP-10 | да, сетевые расширения обязаны быть в песочнице |
 | `com.apple.security.files.user-selected.read-write` | да: импорт, экспорт туннелей и журнала, «Добавить утилиту…» работают с файлами, которые выбрал человек | — |
 | `com.apple.security.network.client`, `com.apple.security.network.server` | — | да: `network.client` — исходящие пакеты к серверу, `network.server` — `bind()` и приём пакетов на UDP-сокете wireguard-go, без него песочница отвечает `operation not permitted`. Те же права у сетевого расширения официального WireGuard. Автоматическая проверка App Review просит обосновать `network.server`: объяснение — в [заметках для ревью](app-store/review-notes.md) ([SystemExtension](features/SystemExtension.md)) |
 
 У приложения и системного расширения есть `PrivacyInfo.xcprivacy` (в `Contents/Resources`): без отслеживания и сбора данных, с причинами для API, которые использует бинарник. На macOS Apple эти причины не проверяет, манифесты — для отчёта о приватности и на будущее ([security.md](security.md), раздел 6).
 
-Provisioning-профили выпуска — App Store (Apple Distribution) с возможностями Network Extensions, System Extension и App Groups (M7-08). Отладочные сборки подписываются автоматически профилями разработки: Mac зарегистрирован в аккаунте, а профиль разработки разрешает значения Network Extension только без суффикса `-systemextension`. Системное расширение активируется, только когда приложение лежит в `/Applications`.
+Архив выпуска подписывается автоматически профилем разработки, а экспорт способом `developer-id` переподписывает приложение и расширение сертификатом Developer ID с профилями Developer ID, которые Xcode создаёт сам (`-allowProvisioningUpdates`). Профиль разработки разрешает значения Network Extension только без суффикса `-systemextension`, поэтому в entitlements суффикса нет. Системное расширение активируется, только когда приложение лежит в `/Applications`.
 
 ## 3. Установка и обновление системного расширения (фича `SystemExtension`)
 
@@ -191,11 +191,16 @@ sequenceDiagram
 
 ## 9. Сборка, подпись, выпуск
 
-1. `Scripts/build-xcframework.sh` собирает `TunnelCore` для `macos-arm64` и `macos-x86_64` (+ iOS, см. документ iOS).
-2. Archive с профилями App Store (Apple Distribution), App Sandbox у приложения и расширения (SP-10), Hardened Runtime, без get-task-allow.
-3. Экспорт способом `app-store-connect` и загрузка в App Store Connect (M7-08). Беты — TestFlight, обновления — App Store: нотаризация, DMG, Sparkle и свой хостинг не нужны (решение D-39).
-4. App Store переподписывает приложение и расширение своим сертификатом (Apple Mac OS Application Signing). Всё, что сверяет подпись, — требование к клиенту XPC ([SecretDelivery](features/SecretDelivery.md)) и ACL элемента System Keychain — проверяется на сборке из TestFlight.
-5. Проверка установки из TestFlight на чистой системе (ВМ): первый запуск, одобрение расширения, обновление со старой версии, удаление (M7-09).
+`Scripts/release.sh <версия> [--publish]` (M8-03):
+
+1. `build-xcframework.sh` собирает `TunnelCore` для `macos-arm64` и `macos-x86_64`.
+2. Archive в Release с автоматической подписью разработки: App Sandbox у приложения и расширения (SP-10), Hardened Runtime, без get-task-allow. Версия — из аргумента, номер сборки — число коммитов.
+3. Экспорт способом `developer-id`: Xcode переподписывает бандлы сертификатом Developer ID и подставляет значения Network Extension с суффиксом `-systemextension`; скрипт проверяет, что они есть у приложения и расширения.
+4. Нотаризация приложения (`notarytool` с профилем связки ключей `splitway-notary`) и сшивание тикета, затем образ DMG с приложением и ссылкой на «Программы», подпись образа Developer ID, его нотаризация и сшивание. `spctl` проверяет приложение и образ, рядом пишется `Splitway.dmg.sha256`.
+5. С `--publish` — релиз `v<версия>` в GitHub Releases с `Splitway.dmg` и контрольной суммой. Имя файла одинаково во всех релизах, поэтому ссылка `releases/latest/download/Splitway.dmg` всегда ведёт на последнюю версию (сайт, D-49).
+6. Проверка установки DMG на чистой системе (ВМ): первый запуск без предупреждений Gatekeeper, одобрение расширения, подключение в обоих режимах (M8-03); обновление со старой версии и удаление — в [отложенных проверках](05-tasks/deferred-checks.md).
+
+Подпись Developer ID показывает имя владельца аккаунта Apple Developer: его видно в сведениях о подписи приложения и образа.
 
 ## 10. Спайки и риски macOS
 
@@ -206,9 +211,9 @@ sequenceDiagram
 | SP-3 | Скорость ретрансляции TCP через netstack | Замер скорости и задержки против режима «Весь трафик»; профиль CPU | Итог в ВМ: 70–90 % скорости «Весь трафик» одним потоком при 1,3–1,5 × CPU на гигабайт; буферы и насосы скорость не ограничивают, цель M4-16 — в [SP-3](features/spikes/SP-3.md) |
 | SP-5 | Доставка секретов в системное расширение (варианты A/B/C) | Работающий вариант, ADR в документе фичи | Итог: вариант B — XPC и System Keychain (решение D-33), проверен в ВМ и на Mac владельца с включённым SIP ([SP-5](features/spikes/SP-5.md)) |
 | SP-6 | UDP/QUIC через `handleNewUDPFlow` | HTTP/3 в Chrome и голосовой звонок в Discord через туннель | Итог: UDP выбранных приложений идёт через перехват — HTTP/3 Safari и URLSession в ВМ, звонок на Mac владельца; QUIC в Chrome при включённом прокси не работает из-за ядра, и Chrome открывает страницы по HTTP/2 ([SP-6](features/spikes/SP-6.md)) |
-| SP-10 | Mac-приложение в App Sandbox: каталог приложений и утилит, подписи чужих приложений, импорт и экспорт, вход при запуске, установка расширения, XPC к расширению; подпись App Store у требования к клиенту XPC и у ACL System Keychain | Все функции Mac-версии работают в песочнице в ВМ; сборка из TestFlight ставит расширение и подключает туннель | Итог в ВМ: все функции работают в песочнице без временных исключений. Найдено и исправлено: требование к клиенту XPC не принимало подпись App Store, утилиту с Рабочего стола и приложения вне системных папок нельзя было добавить, «Move to Trash» не работает в песочнице (теперь «Show in Finder»), на Mac не было видно «Добавить утилиту…» и действий журнала ([SP-10](features/spikes/SP-10.md)). Сборка из TestFlight — M7-09; если ревью не пропустит системное расширение — app extension с новой записью в журнале решений |
+| SP-10 | Mac-приложение в App Sandbox: каталог приложений и утилит, подписи чужих приложений, импорт и экспорт, вход при запуске, установка расширения, XPC к расширению | Все функции Mac-версии работают в песочнице в ВМ; сборка из TestFlight ставит расширение и подключает туннель | Итог в ВМ: все функции работают в песочнице без временных исключений. Найдено и исправлено: требование к клиенту XPC не принимало подпись App Store, утилиту с Рабочего стола и приложения вне системных папок нельзя было добавить, «Move to Trash» не работает в песочнице (теперь «Show in Finder»), на Mac не было видно «Добавить утилиту…» и действий журнала ([SP-10](features/spikes/SP-10.md)). Ветку подписи App Store в требовании к клиенту XPC с выпуском через Developer ID убрала M8-03 |
 
-Прочие риски: ревью Mac App Store может не пропустить системное расширение с прозрачным прокси — по ответам DTS Apple на форуме разработчиков такие расширения в App Store допустимы, но подтвердит это только первая отправка (M7-11); изменения поведения Network Extension в новых macOS (регресс-прогон на бета-версиях каждое лето); пользователь не одобрил расширение (мастер и понятный статус); конфликт с другими VPN (раздел 6.8); на пути с потерями TCP netstack отправляет медленнее TCP macOS; на Mac владельца отправка через прокси в пределах цели (M4-16).
+Прочие риски: изменения поведения Network Extension в новых macOS (регресс-прогон на бета-версиях каждое лето); пользователь не одобрил расширение (мастер и понятный статус); конфликт с другими VPN (раздел 6.8); на пути с потерями TCP netstack отправляет медленнее TCP macOS; на Mac владельца отправка через прокси в пределах цели (M4-16).
 
 ## 11. Тестирование на macOS
 
