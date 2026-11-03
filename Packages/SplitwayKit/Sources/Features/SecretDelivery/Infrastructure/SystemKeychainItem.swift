@@ -43,14 +43,12 @@ struct SystemKeychainItem: Sendable {
     }
 
     func save(_ secret: Data) throws(TunnelStorageError) {
-        let attributes: [CFString: Any] = [kSecValueData: secret]
-        let newItem = query.merging(attributes) { _, secret in secret }
-        let status = SecItemAdd(newItem as CFDictionary, nil)
-        if status == errSecSuccess { return }
-        guard status == errSecDuplicateItem else { throw .unavailable }
-        if SecItemUpdate(query as CFDictionary, attributes as CFDictionary) == errSecSuccess { return }
-        SecItemDelete(query as CFDictionary)
-        guard SecItemAdd(newItem as CFDictionary, nil) == errSecSuccess else { throw .unavailable }
+        let oldItem = query
+        let newItem = oldItem.merging([kSecValueData: secret]) { _, secret in secret }
+        try SystemKeychainReplacement.replace(
+            removingOldItem: { SecItemDelete(oldItem as CFDictionary) },
+            addingNewItem: { SecItemAdd(newItem as CFDictionary, nil) }
+        )
     }
 
     func delete() throws(TunnelStorageError) {
