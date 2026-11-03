@@ -5,13 +5,15 @@ repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$repository_root/Scripts/lib/xcode-environment.sh"
 source "$repository_root/Scripts/lib/build-directory.sh"
 source "$repository_root/Scripts/lib/launch-services.sh"
+source "$repository_root/Scripts/lib/appcast.sh"
 cd "$repository_root"
 
 usage() {
     printf 'Usage: Scripts/release.sh <version> [--publish]\n' >&2
     printf '  <version>  marketing version, for example 1.0 or 1.0.1\n' >&2
-    printf '  --publish  create the GitHub release v<version> with Splitway.dmg and docs/releases/<version>.md\n' >&2
+    printf '  --publish  publish the GitHub release v<version>: Splitway.dmg, appcast.xml, docs/releases/<version>.md\n' >&2
     printf 'Notarization uses the keychain profile named by SPLITWAY_NOTARY_PROFILE (splitway-notary by default).\n' >&2
+    printf 'Updates are signed with the Sparkle key of SPLITWAY_UPDATE_KEY_ACCOUNT (splitway by default).\n' >&2
     exit 64
 }
 
@@ -47,6 +49,12 @@ image="$output_directory/Splitway.dmg"
 checksum_file="$output_directory/Splitway.dmg.sha256"
 release_tag="v$version"
 release_notes="$repository_root/docs/releases/$version.md"
+update_key_account="${SPLITWAY_UPDATE_KEY_ACCOUNT:-splitway}"
+update_feed_url="$(awk '/SPLITWAY_UPDATE_FEED_URL:/ { print $2; exit }' project.yml)"
+repository_url="${update_feed_url%/releases/latest/download/appcast.xml}"
+minimum_system_version="$(awk '/macOS: / { gsub(/"/, "", $2); print $2 ".0"; exit }' project.yml)"
+appcast="$output_directory/appcast.xml"
+sparkle_tools="$output_directory/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin"
 
 if [[ "$publishes" == true && ! -s "$release_notes" ]]; then
     printf 'Write the release notes to docs/releases/%s.md before publishing\n' "$version" >&2
@@ -64,6 +72,13 @@ if ! xcrun notarytool history --keychain-profile "$notary_profile" >/dev/null 2>
     printf 'No notarization credentials in the keychain profile %s. Store them once with:\n' "$notary_profile" >&2
     printf '  xcrun notarytool store-credentials %s --key <AuthKey.p8> --key-id <Key ID> --issuer <Issuer ID>\n' \
         "$notary_profile" >&2
+    exit 1
+fi
+
+if ! security find-generic-password -s https://sparkle-project.org -a "$update_key_account" >/dev/null 2>&1; then
+    printf 'No Sparkle update signing key for the account %s in the keychain. Generate it once with:\n' \
+        "$update_key_account" >&2
+    printf '  generate_keys --account %s\n' "$update_key_account" >&2
     exit 1
 fi
 
@@ -146,12 +161,18 @@ notarize "$image"
 xcrun stapler staple -q "$image"
 spctl --assess --type open --context context:primary-signature --verbose=2 "$image"
 
+enclosure_attributes="$("$sparkle_tools/sign_update" --account "$update_key_account" "$image")"
+write_appcast "$appcast" "$version" "$build_number" "$repository_url" "$minimum_system_version" \
+    "$enclosure_attributes" "$release_notes"
+"$sparkle_tools/sign_update" --account "$update_key_account" "$appcast"
+"$sparkle_tools/sign_update" --account "$update_key_account" --verify "$appcast"
+
 (cd "$output_directory" && shasum -a 256 Splitway.dmg >"$checksum_file")
 printf 'Splitway %s (%s): %s\n' "$version" "$build_number" "$image"
 cat "$checksum_file"
 
 if [[ "$publishes" == true ]]; then
-    gh release create "$release_tag" "$image" "$checksum_file" \
+    gh release create "$release_tag" "$image" "$checksum_file" "$appcast" \
         --title "Splitway $version" --target "$(git rev-parse HEAD)" --notes-file "$release_notes" --generate-notes
     printf 'Published %s\n' "$release_tag"
 fi
