@@ -4,6 +4,7 @@ set -euo pipefail
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$repository_root/Scripts/lib/xcode-environment.sh"
 source "$repository_root/Scripts/lib/build-directory.sh"
+source "$repository_root/Scripts/lib/launch-services.sh"
 cd "$repository_root"
 
 usage() {
@@ -114,6 +115,7 @@ require_system_extension_entitlements() {
 
 rm -rf "$output_directory"
 mkdir -p "$output_directory"
+trap 'unregister_built_applications "$output_directory"' EXIT
 Packages/TunnelCore/Scripts/build-xcframework.sh
 Scripts/generate-project.sh >/dev/null
 

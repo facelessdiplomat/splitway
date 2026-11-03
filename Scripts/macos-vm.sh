@@ -3,6 +3,7 @@ set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$repository_root/Scripts/lib/xcode-environment.sh"
+source "$repository_root/Scripts/lib/launch-services.sh"
 cd "$repository_root"
 
 image_reference="ghcr.io/cirruslabs/macos-tahoe-base@sha256:4aaa751fa7538902d73c767f27a066fc87e83f183069da4e4b5022863abd4c77"
@@ -109,6 +110,7 @@ install_application() {
     mkdir -p "$shared_directory/$install_directory"
     ditto "$checkout/$derived_data_directory/Build/Products/Debug/Splitway.app" \
         "$shared_directory/$install_directory/Splitway.app"
+    unregister_built_applications "$checkout/$derived_data_directory/Build/Products"
     guest_exec pkill -x Splitway || true
     guest_exec rm -rf /Applications/Splitway.app
     guest_exec ditto "$shared_directory_in_guest/$install_directory/Splitway.app" /Applications/Splitway.app
