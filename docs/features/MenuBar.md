@@ -44,7 +44,7 @@ flowchart LR
 | Тип | Что делает |
 |---|---|
 | `MenuBarModel(tunnels:quitConfirmation:lifecycle:)` | состояние меню и действия поверх `TunnelListModel` |
-| `SplitwayMenuBar(model:mainWindowIdentifier:)` | сцена `MenuBarExtra` (только macOS) |
+| `SplitwayMenuBar(model:mainWindowIdentifier:)` | сцена `MenuBarExtra` |
 | `MenuBarIcon`, `MenuBarTunnel` | состояние значка и пункт туннеля |
 | `QuitConfirmation`, `ApplicationLifecycle`, `QuitDecision` (Core) | вопрос при выходе, активация и завершение приложения |
 | `AppKitQuitConfirmation`, `AppKitApplicationLifecycle` (Infrastructure) | реализации на AppKit |
@@ -91,3 +91,4 @@ flowchart LR
 |---|---|---|
 | 2026-10-31 | Строка меню: значок, туннели, режим маршрутизации, окно, настройки и вопрос при выходе | M6-01 |
 | 2026-11-01 | Иконка в Dock видна, только пока открыто окно | M6-02 |
+| 2026-11-03 | Адаптеры AppKit и вью строки меню собираются без `#if os(macOS)`: iOS убрана | M8-02 |

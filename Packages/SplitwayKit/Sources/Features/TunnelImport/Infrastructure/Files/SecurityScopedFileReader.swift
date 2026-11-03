@@ -4,22 +4,17 @@ import TunnelImport
 public struct SecurityScopedFileReader: ImportFileReader {
     private static let readingQueue = DispatchQueue(label: "Splitway.ImportFileReading", qos: .userInitiated)
 
-    private let inbox: ReceivedFileInbox?
-
-    public init(inbox: ReceivedFileInbox? = nil) {
-        self.inbox = inbox
-    }
+    public init() {}
 
     public func read(_ files: [URL]) async -> ImportFileBatch {
-        let inbox = inbox
-        return await withCheckedContinuation { continuation in
+        await withCheckedContinuation { continuation in
             Self.readingQueue.async {
-                continuation.resume(returning: Self.batch(reading: files, removingCopiesFrom: inbox))
+                continuation.resume(returning: Self.batch(reading: files))
             }
         }
     }
 
-    private static func batch(reading files: [URL], removingCopiesFrom inbox: ReceivedFileInbox?) -> ImportFileBatch {
+    private static func batch(reading files: [URL]) -> ImportFileBatch {
         var payloads: [ImportPayload] = []
         var unreadableFileNames: [String] = []
         for file in files {
@@ -27,9 +22,6 @@ public struct SecurityScopedFileReader: ImportFileReader {
                 payloads.append(.file(name: file.lastPathComponent, contents: contents))
             } else {
                 unreadableFileNames.append(file.lastPathComponent)
-            }
-            if inbox?.contains(file) == true {
-                try? FileManager.default.removeItem(at: file)
             }
         }
         return ImportFileBatch(payloads: payloads, unreadableFileNames: unreadableFileNames)
