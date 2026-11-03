@@ -53,58 +53,6 @@
         }
       }
     },
-    "%lld services selected" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld service selected"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld services selected"
-                }
-              }
-            }
-          }
-        },
-        "ru" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Выбран %lld сервис"
-                }
-              },
-              "few" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Выбрано %lld сервиса"
-                }
-              },
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Выбрано %lld сервисов"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Выбрано %lld сервиса"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "All traffic" : {
       "localizations" : {
         "ru" : {
@@ -135,32 +83,12 @@
         }
       }
     },
-    "Choose Services…" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбрать сервисы…"
-          }
-        }
-      }
-    },
     "Choose at least one app, or no traffic will use the tunnel." : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выберите хотя бы одно приложение, иначе через туннель ничего не пойдёт."
-          }
-        }
-      }
-    },
-    "Choose at least one service, or no traffic will use the tunnel." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите хотя бы один сервис, иначе через туннель ничего не пойдёт."
           }
         }
       }
@@ -191,16 +119,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбранные приложения"
-          }
-        }
-      }
-    },
-    "Selected services" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбранные сервисы"
           }
         }
       }

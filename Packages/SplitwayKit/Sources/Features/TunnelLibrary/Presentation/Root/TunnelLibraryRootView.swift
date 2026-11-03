@@ -2,12 +2,10 @@ import SwiftUI
 import TunnelLibrary
 
 public struct TunnelLibraryRootView: View {
-    #if os(macOS)
-        private static let minimumWindowWidth: CGFloat = 640
-        private static let minimumWindowHeight: CGFloat = 440
-        private static let minimumSidebarWidth: CGFloat = 250
-        private static let idealSidebarWidth: CGFloat = 280
-    #endif
+    private static let minimumWindowWidth: CGFloat = 640
+    private static let minimumWindowHeight: CGFloat = 440
+    private static let minimumSidebarWidth: CGFloat = 250
+    private static let idealSidebarWidth: CGFloat = 280
 
     private let model: TunnelListModel
     private let statistics: TunnelStatisticsPolling
@@ -41,9 +39,7 @@ public struct TunnelLibraryRootView: View {
                 export: export,
                 navigation: navigation
             )
-            #if os(macOS)
-                .navigationSplitViewColumnWidth(min: Self.minimumSidebarWidth, ideal: Self.idealSidebarWidth)
-            #endif
+            .navigationSplitViewColumnWidth(min: Self.minimumSidebarWidth, ideal: Self.idealSidebarWidth)
         } detail: {
             detail
         }
@@ -52,9 +48,7 @@ public struct TunnelLibraryRootView: View {
         .modifier(TunnelExportPresenter(model: export))
         .focusedSceneValue(\.selectedTunnel, selectedTunnelActions)
         .focusedSceneValue(\.tunnelSearch, TunnelSearchActivation { isSearching = true })
-        #if os(macOS)
-            .frame(minWidth: Self.minimumWindowWidth, minHeight: Self.minimumWindowHeight)
-        #endif
+        .frame(minWidth: Self.minimumWindowWidth, minHeight: Self.minimumWindowHeight)
         .task { await model.load() }
         .task { await model.observeConnection() }
     }

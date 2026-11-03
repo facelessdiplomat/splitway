@@ -14,7 +14,7 @@ extension ConnectionFailure {
                 message: .moduleResource(
                     "Splitway isn’t allowed to add a VPN configuration. Allow it in Settings, then try again."
                 ),
-                suggestedAction: .openSettings
+                suggestedAction: .none
             )
         case .systemConfigurationUnavailable:
             ConnectionFailureExplanation(

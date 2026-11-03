@@ -15,16 +15,5 @@ struct LogViewerToolbar: ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
             LogViewerFilterMenu(model: model)
         }
-        #if os(iOS)
-            ToolbarItem(placement: .secondaryAction) {
-                LogViewerActionButton(action: .export, model: model, confirmClearing: confirmClearing)
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                LogViewerActionButton(action: .sendReport, model: model, confirmClearing: confirmClearing)
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                LogViewerActionButton(action: .clear, model: model, confirmClearing: confirmClearing)
-            }
-        #endif
     }
 }

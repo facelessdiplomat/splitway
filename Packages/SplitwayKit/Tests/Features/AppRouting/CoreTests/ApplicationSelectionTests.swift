@@ -51,16 +51,4 @@ struct ApplicationSelectionTests {
 
         #expect(selection.applications == [curl, telegram])
     }
-
-    @Test(arguments: ["telegram", "youtube", "custom-7f3a"])
-    func acceptsServiceIdentifiers(_ text: String) throws {
-        #expect(try ServiceIdentifier(text).description == text)
-    }
-
-    @Test(arguments: ["", "Telegram", "you tube", "-telegram", "telegram_web"])
-    func rejectsMalformedServiceIdentifiers(_ text: String) {
-        #expect(throws: ServiceIdentifierError.malformed) {
-            try ServiceIdentifier(text)
-        }
-    }
 }

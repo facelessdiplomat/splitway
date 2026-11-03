@@ -13,9 +13,7 @@ struct CrashReportPresenter: ViewModifier {
                     model.crashReport = nil
                 }
             }
-            #if os(macOS)
-                .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
-            #endif
+            .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
         }
     }
 }

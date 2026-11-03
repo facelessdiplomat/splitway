@@ -381,16 +381,6 @@
         }
       }
     },
-    "Open Settings" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открыть Настройки"
-          }
-        }
-      }
-    },
     "Paste from clipboard" : {
       "localizations" : {
         "ru" : {
@@ -451,16 +441,6 @@
         }
       }
     },
-    "Scan QR code" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сканировать QR-код"
-          }
-        }
-      }
-    },
     "Search Tunnels" : {
       "localizations" : {
         "ru" : {
@@ -487,36 +467,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отправлено"
-          }
-        }
-      }
-    },
-    "Services through the tunnel" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сервисы через туннель"
-          }
-        }
-      }
-    },
-    "Settings" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Настройки"
-          }
-        }
-      }
-    },
-    "Settings…" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Настройки…"
           }
         }
       }

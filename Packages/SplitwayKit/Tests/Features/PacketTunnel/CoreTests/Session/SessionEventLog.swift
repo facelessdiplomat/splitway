@@ -7,7 +7,6 @@ final class SessionEventLog: Sendable {
         case locatedInterface
         case startedDevice(descriptor: Int32)
         case appliedConfiguration
-        case appliedServiceRouting
         case bumpedSockets
         case stoppedDevice
     }

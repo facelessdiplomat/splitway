@@ -18,14 +18,6 @@ struct LiveRoutingChangeTests {
     }
 
     @Test
-    func appliesANewServiceSelectionOfAnUnchangedTunnelLive() throws {
-        let tunnel = try Self.tunnel(routedBy: RoutingPolicy(mode: .selectedServices(ServiceSelection([]))))
-        let selection = RoutingPolicy(mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])))
-
-        #expect(LiveRoutingChange.isPossible(from: tunnel, to: tunnel.configuration, routedBy: selection))
-    }
-
-    @Test
     func needsARestartWhenTheConfigurationChanges() throws {
         let tunnel = try Self.tunnel(routedBy: Self.applications)
         let changed = try #require(WgQuickConfigurationParser.parse(WgQuickFixtures.multiplePeers).configuration)
@@ -42,13 +34,6 @@ struct LiveRoutingChangeTests {
         #expect(
             !LiveRoutingChange.isPossible(from: allTraffic, to: allTraffic.configuration, routedBy: Self.applications))
         #expect(!LiveRoutingChange.isPossible(from: applications, to: applications.configuration, routedBy: .default))
-        #expect(
-            !LiveRoutingChange.isPossible(
-                from: allTraffic,
-                to: allTraffic.configuration,
-                routedBy: RoutingPolicy(mode: .selectedServices(ServiceSelection([])))
-            )
-        )
     }
 
     private static func tunnel(routedBy policy: RoutingPolicy) throws -> Tunnel {

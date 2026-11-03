@@ -6,18 +6,15 @@ public struct RoutingSection: View {
     private let model: RoutingSectionModel
     private let excludesPrivateNetworks: Binding<Bool>?
     private let chooseApplications: (@MainActor () -> Void)?
-    private let chooseServices: (@MainActor () -> Void)?
 
     public init(
         model: RoutingSectionModel,
         excludesPrivateNetworks: Binding<Bool>?,
-        chooseApplications: (@MainActor () -> Void)? = nil,
-        chooseServices: (@MainActor () -> Void)? = nil
+        chooseApplications: (@MainActor () -> Void)? = nil
     ) {
         self.model = model
         self.excludesPrivateNetworks = excludesPrivateNetworks
         self.chooseApplications = chooseApplications
-        self.chooseServices = chooseServices
     }
 
     public var body: some View {
@@ -35,20 +32,13 @@ public struct RoutingSection: View {
                     Text("Choose Apps…", bundle: .module)
                 }
             }
-            if let chooseServices {
-                Button(action: chooseServices) {
-                    Text("Choose Services…", bundle: .module)
-                }
-            }
             if let excludesPrivateNetworks {
                 Toggle(isOn: excludesPrivateNetworks) {
                     Text("Exclude private networks", bundle: .module)
                 }
             }
-            if model.offersUnavailableTunnelChoice {
-                Toggle(isOn: blocksWhenTunnelUnavailable) {
-                    Text("Block traffic when the tunnel is unavailable", bundle: .module)
-                }
+            Toggle(isOn: blocksWhenTunnelUnavailable) {
+                Text("Block traffic when the tunnel is unavailable", bundle: .module)
             }
         } header: {
             Text("Routing", bundle: .module)

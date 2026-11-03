@@ -7,7 +7,6 @@ import TunnelLibraryTestSupport
 
 struct ImportTestEnvironment {
     static let fallbackName = "Pasted tunnel"
-    static let scannedName = "Scanned tunnel"
     static let archiveData = Data([0x50, 0x4B, 0x03, 0x04] + Array("export".utf8))
 
     let records = InMemoryTunnelRecordRepository()
@@ -27,10 +26,7 @@ struct ImportTestEnvironment {
             records: records,
             secrets: secrets,
             archiveReader: archiveReader,
-            fallbackNames: ImportFallbackNames(
-                pastedText: try TunnelName(Self.fallbackName),
-                scannedCode: try TunnelName(Self.scannedName)
-            )
+            fallbackName: try TunnelName(Self.fallbackName)
         )
     }
 

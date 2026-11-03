@@ -11,13 +11,12 @@ build_directory="$package_root/build"
 framework="$package_root/Artifacts/TunnelCoreFramework.xcframework"
 fingerprint_file="$build_directory/sources.sha256"
 library_name="libtunnelcore.a"
-minimum_ios_version="26.0"
 minimum_macos_version="26.0"
 
 sources_fingerprint() {
     {
         go version
-        printf 'ios %s macos %s\n' "$minimum_ios_version" "$minimum_macos_version"
+        printf 'macos %s\n' "$minimum_macos_version"
         find "$go_module" "$interface_directory" "$package_root/Scripts" -type f ! -path '*/testpeer/*' \
             \( \( -name '*.go' ! -name '*_test.go' \) -o -name 'go.mod' -o -name 'go.sum' \
             -o -name '*.h' -o -name '*.modulemap' -o -name '*.sh' \) -print0 \
@@ -55,8 +54,6 @@ if [[ -d "$framework" && -f "$fingerprint_file" && "$(cat "$fingerprint_file")" 
 fi
 
 rm -rf "$build_directory" "$framework"
-build_slice iphoneos ios arm64 "arm64-apple-ios$minimum_ios_version" "$build_directory/ios-arm64"
-build_slice iphonesimulator ios arm64 "arm64-apple-ios$minimum_ios_version-simulator" "$build_directory/ios-arm64-simulator"
 build_slice macosx darwin arm64 "arm64-apple-macos$minimum_macos_version" "$build_directory/macos-arm64"
 build_slice macosx darwin amd64 "x86_64-apple-macos$minimum_macos_version" "$build_directory/macos-x86_64"
 
@@ -67,8 +64,6 @@ lipo -create \
     -output "$build_directory/macos/$library_name"
 
 xcodebuild -create-xcframework \
-    -library "$build_directory/ios-arm64/$library_name" -headers "$interface_directory" \
-    -library "$build_directory/ios-arm64-simulator/$library_name" -headers "$interface_directory" \
     -library "$build_directory/macos/$library_name" -headers "$interface_directory" \
     -output "$framework" >/dev/null
 

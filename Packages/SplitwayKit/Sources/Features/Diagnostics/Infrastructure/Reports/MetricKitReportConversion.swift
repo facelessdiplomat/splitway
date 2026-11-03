@@ -22,9 +22,6 @@
             diagnostics += (payload.diskWriteExceptionDiagnostics ?? []).map { diagnostic in
                 (.diskWriteException, diagnostic)
             }
-            #if os(iOS)
-                diagnostics += (payload.appLaunchDiagnostics ?? []).map { diagnostic in (.appLaunch, diagnostic) }
-            #endif
             return diagnostics
         }
     }

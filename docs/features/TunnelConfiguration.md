@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Статус | завершена (M1); тексты проблем — M3-04 |
-| Платформы | shared |
+| Платформы | macOS |
 | Задачи | M1-04, M1-05, M1-06, M1-07, M1-08, M1-09, M3-04, M3-06 (API для редактора), M3-07 (тексты неверных значений) |
 | Таргеты | `TunnelConfiguration`, `TunnelConfigurationPresentation`, `TunnelConfigurationTestSupport` |
 

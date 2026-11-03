@@ -8,7 +8,6 @@ import TunnelLibraryTestSupport
 @MainActor
 final class ImportTestFlow {
     static let pastedName = "Pasted tunnel"
-    static let scannedName = "Scanned tunnel"
 
     let records = InMemoryTunnelRecordRepository()
     let secrets = InMemoryTunnelSecretStore()
@@ -24,16 +23,11 @@ final class ImportTestFlow {
                     records: records,
                     secrets: secrets,
                     archiveReader: RejectingArchiveReader(),
-                    fallbackNames: ImportFallbackNames(
-                        pastedText: try TunnelName(Self.pastedName),
-                        scannedCode: try TunnelName(Self.scannedName)
-                    )
+                    fallbackName: try TunnelName(Self.pastedName)
                 ),
                 confirmImport: ConfirmImportUseCase(records: records, secrets: secrets),
                 fileReader: FakeImportFileReader(batch: files),
-                clipboard: FakeClipboard(contents: clipboard),
-                cameraAccess: FakeCameraAccess(.authorized),
-                qrCodeDecoder: StubQRCodeDecoder()
+                clipboard: FakeClipboard(contents: clipboard)
             )
         ) { [weak self] in
             self?.importCount += 1

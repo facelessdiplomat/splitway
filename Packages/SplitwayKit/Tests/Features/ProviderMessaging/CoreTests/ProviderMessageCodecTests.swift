@@ -61,7 +61,11 @@ struct ProviderMessageCodecTests {
             .runtimeStatistics,
             .applyRoutingPolicy(
                 policy: RoutingPolicy(
-                    mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])),
+                    mode: .selectedApplications(
+                        ApplicationSelection([
+                            try ApplicationIdentity(kind: .commandLineTool, displayName: "curl", path: "/usr/bin/curl")
+                        ])
+                    ),
                     whenTunnelUnavailable: .bypass
                 )
             ),

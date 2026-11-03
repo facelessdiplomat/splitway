@@ -103,8 +103,7 @@ struct TunnelNetworkPlannerTests {
             plan.dns
                 == TunnelDNSPlan(
                     servers: [try IPAddress("1.1.1.1")],
-                    searchDomains: [try DomainName("corp.example")],
-                    scope: .allDomains
+                    searchDomains: [try DomainName("corp.example")]
                 )
         )
     }
@@ -128,10 +127,10 @@ struct TunnelNetworkPlannerTests {
     @Test
     func rejectsRoutingModesThatThePacketTunnelDoesNotServe() throws {
         let configuration = try Self.configuration("Address = 10.14.0.2/16", peers: ["0.0.0.0/0"])
-        let services = RoutingPolicy(mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])))
+        let applications = RoutingPolicy(mode: .selectedApplications(ApplicationSelection([])))
 
-        #expect(throws: TunnelNetworkPlanError.routingModeNotSupported(.selectedServices)) {
-            try TunnelNetworkPlanner.plan(for: configuration, routedBy: services)
+        #expect(throws: TunnelNetworkPlanError.routingModeNotSupported(.selectedApplications)) {
+            try TunnelNetworkPlanner.plan(for: configuration, routedBy: applications)
         }
     }
 

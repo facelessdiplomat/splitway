@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"strings"
 	"testing"
 
@@ -52,9 +51,6 @@ func TestOperationsOnAnUnknownHandleFail(t *testing.T) {
 	}
 	if status := bumpTunnelSockets(unknownHandle); status != statusUnknownHandle {
 		t.Errorf("bump: expected an unknown handle, got %d", status)
-	}
-	if status := setServiceRouting(unknownHandle, "{}"); status != statusUnknownHandle {
-		t.Errorf("service routing: expected an unknown handle, got %d", status)
 	}
 	if status := stopTunnel(unknownHandle); status != statusUnknownHandle {
 		t.Errorf("stop: expected an unknown handle, got %d", status)
@@ -109,34 +105,6 @@ func TestRebindsTheSocketsOfARunningTunnel(t *testing.T) {
 	}
 }
 
-func TestRoutesServicesOfAFileDescriptorTunnel(t *testing.T) {
-	handle := startChannelTunnel(t)
-	defer stopTunnel(handle)
-
-	status := setServiceRouting(handle, planFixture(t))
-
-	if status != statusOK {
-		t.Fatalf("expected the plan to apply, got %d", status)
-	}
-}
-
-func TestRejectsAServiceRoutingPlanTheEngineCannotUse(t *testing.T) {
-	handle := startChannelTunnel(t)
-	defer stopTunnel(handle)
-	cases := map[string]string{
-		"unknown version": `{"version":99}`,
-		"malformed":       `not a plan`,
-		"invalid plan":    `{"version":1,"virtualResolver":"10.0.0.2","upstreamResolver":"1.1.1.1","fakeIPv4Network":"198.18.0.0/15"}`,
-	}
-	for name, document := range cases {
-		t.Run(name, func(t *testing.T) {
-			if status := setServiceRouting(handle, document); status != statusConfigurationRejected {
-				t.Fatalf("expected a rejected plan, got %d", status)
-			}
-		})
-	}
-}
-
 func startChannelTunnel(t *testing.T) int32 {
 	t.Helper()
 	handle, status := startTunnel(onChannelDevice("private_key=" + interfacePrivateKeyHex + "\nlisten_port=0\n"))
@@ -150,13 +118,4 @@ func onChannelDevice(configuration string) deviceStarter {
 	return func(logger *device.Logger) (runningDevice, error) {
 		return fdtunnel.Start(tuntest.NewChannelTUN().TUN(), configuration, logger)
 	}
-}
-
-func planFixture(t *testing.T) string {
-	t.Helper()
-	document, err := os.ReadFile("../servicerouting/testdata/plan.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return string(document)
 }

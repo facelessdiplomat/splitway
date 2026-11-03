@@ -1,20 +1,18 @@
-#if os(macOS)
-    import Synchronization
+import Synchronization
 
-    final class OneShotContinuation<Value: Sendable>: Sendable {
-        private let continuation: Mutex<CheckedContinuation<Value, Never>?>
+final class OneShotContinuation<Value: Sendable>: Sendable {
+    private let continuation: Mutex<CheckedContinuation<Value, Never>?>
 
-        init(_ continuation: CheckedContinuation<Value, Never>) {
-            self.continuation = Mutex(continuation)
-        }
-
-        func resume(returning value: Value) {
-            let pending = continuation.withLock { stored -> CheckedContinuation<Value, Never>? in
-                let taken = stored
-                stored = nil
-                return taken
-            }
-            pending?.resume(returning: value)
-        }
+    init(_ continuation: CheckedContinuation<Value, Never>) {
+        self.continuation = Mutex(continuation)
     }
-#endif
+
+    func resume(returning value: Value) {
+        let pending = continuation.withLock { stored -> CheckedContinuation<Value, Never>? in
+            let taken = stored
+            stored = nil
+            return taken
+        }
+        pending?.resume(returning: value)
+    }
+}

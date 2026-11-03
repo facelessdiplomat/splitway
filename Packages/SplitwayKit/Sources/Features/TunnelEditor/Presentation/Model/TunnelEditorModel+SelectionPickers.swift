@@ -1,6 +1,5 @@
 import AppRouting
 import ApplicationCatalogPresentation
-import ServiceCatalogPresentation
 
 extension TunnelEditorModel {
     public var canChooseApplications: Bool {
@@ -19,24 +18,5 @@ extension TunnelEditorModel {
 
     public func finishChoosingApplications() {
         applicationPicker = nil
-    }
-
-    public var canChooseServices: Bool {
-        servicePickerActions != nil && routing.selectedMode == .selectedServices
-    }
-
-    public func chooseServices() {
-        guard canChooseServices, let servicePickerActions else { return }
-        servicePicker = ServicePickerModel(
-            selection: routing.serviceSelection,
-            configuration: currentDraft.validation.configuration,
-            actions: servicePickerActions
-        ) { [routing] selection in
-            routing.setServices(selection)
-        }
-    }
-
-    public func finishChoosingServices() {
-        servicePicker = nil
     }
 }

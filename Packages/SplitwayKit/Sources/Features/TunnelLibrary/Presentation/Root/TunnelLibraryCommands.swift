@@ -41,16 +41,5 @@ public struct TunnelLibraryCommands: Commands {
             }
             .keyboardShortcut("l", modifiers: [.command, .option])
         }
-        #if os(iOS)
-            CommandGroup(replacing: .appSettings) {
-                Button {
-                    navigation.showSettings?()
-                } label: {
-                    Text("Settings…", bundle: .module)
-                }
-                .keyboardShortcut(",")
-                .disabled(navigation.showSettings == nil)
-            }
-        #endif
     }
 }

@@ -5,8 +5,6 @@ extension RoutingPolicy {
             []
         case .selectedApplications(let selection):
             selection.isEmpty ? [.emptyApplicationSelection] : []
-        case .selectedServices(let selection):
-            selection.isEmpty ? [.emptyServiceSelection] : []
         }
     }
 }

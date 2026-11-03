@@ -158,12 +158,11 @@ let features: [FeatureModule] = [
         coreDependencies: ["AppRouting", "TunnelConfiguration", "TunnelLibrary"],
         presentationDependencies: [
             "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation",
-            "ApplicationCatalogPresentation", "ServiceCatalogPresentation", "DesignSystemPresentation",
+            "ApplicationCatalogPresentation", "DesignSystemPresentation",
         ],
         testDependencies: ["TunnelConfigurationTestSupport"],
         presentationTestDependencies: [
             "TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "ApplicationCatalogTestSupport",
-            "ServiceCatalog", "ServiceCatalogTestSupport",
         ]
     ),
     FeatureModule(
@@ -205,9 +204,9 @@ let features: [FeatureModule] = [
         name: "PacketTunnel",
         layers: [.core, .infrastructure],
         coreDependencies: [
-            "TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging", "ServiceCatalog",
+            "TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging",
         ],
-        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport", "ServiceCatalogTestSupport"]
+        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"]
     ),
     FeatureModule(
         name: "TransparentProxy",
@@ -258,27 +257,9 @@ let features: [FeatureModule] = [
         providesTestSupport: true
     ),
     FeatureModule(
-        name: "ServiceCatalog",
-        layers: [.core, .infrastructure, .presentation],
-        coreDependencies: ["AppRouting", "TunnelConfiguration"],
-        presentationDependencies: ["AppRouting", "TunnelConfiguration", "DesignSystemPresentation"],
-        testDependencies: ["TunnelConfigurationTestSupport"],
-        infrastructureResources: [.process("Resources")],
-        providesTestSupport: true
-    ),
-    FeatureModule(
         name: "Shortcuts",
         coreDependencies: ["TunnelLibrary", "TunnelConnection"],
         testDependencies: ["TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "TunnelConfigurationTestSupport"]
-    ),
-    FeatureModule(
-        name: "ControlWidgets",
-        layers: [.core, .infrastructure],
-        coreDependencies: ["TunnelLibrary", "TunnelConnection", "Shortcuts"],
-        testDependencies: [
-            "TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "TunnelConfigurationTestSupport",
-        ],
-        layersWithoutTests: [.infrastructure]
     ),
     FeatureModule(
         name: "MenuBar",
@@ -299,7 +280,7 @@ let features: [FeatureModule] = [
 let package = Package(
     name: "SplitwayKit",
     defaultLocalization: "en",
-    platforms: [.iOS(.v26), .macOS(.v26)],
+    platforms: [.macOS(.v26)],
     products: [.library(name: "SharedKernel", targets: ["SharedKernel"])] + features.flatMap(\.products),
     dependencies: [.package(url: "https://github.com/weichsel/ZIPFoundation.git", exact: "0.9.20")],
     targets: sharedKernelTargets + features.flatMap(\.targets)

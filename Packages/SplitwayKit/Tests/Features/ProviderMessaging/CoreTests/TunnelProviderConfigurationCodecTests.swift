@@ -11,7 +11,11 @@ struct TunnelProviderConfigurationCodecTests {
         let configuration = TunnelProviderConfiguration(
             tunnelID: TunnelIdentifier(),
             routingPolicy: RoutingPolicy(
-                mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])),
+                mode: .selectedApplications(
+                    ApplicationSelection([
+                        try ApplicationIdentity(kind: .commandLineTool, displayName: "curl", path: "/usr/bin/curl")
+                    ])
+                ),
                 whenTunnelUnavailable: .bypass
             )
         )
