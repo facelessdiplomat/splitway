@@ -62,9 +62,9 @@ flowchart LR
 
 | Пункт задачи | Итог | Как проверено |
 |---|---|---|
-| Атрибуты Keychain | Соответствуют разделу 1 | `KeychainTunnelSecretStore` и `SystemKeychainSecretStore` в коде. Интеграционные тесты Keychain работали на симуляторе iPhone и ушли вместе с iOS (решение D-45), их перенос на Mac — задача M8-07 |
+| Атрибуты Keychain | Соответствуют разделу 1 | `KeychainTunnelSecretStore` и `SystemKeychainSecretStore` в коде. `KeychainTunnelSecretStoreTests` в `macOSIntegrationTests` проверяют на Mac доступность `AfterFirstUnlockThisDeviceOnly` и отсутствие синхронизации (M8-07) |
 | Требования к подписи XPC | Только приложение нашей команды с нашим bundle ID | Тесты `ClientCodeRequirement` (неверный Team ID и bundle ID, кавычки и пробелы отклоняются); в тестовой ВМ 2026-10-30 ([SP-5](features/spikes/SP-5.md)) |
-| Ключей нет в журнале, `providerConfiguration`, `UserDefaults` и отчётах о сбоях | Нет | Тест-сканер `SecretLeakScanTests` проверял это на симуляторах iPhone и iPad до решения D-45, его перенос на Mac — задача M8-07 (раздел 7). Тесты маскирования в `LogRedactor`, записях журнала и отчёте о сбое |
+| Ключей нет в журнале, `providerConfiguration`, `UserDefaults` и отчётах о сбоях | Нет | Тест-сканер `SecretLeakScanTests` в `macOSIntegrationTests` (раздел 7). Тесты маскирования в `LogRedactor`, записях журнала и отчёте о сбое |
 | Предупреждения при экспорте | Перед каждым экспортом одного туннеля и всех туннелей | `TunnelExportModelTests` |
 | Время жизни ключей в буфере обмена | Приватных ключей приложение в буфер не кладёт: кнопка в редакторе копирует только публичный ключ, поэтому `expirationDate` и `localOnly` не нужны | Код: единственная запись в буфер — `SystemClipboard.copy` из «Скопировать публичный ключ» |
 | Zip-бомбы и огромные файлы | Лимиты из раздела 2 | Тесты `ZIPArchiveReader` (граница и превышение лимитов, заниженный в заголовке размер, испорченная контрольная сумма) и `SecurityScopedFileReader` (файл больше лимита) |
@@ -110,6 +110,6 @@ flowchart LR
 
 ## 7. Как проверять
 
-- `SecretLeakScanTests` работал в `iOSIntegrationTests` на симуляторе iPhone и ушёл вместе с iOS (решение D-45). Его перенос на Mac — задача M8-07: файл со случайными ключами импортируется в настоящий Keychain и App Group, туннель ставится в слот, журнал экспортируется, затем тест ищет ключи во всех файлах контейнеров и в `UserDefaults`.
+- `SecretLeakScanTests` в `macOSIntegrationTests` (M8-07): файл со случайными ключами импортируется в настоящий Keychain и App Group, туннель ставится в слот, журнал экспортируется, затем тест ищет ключи в base64, hex и сырых байтах во всех файлах контейнера хоста и группы, в `UserDefaults` и в журнале. `SecretLeakScannerTests` подтверждает, что сканер находит ключ, нарочно записанный в файл контейнера. Тесты идут в хост-приложении `IntegrationTestHost` с подписью разработки, шаг «macOS integration tests» в `Scripts/check.sh`, на Mac владельца и на раннере CI.
 - Вручную на Mac: поиск ключа тестового туннеля в `~/Library/Containers/com.facelessdiplomat.splitway` и `~/Library/Group Containers/8625S77CSU.com.facelessdiplomat.splitway`.
 - Модульные тесты: `SecurityScopedFileReaderTests`, `TemporaryExportCopiesTests`, `TunnelExportModelTests`, тесты `LogRedactor`, `ZIPArchiveReader`, `ClientCodeRequirement` и `ProviderMessageDispatcher`.
