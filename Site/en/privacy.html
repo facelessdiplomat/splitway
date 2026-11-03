@@ -37,13 +37,15 @@
 <h2>Network traffic</h2>
 <p>Splitway is a WireGuard client. The traffic you choose goes to the VPN server named in the tunnel configuration. You or your VPN provider choose and set up that server. The developer of Splitway has nothing to do with it and cannot see your traffic. How data is handled on the server is up to its operator.</p>
 <p>To send only what you chose through the tunnel, Splitway identifies which app opens a connection. This happens only on the device: addresses, site names and connection lists are neither stored nor sent anywhere.</p>
+<h2>Updates</h2>
+<p>Splitway checks for new versions by asking GitHub, where its releases are published, for the list of versions. It does this when you choose Check for Updates… and, if you allow it, automatically once a day: Splitway asks for your permission on the second launch, and you can change it in Settings at any time. As with any website visit, GitHub sees your IP address and the name and version of the app; Splitway adds nothing else to the request. If you agree to install an update, Splitway downloads it from GitHub too. GitHub handles this data under the GitHub Privacy Statement.</p>
 <h2>Permissions</h2>
 <ul>
 <li><strong>VPN configuration</strong> — to connect tunnels.</li>
 <li><strong>Network extension</strong> — to route the traffic of the chosen apps. Splitway reads the list of installed apps and their signatures to show them to you when you choose and to recognize the chosen apps.</li>
 </ul>
 <h2>When data leaves the device</h2>
-<p>Splitway sends nothing by itself. Data leaves the device only when you act, and you choose the recipient:</p>
+<p>Apart from the update check described above, Splitway sends nothing by itself. Data leaves the device only when you act, and you choose the recipient:</p>
 <ul>
 <li><strong>Tunnel export</strong> — a file with private keys. The app warns you about this before exporting.</li>
 <li><strong>Log export</strong> — a text file.</li>
