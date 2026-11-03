@@ -9,10 +9,6 @@ extension TunnelAdditionMethod {
         }
     }
 
-    var usesSystemPasteButton: Bool {
-        false
-    }
-
     var keyboardShortcut: KeyboardShortcut? {
         switch self {
         case .importFromFile: Self.importShortcut

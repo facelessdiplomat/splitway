@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Статус | изменена: сеть одного адреса и диапазон `2000::/3` (M2-05), `Ticker` (M3-12), байты адреса и `AwaitableState` (M4-10) |
-| Платформы | shared |
+| Платформы | macOS |
 | Задачи | M0-05, M1-01, M1-02, M1-03, M1-05, M2-05 (сети для полного туннеля), M3-12 (`Ticker`), M4-10 (байты адреса, `AwaitableState`), M7-02 (`AbandonedExportCopies`) |
 | Таргеты | `SharedKernel`, `SharedKernelTestSupport` |
 

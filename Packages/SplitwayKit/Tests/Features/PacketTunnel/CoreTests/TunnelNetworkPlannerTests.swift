@@ -103,8 +103,7 @@ struct TunnelNetworkPlannerTests {
             plan.dns
                 == TunnelDNSPlan(
                     servers: [try IPAddress("1.1.1.1")],
-                    searchDomains: [try DomainName("corp.example")],
-                    scope: .allDomains
+                    searchDomains: [try DomainName("corp.example")]
                 )
         )
     }

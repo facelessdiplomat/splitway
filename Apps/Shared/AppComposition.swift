@@ -77,10 +77,6 @@ struct AppComposition {
         }
     }
 
-    func paste(_ texts: [String]) {
-        Task.immediate { await tunnelImport.importPastedTexts(texts) }
-    }
-
     private static func logViewer(diagnostics: DiagnosticsAssembly, configuration: AppConfiguration)
         -> LogViewerPresenter
     {

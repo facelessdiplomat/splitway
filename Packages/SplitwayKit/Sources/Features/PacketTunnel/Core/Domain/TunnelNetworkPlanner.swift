@@ -43,6 +43,6 @@ public enum TunnelNetworkPlanner {
 
     private static func dnsPlan(for dns: DNSConfiguration) -> TunnelDNSPlan? {
         guard !dns.servers.isEmpty else { return nil }
-        return TunnelDNSPlan(servers: dns.servers, searchDomains: dns.searchDomains, scope: .allDomains)
+        return TunnelDNSPlan(servers: dns.servers, searchDomains: dns.searchDomains)
     }
 }

@@ -36,7 +36,7 @@ flowchart LR
 - `Start(Options{Addresses, DNSServers, MTU}, uapi, logger)`:
   - `netstack.CreateNetTUN` создаёт стек с адресами интерфейса и DNS туннеля;
   - `coalescingDevice` оборачивает его устройство и прореживает исходящие подтверждения TCP (ниже);
-  - `fdtunnel.Start` поднимает на нём устройство wireguard-go со стандартным bind, то есть с настоящими UDP-сокетами к endpoint-ам.
+  - `fdtunnel.Start` поднимает на нём устройство wireguard-go с `udpbind`, то есть с настоящими UDP-сокетами к endpoint-ам.
 
   `Apply`, `Configuration` и `BumpSockets` идут к устройству.
 - `DialTCP(context, адрес)` подключается через туннель. Тайм-аут задаёт контекст вызывающего, на его истечение приходит ошибка с `context.DeadlineExceeded`. `DialUDP(адрес)` открывает подключённый UDP-сокет к одному адресату. Ошибки подключения оборачиваются в `ErrDialFailed`.
@@ -71,7 +71,6 @@ flowchart LR
 - Соединения лежат в своей таблице хэндлов. `tc_connection_close(..., Both)` закрывает соединение и освобождает хэндл, `Write` и `Read` закрывают одну сторону.
 - Приём: `tc_connection_start_receiving` выделяет буфер чтения через `malloc`, и горутина читает прямо в эту память C. В обратный вызов уходит указатель на неё, а не на память Go. Буфер освобождается после `finish`.
 - Каждая экспортная функция, включая функции режима fd, выполняется внутри `guarded`: паника превращается в `TCStatusInternalFailure` и не пересекает границу cgo.
-- Код режима netstack собирается только для macOS (`//go:build !ios`). В слайсы iOS не попадают ни `usernet`, ни gVisor, и пакетный туннель iOS не платит памятью за их `init`.
 
 | Функция | Назначение |
 |---|---|
@@ -95,7 +94,7 @@ flowchart LR
   - `UserspaceConnectionReceiver`: `receive(_:)` и `finish(_:)`.
 
   Ошибки — `UserspaceNetworkError`. Все вызовы синхронные и блокирующие: их делают с выделенных очередей ретрансляции, а не с кооперативного пула.
-- Адаптер в `TunnelCoreAdapter` (только macOS):
+- Адаптер в `TunnelCoreAdapter`:
   - `TunnelCoreUserspaceNetworkEngine` передаёт адреса строками;
   - `TunnelCoreUserspaceNetwork` для операций устройства использует `TunnelCoreWireGuardDevice` с тем же хэндлом;
   - `TunnelCoreUserspaceConnection` закрывает соединение в `deinit`.
@@ -169,7 +168,7 @@ flowchart LR
 - `BenchmarkUploadThroughTheTunnel` — клиент пишет в приёмник пира без ответа;
 - `BenchmarkDownloadThroughTheTunnel` — источник пира (`testpeer.SourcePort`) пишет без остановки, клиент читает с кредитом. Кроме скорости он отчитывается метрикой `acks/segment`: сколько пакетов клиент отправил пиру на один пакет данных. Пакеты считает устройство пира (`PacketCounts`).
 
-`Scripts/check.sh --bench` (или `Scripts/benchmark.sh`) запускает их пять раз по 2 с и сравнивает медианы с базовой линией `usernet/testdata/benchmark-baseline.txt` (`Scripts/benchmark-check`). Скорость и время на операцию хуже базовой линии больше чем на 10 % — ошибка. Для `acks/segment` допуск 35 %: доля подтверждений зависит от планировщика и между прогонами одного кода меняется на 15 %. Новая базовая линия пишется `Scripts/benchmark.sh --write-baseline`. Тот же скрипт сравнивает бенчмарки `servicerouting` с их собственной базовой линией ([ServiceRouting](ServiceRouting.md)), и `--write-baseline` переписывает обе.
+`Scripts/check.sh --bench` (или `Scripts/benchmark.sh`) запускает их пять раз по 2 с и сравнивает медианы с базовой линией `usernet/testdata/benchmark-baseline.txt` (`Scripts/benchmark-check`). Скорость и время на операцию хуже базовой линии больше чем на 10 % — ошибка. Для `acks/segment` допуск 35 %: доля подтверждений зависит от планировщика и между прогонами одного кода меняется на 15 %. Новая базовая линия пишется `Scripts/benchmark.sh --write-baseline`. Тот же скрипт сравнивает бенчмарки `udpbind` с их собственной базовой линией ([TunnelEngine](TunnelEngine.md)), и `--write-baseline` переписывает обе.
 
 Запуск: `go test ./...` в `Packages/TunnelCore/go`; бенчмарк — `go test -run '^$' -bench . ./usernet/`; Swift — `Packages/TunnelCore/Scripts/build-test-peer.sh` и `swift test --package-path Packages/TunnelCore`.
 
@@ -181,3 +180,4 @@ flowchart LR
 | 2026-10-30 | Мост C, порты и адаптер Swift, процесс-пир для тестов Swift, `recover` в экспортных функциях | M4-06 |
 | 2026-10-31 | Бенчмарк загрузки с метрикой подтверждений, сравнение с базовой линией в `Scripts/check.sh --bench` | M4-16 |
 | 2026-10-31 | Прореживание исходящих подтверждений TCP (`coalescingDevice`) | M4-16 |
+| 2026-11-03 | Убраны iOS и выбор сервисов: срезы iOS без `usernet`, тест отказа плана сервисов для сети `usernet` в мосте; `Scripts/benchmark.sh` сравнивает рядом с `usernet` только `udpbind` | M8-02 |

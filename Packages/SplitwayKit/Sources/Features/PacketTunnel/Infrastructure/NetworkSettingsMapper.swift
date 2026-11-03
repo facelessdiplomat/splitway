@@ -47,13 +47,7 @@ public enum NetworkSettingsMapper {
     private static func dnsSettings(for plan: TunnelDNSPlan) -> NEDNSSettings {
         let settings = NEDNSSettings(servers: plan.servers.map(\.description))
         settings.searchDomains = plan.searchDomains.map(\.description)
-        switch plan.scope {
-        case .allDomains:
-            settings.matchDomains = [everyDomain]
-        case .matchingDomains(let domains):
-            settings.matchDomains = domains.map(\.description)
-            settings.matchDomainsNoSearch = true
-        }
+        settings.matchDomains = [everyDomain]
         return settings
     }
 
