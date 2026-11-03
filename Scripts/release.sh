@@ -8,7 +8,7 @@ cd "$repository_root"
 usage() {
     printf 'Usage: Scripts/release.sh <version> [--publish]\n' >&2
     printf '  <version>  marketing version, for example 1.0 or 1.0.1\n' >&2
-    printf '  --publish  create the GitHub release v<version> with Splitway.dmg\n' >&2
+    printf '  --publish  create the GitHub release v<version> with Splitway.dmg and docs/releases/<version>.md\n' >&2
     printf 'Notarization uses the keychain profile named by SPLITWAY_NOTARY_PROFILE (splitway-notary by default).\n' >&2
     exit 64
 }
@@ -44,6 +44,12 @@ application="$export_directory/Splitway.app"
 image="$output_directory/Splitway.dmg"
 checksum_file="$output_directory/Splitway.dmg.sha256"
 release_tag="v$version"
+release_notes="$repository_root/docs/releases/$version.md"
+
+if [[ "$publishes" == true && ! -s "$release_notes" ]]; then
+    printf 'Write the release notes to docs/releases/%s.md before publishing\n' "$version" >&2
+    exit 1
+fi
 
 signing_identity="$(security find-identity -v -p codesigning |
     awk -v team="($team_identifier)" 'index($0, "Developer ID Application") && index($0, team) { print $2; exit }')"
@@ -143,6 +149,6 @@ cat "$checksum_file"
 
 if [[ "$publishes" == true ]]; then
     gh release create "$release_tag" "$image" "$checksum_file" \
-        --title "Splitway $version" --target "$(git rev-parse HEAD)" --generate-notes
+        --title "Splitway $version" --target "$(git rev-parse HEAD)" --notes-file "$release_notes" --generate-notes
     printf 'Published %s\n' "$release_tag"
 fi
