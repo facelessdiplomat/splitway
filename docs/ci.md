@@ -6,7 +6,7 @@ CI — GitHub Actions (решение D-47). Тяжёлые задания ид�
 
 | Файл | Когда | Где | Что делает |
 |---|---|---|---|
-| `check.yml` | пуш в `master`, ручной запуск | раннер `splitway` | `Scripts/check.sh` |
+| `check.yml` | пуш в `master`, ручной запуск | раннер `splitway` | `Scripts/check.sh`, в том числе интеграционные тесты в хост-приложении с подписью разработки (M8-07) |
 | `release.yml` | тег `v*` | раннер `splitway` | `Scripts/release.sh <версия> --publish`: DMG с подписью Developer ID и нотаризацией и подписанная лента Sparkle `appcast.xml` в GitHub Releases ([03-platform-macos.md](03-platform-macos.md), раздел 9) |
 | `pull-request.yml` | pull request | облачный `macos-latest` | `gofmt`, проверка комментариев Go, `go vet` и `go test` всех Go-модулей; секретов и раннера владельца не видит |
 | `site.yml` | пуш в `master` с изменениями в `Site/`, ручной запуск | облачный `ubuntu-latest` | публикует `Site/` на GitHub Pages ([site.md](site.md)); пока репозиторий приватный, задание пропускается |

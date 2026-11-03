@@ -4,6 +4,7 @@ set -euo pipefail
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$repository_root/Scripts/lib/xcode-environment.sh"
 source "$repository_root/Scripts/lib/build-directory.sh"
+source "$repository_root/Scripts/lib/launch-services.sh"
 cd "$repository_root"
 
 runs_benchmarks=false
@@ -18,6 +19,7 @@ for argument in "$@"; do
 done
 
 derived_data="$repository_root/build/DerivedData"
+integration_derived_data="$repository_root/build/DerivedData-integration"
 go_modules=(Packages/TunnelCore/go Scripts/go-comment-check Scripts/benchmark-check)
 started_at=$SECONDS
 
@@ -69,6 +71,17 @@ Scripts/generate-project.sh
 
 step "macOS build"
 build_scheme macOSApp 'generic/platform=macOS'
+
+step "macOS integration tests"
+if security find-identity -v -p codesigning | grep -q 'Apple Development'; then
+    integration_status=0
+    xcodebuild -project Splitway.xcodeproj -scheme IntegrationTestHost -destination 'platform=macOS' \
+        -derivedDataPath "$integration_derived_data" -allowProvisioningUpdates test -quiet || integration_status=$?
+    unregister_built_applications "$integration_derived_data/Build/Products"
+    [[ "$integration_status" -eq 0 ]] || exit "$integration_status"
+else
+    printf 'Skipped: no Apple Development certificate in the keychain to sign the test host\n'
+fi
 
 if [[ "$runs_benchmarks" == true ]]; then
     step "Benchmarks"
