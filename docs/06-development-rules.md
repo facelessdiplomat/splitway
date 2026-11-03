@@ -152,7 +152,7 @@
 
 - **ИИ-ассистент никогда не указывается автором или соавтором коммита.** Запрещены трейлеры `Co-Authored-By` с ИИ, строки «Generated with…» в сообщениях коммитов и описаниях pull request. Коммиты создаются от имени разработчика по его `git config`; ассистент не меняет `user.name` и `user.email`.
 - Формат сообщения — Conventional Commits **на английском** (решение D-24), область = фича: `feat(TunnelConfiguration): parse multi-value AllowedIPs`. В теле — ID задачи (`Task: M1-07`).
-- Ветка на задачу (решение D-26): `feature/<task-id>-<slug>`, `fix/<slug>`, `spike/SP-x`. Слияние в основную ветку `master` (решение D-31) — `git merge --no-ff` и только после успешного `Scripts/check.sh` (его запускает хук `pre-merge-commit`), затем `git push` в `origin`. CI нет (решение D-23); `master` всегда рабочий.
+- Ветка на задачу (решение D-26): `feature/<task-id>-<slug>`, `fix/<slug>`, `spike/SP-x`. Слияние в основную ветку `master` (решение D-31) — `git merge --no-ff` и только после успешного `Scripts/check.sh` (его запускает хук `pre-merge-commit`), затем `git push` в `origin`. После пуша CI на GitHub Actions повторяет `Scripts/check.sh` на раннере владельца (решение D-47, [ci.md](ci.md)); `master` всегда рабочий.
 - Коммит, закрывающий задачу, отмечает её чекбокс в файле вехи (решение D-27).
 - Коммиты небольшие и атомарные: тесты и реализация одного поведения.
 
@@ -185,6 +185,6 @@
 | Нет `print`, force unwrap, `try!` | SwiftLint | `Scripts/check.sh` |
 | Форматирование | `swift format`, `gofmt` | хук `pre-commit`, `Scripts/check.sh` |
 | Strict concurrency | Swift 6 language mode | сборка |
-| Тесты | `swift test`, `xcodebuild test`, `go test` | `Scripts/check.sh`, хук `pre-merge-commit` |
+| Тесты | `swift test`, `xcodebuild test`, `go test` | `Scripts/check.sh`, хук `pre-merge-commit`, workflow «Check» после пуша в `master` |
 | Скорость горячего пути | `go test -bench` против базовой линии (`Scripts/benchmark-check`): регресс скорости больше 10 % — ошибка | `Scripts/check.sh --bench` |
 | Формат коммитов и отсутствие ИИ-трейлеров | хук `commit-msg`: Conventional Commits, отклоняет `Co-Authored-By` с ИИ и «Generated with» | хук `commit-msg` |

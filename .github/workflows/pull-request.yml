@@ -1,0 +1,26 @@
+name: Pull request
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: Packages/TunnelCore/go/go.mod
+      - name: Format
+        run: test -z "$(gofmt -l Packages/TunnelCore/go Scripts/go-comment-check Scripts/benchmark-check)"
+      - name: Comments
+        run: cd Scripts/go-comment-check && go run . ../../Packages/TunnelCore/go ../benchmark-check .
+      - name: Vet and test
+        run: |
+          for module in Packages/TunnelCore/go Scripts/go-comment-check Scripts/benchmark-check; do
+            (cd "$module" && go vet ./... && go test ./...)
+          done
