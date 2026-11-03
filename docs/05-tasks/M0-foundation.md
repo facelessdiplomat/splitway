@@ -21,7 +21,7 @@
 - [x] SP-9 Атрибуция DNS-запросов в DNS-прокси — DNS-прокси видит то же, что прозрачный прокси, и по решению D-34 не используется; тест утечек в ВМ 2026-10-31 снова показал DNS выбранного приложения через туннель ([итоги](../features/spikes/SP-9.md))
 - [x] SP-3 Скорость ретрансляции через netstack — ретрансляция годится для v1, цель M4-16 записана; по решению D-36 замеры делаются в ВМ ([итоги](../features/spikes/SP-3.md))
 - [x] SP-5 Секреты в системном расширении — вариант B (D-33); после перезагрузки туннель включается без приложения, ключа нет в настройках VPN: в ВМ (2026-10-31) и на Mac владельца с включённым SIP (2026-11-01) ([итоги](../features/spikes/SP-5.md)); удаление и повторная установка расширения — в M6-02
-- [x] SP-4 Прототип выбора сервисов на iOS — на iPhone 13 Pro выбранные домены идут через туннель, остальные напрямую, пик памяти расширения под нагрузкой 12,2 МБ ([итоги](../features/spikes/SP-4.md))
+- [x] SP-4 Прототип выбора сервисов на iOS — на iPhone 13 Pro выбранные домены идут через туннель, остальные напрямую, пик памяти расширения под нагрузкой 12,2 МБ (итоги (тег `ios-final`))
 - [x] M0-11 Точка решения по итогам спайков — SP-2…SP-7 и SP-9 закрыты (2026-11-01); по их итогам приняты D-33 (SP-5) и D-34 (SP-2, SP-9), добавлена M4-19 (SP-2), цель M4-16 взята из SP-3, ADR-02, ADR-11 и таблицы рисков обновлены; план M2 и M5 подтверждён
 
 ## Подготовка
@@ -67,7 +67,7 @@
 ### M0-06. Проект XcodeGen и оболочки таргетов
 `shared` · M · зависит от: M0-04, M0-05
 
-**Сделать:** `project.yml` с таргетами `iOSApp`, `macOSApp`, `PacketTunnelExtension`, `NetworkSystemExtension` (`ControlsExtension` добавляется в M6). Файлы entitlements и `Info.plist` из [03-platform-macos.md](../03-platform-macos.md) и [04-platform-ios-ipados.md](../04-platform-ios-ipados.md). Настройки сборки: Swift 6, strict concurrency, Hardened Runtime (macOS), встраивание системного расширения в `Contents/Library/SystemExtensions`. Пустые точки входа: SwiftUI-окно, провайдеры с методами-заглушками. Скрипт `Scripts/generate-project.sh`.
+**Сделать:** `project.yml` с таргетами `iOSApp`, `macOSApp`, `PacketTunnelExtension`, `NetworkSystemExtension` (`ControlsExtension` добавляется в M6). Файлы entitlements и `Info.plist` из [03-platform-macos.md](../03-platform-macos.md) и 04-platform-ios-ipados.md (тег `ios-final`). Настройки сборки: Swift 6, strict concurrency, Hardened Runtime (macOS), встраивание системного расширения в `Contents/Library/SystemExtensions`. Пустые точки входа: SwiftUI-окно, провайдеры с методами-заглушками. Скрипт `Scripts/generate-project.sh`.
 **Тесты сначала:** не требуются (конфигурация сборки).
 **Готово, когда:** все таргеты собираются для симулятора iOS и для macOS; системное расширение лежит внутри `.app`.
 
