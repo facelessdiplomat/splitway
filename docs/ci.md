@@ -15,12 +15,12 @@ CI — GitHub Actions (решение D-47). Тяжёлые задания ид�
 
 ## Раннер
 
-- Где: `~/actions-runner/splitway`, учётная запись владельца, служба `launchd` `actions.runner.facelessdiplomat-splitway.splitway-mac` (`~/Library/LaunchAgents`). Агент работает, пока владелец вошёл в систему, поэтому ему доступны связка ключей входа с сертификатом Developer ID и профилем `splitway-notary`.
+- Где: `~/actions-runner/splitway`, учётная запись владельца, служба `launchd` `actions.runner.facelessdiplomat-splitway.splitway-mac` (`~/Library/LaunchAgents`). Агент работает в сеансе владельца, пока тот вошёл в систему, и задания видят его связку ключей с сертификатом Developer ID и профилем `splitway-notary`. Для этого в plist службы нет ключа `SessionCreate`. Шаблон `svc.sh` его добавляет, и тогда задания идут в отдельном сеансе безопасности, где `notarytool` не находит профиль: так 2026-11-03 упал первый запуск выпуска 1.0.
 - Имя `splitway-mac`, метки `self-hosted`, `macOS`, `ARM64`, `splitway`. Workflow выбирают раннер по метке `splitway`.
 - Версия: v2.338.2 из [actions/runner](https://github.com/actions/runner/releases), контрольная сумма архива сверена с описанием релиза. Раннер обновляется сам.
 - Состояние: `~/actions-runner/splitway/svc.sh status`; журналы — `~/Library/Logs/actions.runner.facelessdiplomat-splitway.splitway-mac`.
-- Переустановка: `./svc.sh stop && ./svc.sh uninstall`, затем `./config.sh remove --token <токен>` и регистрация заново с токеном из `gh api -X POST repos/facelessdiplomat/splitway/actions/runners/registration-token --jq .token`.
-- В журналах заданий публичного репозитория видны имя раннера и имя компьютера.
+- Переустановка: `./svc.sh stop && ./svc.sh uninstall`, затем `./config.sh remove --token <токен>` и регистрация заново с токеном из `gh api -X POST repos/facelessdiplomat/splitway/actions/runners/registration-token --jq .token`. После `./svc.sh install` ключ `SessionCreate` убирают снова: `plutil -remove SessionCreate` для plist службы, затем `launchctl bootout gui/$(id -u)/actions.runner.facelessdiplomat-splitway.splitway-mac` и `launchctl bootstrap gui/$(id -u)` с тем же plist.
+- В журналах заданий публичного репозитория видны имя раннера и имя компьютера (`Machine name`) — сетевое имя Mac, которое печатает `hostname`. Другое имя задаёт `sudo scutil --set HostName <имя>`, после чего службу перезапускают.
 
 ## Настройки репозитория
 
