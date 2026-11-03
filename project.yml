@@ -136,3 +136,45 @@ targets:
         product: SecretDeliveryInfrastructure
       - package: TunnelCore
         product: TunnelCoreAdapter
+  IntegrationTestHost:
+    type: application
+    platform: macOS
+    sources:
+      - path: IntegrationTestHost
+    settings:
+      base:
+        PRODUCT_NAME: SplitwayIntegrationTestHost
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-test-host
+        CODE_SIGN_ENTITLEMENTS: IntegrationTestHost/IntegrationTestHost.entitlements
+        INFOPLIST_FILE: IntegrationTestHost/Info.plist
+    scheme:
+      testTargets:
+        - macOSIntegrationTests
+  macOSIntegrationTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: IntegrationTests
+    dependencies:
+      - target: IntegrationTestHost
+      - package: SplitwayKit
+        product: TunnelLibrary
+      - package: SplitwayKit
+        product: TunnelLibraryInfrastructure
+      - package: SplitwayKit
+        product: TunnelImport
+      - package: SplitwayKit
+        product: TunnelImportInfrastructure
+      - package: SplitwayKit
+        product: TunnelConnection
+      - package: SplitwayKit
+        product: ProviderMessaging
+      - package: SplitwayKit
+        product: Diagnostics
+      - package: SplitwayKit
+        product: DiagnosticsInfrastructure
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/SplitwayIntegrationTestHost.app/Contents/MacOS/SplitwayIntegrationTestHost
+        BUNDLE_LOADER: $(TEST_HOST)
