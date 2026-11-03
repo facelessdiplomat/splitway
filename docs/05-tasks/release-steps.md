@@ -36,4 +36,4 @@ git tag v1.0 && git push origin v1.0
 
 ## 5. App Store
 
-App Store не используется. Запись «Splitway Tunnel» в App Store Connect больше не нужна, удалять её не обязательно. Отказ ревью от 2026-11-03 и ответ на него описаны в [docs/app-store/review-notes.md](../app-store/review-notes.md) до тех пор, пока эти материалы не уберёт M8-06.
+App Store не используется. Запись «Splitway Tunnel» в App Store Connect больше не нужна, удалять её не обязательно. Материалы для App Store — тексты, анкеты, заметки и ответ на отказ ревью 2026-11-03 — убраны в M8-06 и остались в истории git.

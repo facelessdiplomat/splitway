@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem
+    url: https://github.com/facelessdiplomat/splitway/security/advisories/new
+    about: Report vulnerabilities privately, not in a public issue.
+  - name: Help with installing and using Splitway
+    url: https://facelessdiplomat.github.io/splitway/en/support.html
+    about: Answers to common questions.
