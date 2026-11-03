@@ -4,40 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Splitway Privacy Policy</title>
+<link rel="icon" type="image/png" href="../images/icon-64.png">
+<link rel="apple-touch-icon" href="../images/icon-180.png">
 <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-<header>
-<a class="brand" href="../index.html">Splitway</a>
-<nav>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="container">
+<a class="brand" href="../"><img src="../images/icon-64.png" alt="" width="30" height="30">Splitway</a>
+<nav class="site-nav" aria-label="Footer">
 <a href="support.html">Support</a>
 <a href="privacy.html" aria-current="page">Privacy</a>
-<a href="../ru/privacy.html" lang="ru">Русский</a>
+<a class="language" href="../ru/privacy.html" hreflang="ru" lang="ru">Русский</a>
 </nav>
+</div>
 </header>
-<main>
+<main id="main" class="container document">
 <h1>Splitway Privacy Policy</h1>
-<p>Version of November 2, 2026. Applies to Splitway on iPhone, iPad and Mac.</p>
+<p class="meta">Version of November 3, 2026. Applies to Splitway for Mac.</p>
 <h2>In short</h2>
 <p>Splitway does not collect data. The app has no accounts, analytics, ads or tracking, and it never contacts the developer's servers. We do not sell, use or disclose any user data to third parties for any purpose.</p>
 <h2>What stays on your device</h2>
 <p>Everything Splitway needs stays on your device:</p>
 <ul>
-<li><strong>WireGuard tunnel configurations, including private keys.</strong> They are kept in the device keychain and are not synced through iCloud. On a Mac, Splitway's network extension receives a copy of the configuration and keeps it in the system keychain.</li>
-<li><strong>Tunnel names and routing settings:</strong> which apps (on Mac) or services (on iPhone and iPad) use the tunnel, and your own services — domains and subnets.</li>
+<li><strong>WireGuard tunnel configurations, including private keys.</strong> They are kept in the keychain and are not synced through iCloud. Splitway's network extension receives a copy of the configuration and keeps it in the system keychain.</li>
+<li><strong>Tunnel names and routing settings:</strong> which apps use the tunnel.</li>
 <li><strong>Diagnostic log:</strong> connection and disconnection times, errors and tunnel names. Keys are never written to the log. The log takes at most 2 MB, and old entries are deleted automatically.</li>
 <li><strong>Crash reports</strong> that the system hands to the app on the device (the latest 20 at most).</li>
 <li><strong>Internal settings,</strong> such as whether you have finished the first-run introduction.</li>
 </ul>
 <h2>Network traffic</h2>
 <p>Splitway is a WireGuard client. The traffic you choose goes to the VPN server named in the tunnel configuration. You or your VPN provider choose and set up that server. The developer of Splitway has nothing to do with it and cannot see your traffic. How data is handled on the server is up to its operator.</p>
-<p>To send only what you chose through the tunnel, Splitway on a Mac identifies which app opens a connection, and on iPhone and iPad it recognizes the domains of the chosen services in DNS queries. This happens only on the device: addresses, site names and connection lists are neither stored nor sent anywhere.</p>
+<p>To send only what you chose through the tunnel, Splitway identifies which app opens a connection. This happens only on the device: addresses, site names and connection lists are neither stored nor sent anywhere.</p>
 <h2>Permissions</h2>
 <ul>
 <li><strong>VPN configuration</strong> — to connect tunnels.</li>
-<li><strong>Camera</strong> (iPhone and iPad) — only to scan a QR code with a configuration. The image is processed on the device and is not stored.</li>
-<li><strong>Photos</strong> — only the QR code image you pick yourself.</li>
-<li><strong>Network extension</strong> (Mac) — to route the traffic of the chosen apps. Splitway reads the list of installed apps and their signatures to show them to you when you choose and to recognize the chosen apps.</li>
+<li><strong>Network extension</strong> — to route the traffic of the chosen apps. Splitway reads the list of installed apps and their signatures to show them to you when you choose and to recognize the chosen apps.</li>
 </ul>
 <h2>When data leaves the device</h2>
 <p>Splitway sends nothing by itself. Data leaves the device only when you act, and you choose the recipient:</p>
@@ -47,20 +50,30 @@
 <li><strong>Crash report</strong> — an archive with the log and system reports that you send through the Share menu.</li>
 </ul>
 <p>If you send a report to the developer yourself, it is used only to find and fix the problem and is never passed to third parties.</p>
-<p>If "Share With App Developers" is turned on in the device settings, Apple may share crash reports and usage statistics with developers. This is governed by Apple's privacy policy. You can turn this setting on or off in the device settings under Privacy &amp; Security.</p>
+<p>If "Share With App Developers" is turned on in System Settings, Apple may share crash reports and usage statistics with developers. This is governed by Apple's privacy policy. You can turn this setting on or off in System Settings under Privacy &amp; Security.</p>
 <h2>Retention and deletion</h2>
 <p>Data stays on the device until you delete it:</p>
 <ul>
 <li>deleting a tunnel erases its configuration and keys;</li>
 <li>Clear Log erases the log;</li>
-<li>on iPhone and iPad, deleting the app erases its files: the tunnel list, the log and the settings. iOS keeps configurations with keys in the keychain even after the app is deleted, and only Splitway can read them. To erase them too, delete the tunnels in Splitway before deleting the app;</li>
-<li>on a Mac, Uninstall Splitway… in Settings erases the tunnels with their keys, including the copy in the system keychain, the VPN configurations, the app's data and the network extension. Moving the app to the Trash leaves all of this in place.</li>
+<li>Uninstall Splitway… in Settings erases the tunnels with their keys, including the copy in the system keychain, the VPN configurations, the app's data and the network extension. Moving the app to the Trash leaves all of this in place.</li>
 </ul>
 <p>The developer has none of your data, so no separate deletion request is needed. If you have sent us a crash report, write to us and we will delete it.</p>
 <h2>Changes to this policy</h2>
 <p>A new version is published on this page with a new date.</p>
 <h2>Contact</h2>
-<p>You can reach the developer through the support address listed on the Splitway page in the App Store or on the app's website.</p>
+<p>You can reach the developer through the support page on the app's website or through the project's GitHub Issues.</p>
 </main>
+<footer class="site-footer">
+<div class="container">
+<span>© 2026 facelessdiplomat</span>
+<nav aria-label="Footer">
+<a href="privacy.html">Privacy</a>
+<a href="support.html">Support</a>
+<a href="https://github.com/facelessdiplomat/splitway">GitHub</a>
+</nav>
+<p class="trademark">“WireGuard” is a registered trademark of Jason A. Donenfeld. Splitway is not affiliated with or endorsed by the WireGuard project.</p>
+</div>
+</footer>
 </body>
 </html>

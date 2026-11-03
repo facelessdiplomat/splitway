@@ -43,6 +43,9 @@ Scripts/tests/lint-rules-test.sh
 step "Git hook checks"
 Scripts/tests/git-hooks-test.sh
 
+step "Site links"
+Scripts/check-site.sh
+
 step "Go modules"
 for module in "${go_modules[@]}"; do
     (cd "$module" && go vet ./... && go test ./...)

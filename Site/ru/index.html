@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splitway — VPN только для нужных приложений</title>
+<meta name="description" content="Splitway — бесплатный клиент WireGuard для Mac с открытым кодом. Выберите приложения, которые идут через туннель, остальное работает как обычно.">
+<link rel="icon" type="image/png" href="../images/icon-64.png">
+<link rel="apple-touch-icon" href="../images/icon-180.png">
+<link rel="alternate" hreflang="en" href="../">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">К содержанию</a>
+<header class="site-header">
+<div class="container">
+<a class="brand" href="./"><img src="../images/icon-64.png" alt="" width="30" height="30">Splitway</a>
+<nav class="site-nav" aria-label="Основная навигация">
+<a class="nav-section" href="#features">Возможности</a>
+<a class="nav-section" href="#how">Как это работает</a>
+<a class="nav-section" href="#install">Установка</a>
+<a class="nav-section" href="#faq">Вопросы</a>
+<a href="https://github.com/facelessdiplomat/splitway">GitHub</a>
+<a class="language" href="../" hreflang="en" lang="en">English</a>
+</nav>
+</div>
+</header>
+
+<main id="main">
+<section class="hero">
+<svg class="hero-routes" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<path d="M-40 360 C 220 360, 300 360, 430 300 S 700 140, 1240 120" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+<path d="M430 300 C 560 360, 760 470, 1240 500" fill="none" stroke="var(--direct)" stroke-width="2" stroke-dasharray="2 10" stroke-linecap="round" opacity="0.6"/>
+</svg>
+<div class="container">
+<div class="hero-text">
+<p class="eyebrow">Бесплатно и с открытым кодом · macOS 26 и новее</p>
+<h1>VPN только для нужных приложений</h1>
+<p class="lead">Splitway — клиент WireGuard® для Mac. Добавьте свою конфигурацию, выберите приложения, которые пойдут через туннель, а всё остальное останется на обычном подключении.</p>
+<div class="actions">
+<a class="button button-primary" href="https://github.com/facelessdiplomat/splitway/releases/latest/download/Splitway.dmg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+Скачать для Mac
+</a>
+<a class="button button-secondary" href="https://github.com/facelessdiplomat/splitway">
+<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.46c.53.1.72-.23.72-.5v-1.78c-2.92.63-3.54-1.4-3.54-1.4-.48-1.22-1.17-1.54-1.17-1.54-.95-.65.08-.64.08-.64 1.05.08 1.6 1.08 1.6 1.08.94 1.6 2.46 1.14 3.06.87.1-.68.37-1.14.66-1.4-2.33-.27-4.78-1.17-4.78-5.18 0-1.15.41-2.08 1.08-2.82-.11-.26-.47-1.33.1-2.77 0 0 .88-.28 2.89 1.08a10 10 0 0 1 5.26 0c2-1.36 2.88-1.08 2.88-1.08.58 1.44.22 2.51.11 2.77.67.74 1.08 1.67 1.08 2.82 0 4.02-2.46 4.9-4.8 5.16.38.33.72.97.72 1.96v2.9c0 .28.19.61.73.5A10.5 10.5 0 0 0 12 1.5Z"/></svg>
+Код на GitHub
+</a>
+</div>
+<p class="fine-print">Подписано Developer ID и нотаризовано Apple · Apple silicon и Intel · <a href="https://github.com/facelessdiplomat/splitway/releases">Все версии</a></p>
+</div>
+<img class="screenshot" src="../images/main-ru.png" width="962" height="575" alt="Окно Splitway: туннель «Прага» пропускает через себя только Safari и Терминал, туннели «Амстердам» и «Дом» пропускают весь трафик.">
+</div>
+</section>
+
+<section class="section section-muted" id="features">
+<div class="container">
+<h2 class="section-title">Раздельное туннелирование без возни</h2>
+<p class="section-lead">Официальный клиент WireGuard направляет в туннель целые подсети. Splitway позволяет выбрать приложения, а остальной Mac оставляет на обычном подключении.</p>
+<div class="features">
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="m15 17.5 2 2 4-4"/></svg></div>
+<h3>Приложения, а не подсети</h3>
+<p>Выбирайте приложения и утилиты командной строки. Их помощники и запущенные ими процессы идут следом: команды в выбранном Терминале тоже пойдут через туннель.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+<h3>DNS вместе с приложением</h3>
+<p>DNS-запросы выбранных приложений тоже идут через туннель: они не утекают, а геолокация совпадает с VPN.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.3 8.2 8 9 4.7-.8 8-4.5 8-9V6l-8-3Z"/><path d="M9 12h6"/></svg></div>
+<h3>Туннель упал — трафик не утечёт</h3>
+<p>Если туннель недоступен, выбранные приложения ждут его, а не уходят напрямую. Для каждого туннеля это можно выключить.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-4 4 3 3m-5-1 2 2"/></svg></div>
+<h3>Ваш конфиг, ваш сервер</h3>
+<p>Импортируйте .conf или .zip, вставьте текст из буфера или создайте туннель с новыми ключами. Без учётных записей и аналитики, ключи хранятся в связке ключей.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1.5"/><path d="M7 12h10M7 16h6"/></svg></div>
+<h3>Всегда под рукой</h3>
+<p>Переключайте туннели из строки меню, запускайте Splitway при входе или подключайтесь через «Команды» и Siri.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></div>
+<h3>Открытый код</h3>
+<p>Весь код приложения на GitHub под лицензией GPL-3.0: его можно прочитать, собрать самостоятельно или помочь улучшить.</p>
+</article>
+</div>
+</div>
+</section>
+
+<section class="section" id="how">
+<div class="container split">
+<div>
+<h2 class="section-title">Как это работает</h2>
+<p class="section-lead">Splitway пользуется только публичными API macOS. Маршрутизация происходит на вашем Mac, а сведения о соединениях нигде не сохраняются и никуда не отправляются.</p>
+<ol class="flow">
+<li><span class="step">1</span><div><h3>Расширение видит каждое соединение</h3><p>Splitway ставит системное сетевое расширение с прозрачным прокси. macOS сообщает ему, какое приложение открыло каждое TCP- или UDP-соединение.</p></div></li>
+<li><span class="step">2</span><div><h3>Выбранные приложения идут в туннель</h3><p>Соединения выбранных приложений проходят через WireGuard внутри расширения. Всё остальное возвращается системе и идёт напрямую.</p></div></li>
+<li><span class="step">3</span><div><h3>Или весь трафик</h3><p>Туннель может пропускать и весь трафик, как официальный клиент, с возможностью оставить локальные сети в стороне.</p></div></li>
+</ol>
+</div>
+<img class="screenshot sheet" src="../images/apps-ru.png" width="480" height="618" alt="Выбор приложений для туннеля: выбраны Safari и Терминал, есть вкладки «Все», «Выбранные» и «Утилиты командной строки».">
+</div>
+</section>
+
+<section class="section section-muted" id="install">
+<div class="container">
+<h2 class="section-title">Начать за минуту</h2>
+<p class="section-lead">Нужен сервер WireGuard: свой, на роутере или у VPN-провайдера, который выдаёт конфигурации WireGuard.</p>
+<ol class="install">
+<li><h3>Скачайте</h3><p>Возьмите последний <a href="https://github.com/facelessdiplomat/splitway/releases/latest/download/Splitway.dmg">Splitway.dmg</a>.</p></li>
+<li><h3>Перенесите в «Программы»</h3><p>Откройте образ и перетащите Splitway в «Программы»: сетевое расширение запускается только оттуда.</p></li>
+<li><h3>Разрешите расширение</h3><p>При первом запуске включите Splitway в «Системные настройки › Основные › Объекты входа и расширения › Сетевые расширения». Приложение подскажет путь.</p></li>
+<li><h3>Импортируйте и подключитесь</h3><p>Добавьте конфигурацию, разрешите конфигурацию VPN, когда macOS спросит, выберите приложения и включите туннель.</p></li>
+</ol>
+<ul class="requirements">
+<li>macOS 26 Tahoe и новее</li>
+<li>Apple silicon или Intel</li>
+<li>Бесплатно · GPL-3.0</li>
+<li>Русский и английский</li>
+</ul>
+</div>
+</section>
+
+<section class="section" id="faq">
+<div class="container">
+<h2 class="section-title">Вопросы</h2>
+<div class="faq">
+<details>
+<summary>Splitway — это VPN-сервис?</summary>
+<p>Нет. Это клиент, который подключается к серверу WireGuard — вашему или вашего провайдера. У Splitway нет своих серверов, учётных записей и подписок.</p>
+</details>
+<details>
+<summary>Splitway собирает данные?</summary>
+<p>Нет. В приложении нет аналитики, рекламы и отслеживания, и оно никогда не обращается к разработчику. Подробности — в <a href="privacy.html">политике конфиденциальности</a>.</p>
+</details>
+<details>
+<summary>Какие приложения можно выбрать?</summary>
+<p>Любое приложение или утилиту командной строки, в том числе Safari и приложения на WebKit или Electron. Процессы, которые запускает выбранное приложение, идут через туннель вместе с ним. Часть системных служб, которые работают за приложения Apple, может идти напрямую — приложение предупреждает об этом рядом с ними.</p>
+</details>
+<details>
+<summary>Почему Splitway нет в App Store?</summary>
+<p>App Store принимает VPN-приложения только от компаний, а Splitway — независимый проект с открытым кодом. Вместо этого каждый выпуск подписан Developer ID и нотаризован Apple, поэтому macOS открывает его без предупреждений.</p>
+</details>
+<details>
+<summary>Есть ли версия для iPhone или iPad?</summary>
+<p>Нет. iOS не сообщает туннелю, какое приложение отправило пакет, а приложения для iPhone попадают к людям только через App Store.</p>
+</details>
+<details>
+<summary>Как обновить?</summary>
+<p>Скачайте новую версию и замените Splitway в «Программах». Сетевое расширение обновится само при следующем запуске приложения.</p>
+</details>
+<details>
+<summary>Как удалить?</summary>
+<p>Выберите «Удалить Splitway…» в настройках. Это сотрёт туннели с ключами, конфигурации VPN, данные приложения и сетевое расширение. Если просто перенести приложение в Корзину, всё это останется.</p>
+</details>
+</div>
+</div>
+</section>
+
+<section class="section section-muted cta">
+<div class="container">
+<h2 class="section-title">Только то, что нужно, — через туннель</h2>
+<p class="section-lead" style="margin-inline:auto">Бесплатно, с открытым кодом и без сбора данных.</p>
+<div class="actions">
+<a class="button button-primary" href="https://github.com/facelessdiplomat/splitway/releases/latest/download/Splitway.dmg">Скачать для Mac</a>
+<a class="button button-secondary" href="support.html">Помощь</a>
+</div>
+</div>
+</section>
+</main>
+
+<footer class="site-footer">
+<div class="container">
+<span>© 2026 facelessdiplomat</span>
+<nav aria-label="Ссылки внизу страницы">
+<a href="privacy.html">Конфиденциальность</a>
+<a href="support.html">Поддержка</a>
+<a href="https://github.com/facelessdiplomat/splitway">GitHub</a>
+<a href="../" hreflang="en" lang="en">English</a>
+</nav>
+<p class="trademark">«WireGuard» — зарегистрированный товарный знак Jason A. Donenfeld. Splitway не связан с проектом WireGuard и не одобрен им.</p>
+</div>
+</footer>
+</body>
+</html>

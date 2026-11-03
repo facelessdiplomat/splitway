@@ -4,41 +4,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Splitway Support</title>
+<link rel="icon" type="image/png" href="../images/icon-64.png">
+<link rel="apple-touch-icon" href="../images/icon-180.png">
 <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-<header>
-<a class="brand" href="../index.html">Splitway</a>
-<nav>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="container">
+<a class="brand" href="../"><img src="../images/icon-64.png" alt="" width="30" height="30">Splitway</a>
+<nav class="site-nav" aria-label="Footer">
 <a href="support.html" aria-current="page">Support</a>
 <a href="privacy.html">Privacy</a>
-<a href="../ru/support.html" lang="ru">Русский</a>
+<a class="language" href="../ru/support.html" hreflang="ru" lang="ru">Русский</a>
 </nav>
+</div>
 </header>
-<main>
+<main id="main" class="container document">
 <h1>Splitway Support</h1>
-<p>Splitway is a WireGuard client for iPhone, iPad and Mac. Only what you choose goes through the tunnel: chosen apps on a Mac, chosen services on iPhone and iPad.</p>
+<p class="meta">Splitway is a WireGuard client for Mac that sends only the apps you choose through the tunnel.</p>
 <h2>Contact</h2>
-<p>Write to us in <a href="https://github.com/facelessdiplomat/facelessdiplomat.github.io/issues">GitHub Issues</a>. Please include your device, its system version, the Splitway version from Settings and what you did before the problem. Issues are public: never post configurations, keys or crash reports there. If we need a report from Log › Send Report…, we will tell you how to send it privately.</p>
+<p>Open an issue on <a href="https://github.com/facelessdiplomat/splitway/issues">GitHub</a>. Include your macOS version, the Splitway version from Settings and what you did before the problem. Issues are public: never post configurations, keys or crash reports there. If we need a report from Log › Send Report…, we will tell you how to send it privately.</p>
+<p>Found a security problem? Report it privately with <a href="https://github.com/facelessdiplomat/splitway/security/advisories/new">Report a vulnerability</a> on GitHub instead of a public issue.</p>
 <h2>Questions</h2>
 <h3>Where do I get a configuration?</h3>
 <p>From your VPN provider or your own WireGuard server. Splitway does not offer VPN servers: it connects to the ones you add.</p>
 <h3>How do I add a tunnel?</h3>
-<p>Import a .conf or .zip file, paste a configuration from the clipboard, scan a QR code on iPhone or iPad, or create a tunnel from scratch.</p>
+<p>Import a .conf or .zip file, drop it onto the window, paste a configuration from the clipboard, or create a tunnel from scratch with new keys.</p>
 <h3>My Mac asks me to allow a network extension</h3>
-<p>Splitway sends the traffic of the chosen apps through its network extension. Turn on Splitway in System Settings › General › Login Items &amp; Extensions › Network Extensions. On first launch Splitway guides you through it.</p>
+<p>Splitway routes the traffic of the chosen apps through its network extension. Turn on Splitway in System Settings › General › Login Items &amp; Extensions › Network Extensions. On first launch Splitway guides you through it. The extension starts only when Splitway is in the Applications folder.</p>
+<h3>macOS says the app cannot be opened</h3>
+<p>Every release is signed with Developer ID and notarized by Apple. If macOS still refuses, download Splitway again from the <a href="https://github.com/facelessdiplomat/splitway/releases">releases page</a>: copies from other places may be damaged or altered.</p>
 <h3>Part of an Apple app's traffic bypasses the tunnel</h3>
 <p>System services make some network requests on behalf of Apple apps, so part of their traffic may go around the tunnel. Splitway marks such apps in the list.</p>
-<h3>An app or a command-line tool is missing from the list on a Mac</h3>
+<h3>An app or a command-line tool is missing from the list</h3>
 <p>Splitway lists the apps in the Applications folders. Add any other app or tool with Add Tool… or drag it onto the list.</p>
-<h3>How do chosen services work on iPhone and iPad?</h3>
-<p>The domains and subnets of the services you choose go through the tunnel, and everything else goes directly. You can add your own services with their domains and subnets.</p>
 <h3>The server is not responding</h3>
 <p>The tunnel is connected, but the server has never answered. Check the configuration: the endpoint, the keys, and whether the server is running.</p>
-<h3>How do I uninstall Splitway from a Mac?</h3>
+<h3>How do I update Splitway?</h3>
+<p>Download the new version from the <a href="https://github.com/facelessdiplomat/splitway/releases">releases page</a> and replace the app in the Applications folder. The network extension updates itself the next time Splitway starts.</p>
+<h3>How do I uninstall Splitway?</h3>
 <p>In Settings, choose Uninstall Splitway…: it removes the tunnels with their keys, the VPN configurations, the app's data and the network extension. Then drag Splitway from the Applications folder to the Trash.</p>
 <h2>Privacy</h2>
 <p>Splitway collects no data. Read the <a href="privacy.html">privacy policy</a>.</p>
 </main>
+<footer class="site-footer">
+<div class="container">
+<span>© 2026 facelessdiplomat</span>
+<nav aria-label="Footer">
+<a href="privacy.html">Privacy</a>
+<a href="support.html">Support</a>
+<a href="https://github.com/facelessdiplomat/splitway">GitHub</a>
+</nav>
+<p class="trademark">“WireGuard” is a registered trademark of Jason A. Donenfeld. Splitway is not affiliated with or endorsed by the WireGuard project.</p>
+</div>
+</footer>
 </body>
 </html>

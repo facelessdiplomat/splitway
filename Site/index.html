@@ -3,20 +3,188 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Splitway</title>
+<title>Splitway — VPN only for the apps that need it</title>
+<meta name="description" content="Splitway is a free, open-source WireGuard client for Mac. Choose which apps go through the tunnel; everything else stays on your regular connection.">
+<link rel="icon" type="image/png" href="images/icon-64.png">
+<link rel="apple-touch-icon" href="images/icon-180.png">
+<link rel="alternate" hreflang="ru" href="ru/">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-<span class="brand">Splitway</span>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="container">
+<a class="brand" href="./"><img src="images/icon-64.png" alt="" width="30" height="30">Splitway</a>
+<nav class="site-nav" aria-label="Main">
+<a class="nav-section" href="#features">Features</a>
+<a class="nav-section" href="#how">How it works</a>
+<a class="nav-section" href="#install">Install</a>
+<a class="nav-section" href="#faq">FAQ</a>
+<a href="https://github.com/facelessdiplomat/splitway">GitHub</a>
+<a class="language" href="ru/" hreflang="ru" lang="ru">Русский</a>
+</nav>
+</div>
 </header>
-<main>
-<h1>Splitway</h1>
-<p>A WireGuard client for iPhone, iPad and Mac that sends only the apps and services you choose through the tunnel.</p>
-<ul class="links">
-<li><a href="en/support.html">Support</a> · <a href="en/privacy.html">Privacy Policy</a></li>
-<li lang="ru"><a href="ru/support.html">Поддержка</a> · <a href="ru/privacy.html">Политика конфиденциальности</a></li>
+
+<main id="main">
+<section class="hero">
+<svg class="hero-routes" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<path d="M-40 360 C 220 360, 300 360, 430 300 S 700 140, 1240 120" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+<path d="M430 300 C 560 360, 760 470, 1240 500" fill="none" stroke="var(--direct)" stroke-width="2" stroke-dasharray="2 10" stroke-linecap="round" opacity="0.6"/>
+</svg>
+<div class="container">
+<div class="hero-text">
+<p class="eyebrow">Free and open source · macOS 26 and later</p>
+<h1>VPN only for the apps that need it</h1>
+<p class="lead">Splitway is a WireGuard® client for Mac. Bring your own configuration, choose which apps go through the tunnel, and everything else stays on your regular connection.</p>
+<div class="actions">
+<a class="button button-primary" href="https://github.com/facelessdiplomat/splitway/releases/latest/download/Splitway.dmg">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+Download for Mac
+</a>
+<a class="button button-secondary" href="https://github.com/facelessdiplomat/splitway">
+<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 0 0-3.32 20.46c.53.1.72-.23.72-.5v-1.78c-2.92.63-3.54-1.4-3.54-1.4-.48-1.22-1.17-1.54-1.17-1.54-.95-.65.08-.64.08-.64 1.05.08 1.6 1.08 1.6 1.08.94 1.6 2.46 1.14 3.06.87.1-.68.37-1.14.66-1.4-2.33-.27-4.78-1.17-4.78-5.18 0-1.15.41-2.08 1.08-2.82-.11-.26-.47-1.33.1-2.77 0 0 .88-.28 2.89 1.08a10 10 0 0 1 5.26 0c2-1.36 2.88-1.08 2.88-1.08.58 1.44.22 2.51.11 2.77.67.74 1.08 1.67 1.08 2.82 0 4.02-2.46 4.9-4.8 5.16.38.33.72.97.72 1.96v2.9c0 .28.19.61.73.5A10.5 10.5 0 0 0 12 1.5Z"/></svg>
+Source on GitHub
+</a>
+</div>
+<p class="fine-print">Signed with Developer ID and notarized by Apple · Apple silicon and Intel · <a href="https://github.com/facelessdiplomat/splitway/releases">All versions</a></p>
+</div>
+<img class="screenshot" src="images/main-en.png" width="962" height="575" alt="The Splitway window: the Prague tunnel routes only Safari and Terminal through the tunnel, the Amsterdam and Home tunnels route all traffic.">
+</div>
+</section>
+
+<section class="section section-muted" id="features">
+<div class="container">
+<h2 class="section-title">Split tunneling that just works</h2>
+<p class="section-lead">The official WireGuard client sends whole subnets through the tunnel. Splitway lets you pick apps instead, and keeps the rest of your Mac on the regular connection.</p>
+<div class="features">
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="m15 17.5 2 2 4-4"/></svg></div>
+<h3>Choose apps, not subnets</h3>
+<p>Pick apps and command-line tools. Their helpers and the processes they start go along: commands in a selected Terminal use the tunnel too.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+<h3>DNS follows the app</h3>
+<p>Name lookups of selected apps go through the tunnel as well, so they do not leak and locations match the VPN.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.3 8.2 8 9 4.7-.8 8-4.5 8-9V6l-8-3Z"/><path d="M9 12h6"/></svg></div>
+<h3>Blocked, not exposed</h3>
+<p>If the tunnel drops, selected apps wait for it instead of going direct. You can let them go direct instead, per tunnel.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-4 4 3 3m-5-1 2 2"/></svg></div>
+<h3>Your config, your server</h3>
+<p>Import a .conf or .zip, paste from the clipboard or create a tunnel with fresh keys. No accounts and no analytics; keys stay in the Keychain.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1.5"/><path d="M7 12h10M7 16h6"/></svg></div>
+<h3>Always at hand</h3>
+<p>Switch tunnels from the menu bar, start Splitway at login, or ask Shortcuts and Siri to connect.</p>
+</article>
+<article class="card">
+<div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></div>
+<h3>Open source</h3>
+<p>The whole app is on GitHub under GPL-3.0: read the code, build it yourself or help improve it.</p>
+</article>
+</div>
+</div>
+</section>
+
+<section class="section" id="how">
+<div class="container split">
+<div>
+<h2 class="section-title">How it works</h2>
+<p class="section-lead">Splitway uses only public macOS APIs. The routing happens on your Mac, and nothing about your connections is stored or sent anywhere.</p>
+<ol class="flow">
+<li><span class="step">1</span><div><h3>An extension sees each connection</h3><p>Splitway installs a network system extension with a transparent proxy. macOS tells it which app opened every TCP or UDP connection.</p></div></li>
+<li><span class="step">2</span><div><h3>Selected apps take the tunnel</h3><p>Connections of the apps you chose go through WireGuard inside the extension. Everything else goes back to macOS and leaves directly.</p></div></li>
+<li><span class="step">3</span><div><h3>Or send all traffic</h3><p>A tunnel can also carry all traffic, like the official client, with an option to keep local networks out.</p></div></li>
+</ol>
+</div>
+<img class="screenshot sheet" src="images/apps-en.png" width="480" height="618" alt="Choosing apps for a tunnel: Safari and Terminal are selected, with tabs for all apps, selected apps and command-line tools.">
+</div>
+</section>
+
+<section class="section section-muted" id="install">
+<div class="container">
+<h2 class="section-title">Get started in a minute</h2>
+<p class="section-lead">You need a WireGuard server: your own, on a router, or from a VPN provider that gives out WireGuard configurations.</p>
+<ol class="install">
+<li><h3>Download</h3><p>Get the latest <a href="https://github.com/facelessdiplomat/splitway/releases/latest/download/Splitway.dmg">Splitway.dmg</a>.</p></li>
+<li><h3>Move to Applications</h3><p>Open the image and drag Splitway to Applications. The network extension starts only from there.</p></li>
+<li><h3>Allow the extension</h3><p>On first launch, turn Splitway on in System Settings › General › Login Items &amp; Extensions › Network Extensions. The app guides you.</p></li>
+<li><h3>Import and connect</h3><p>Add your configuration, allow the VPN configuration when macOS asks, choose the apps and turn the tunnel on.</p></li>
+</ol>
+<ul class="requirements">
+<li>macOS 26 Tahoe or later</li>
+<li>Apple silicon or Intel</li>
+<li>Free · GPL-3.0</li>
+<li>English and Russian</li>
 </ul>
+</div>
+</section>
+
+<section class="section" id="faq">
+<div class="container">
+<h2 class="section-title">Questions</h2>
+<div class="faq">
+<details>
+<summary>Is Splitway a VPN service?</summary>
+<p>No. It is a client that connects to the WireGuard server you or your provider run. There are no Splitway servers, accounts or subscriptions.</p>
+</details>
+<details>
+<summary>Does Splitway collect data?</summary>
+<p>No. There are no analytics, ads or tracking, and the app never contacts the developer. See the <a href="en/privacy.html">privacy policy</a>.</p>
+</details>
+<details>
+<summary>Which apps can I choose?</summary>
+<p>Any app or command-line tool, including Safari and apps built on WebKit or Electron. Processes that a selected app starts go through the tunnel with it. Some system services that work on behalf of Apple apps may still go direct, and the app says so next to them.</p>
+</details>
+<details>
+<summary>Why is it not in the App Store?</summary>
+<p>The App Store accepts VPN apps only from companies, and Splitway is an independent open-source project. Instead, every release is signed with Developer ID and notarized by Apple, so macOS opens it without warnings.</p>
+</details>
+<details>
+<summary>Is there a version for iPhone or iPad?</summary>
+<p>No. iOS does not tell a tunnel which app sent a packet, and iPhone apps can reach people only through the App Store.</p>
+</details>
+<details>
+<summary>How do I update?</summary>
+<p>Download the new version and replace Splitway in Applications. The network extension updates itself the next time the app starts.</p>
+</details>
+<details>
+<summary>How do I uninstall?</summary>
+<p>Choose Uninstall Splitway… in Settings. It removes the tunnels with their keys, the VPN configurations, the app's data and the network extension. Moving the app to the Trash leaves all of that in place.</p>
+</details>
+</div>
+</div>
+</section>
+
+<section class="section section-muted cta">
+<div class="container">
+<h2 class="section-title">Route only what matters</h2>
+<p class="section-lead" style="margin-inline:auto">Free, open source and private by design.</p>
+<div class="actions">
+<a class="button button-primary" href="https://github.com/facelessdiplomat/splitway/releases/latest/download/Splitway.dmg">Download for Mac</a>
+<a class="button button-secondary" href="en/support.html">Get help</a>
+</div>
+</div>
+</section>
 </main>
+
+<footer class="site-footer">
+<div class="container">
+<span>© 2026 facelessdiplomat</span>
+<nav aria-label="Footer">
+<a href="en/privacy.html">Privacy</a>
+<a href="en/support.html">Support</a>
+<a href="https://github.com/facelessdiplomat/splitway">GitHub</a>
+<a href="ru/" hreflang="ru" lang="ru">Русский</a>
+</nav>
+<p class="trademark">“WireGuard” is a registered trademark of Jason A. Donenfeld. Splitway is not affiliated with or endorsed by the WireGuard project.</p>
+</div>
+</footer>
 </body>
 </html>
