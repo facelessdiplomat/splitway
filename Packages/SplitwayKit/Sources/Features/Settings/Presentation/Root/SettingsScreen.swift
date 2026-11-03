@@ -22,6 +22,7 @@ public struct SettingsScreen: View {
                 version: presenter.version,
                 notices: presenter.notices,
                 loginItem: presenter.loginItem,
+                updates: presenter.updates,
                 uninstall: presenter.uninstall
             )
             .navigationTitle(Text("Settings", bundle: .module))

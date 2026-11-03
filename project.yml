@@ -8,6 +8,8 @@ options:
 settings:
   base:
     SPLITWAY_BUNDLE_ID_PREFIX: com.facelessdiplomat
+    SPLITWAY_UPDATE_FEED_URL: https://github.com/facelessdiplomat/splitway/releases/latest/download/appcast.xml
+    SPLITWAY_UPDATE_PUBLIC_KEY: 4Qdz/CnCaYgplMJWnHwupw108iZwiI5aQeZg8Imu4fE=
     MARKETING_VERSION: 0.1.0
     CURRENT_PROJECT_VERSION: 1
     SWIFT_VERSION: "6.0"
@@ -41,6 +43,11 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Splitway
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_NSHumanReadableCopyright: Copyright © 2026 facelessdiplomat
+      configs:
+        Debug:
+          SPLITWAY_STARTS_UPDATER: NO
+        Release:
+          SPLITWAY_STARTS_UPDATER: YES
     dependencies:
       - target: NetworkSystemExtension
       - package: SplitwayKit
@@ -75,6 +82,10 @@ targets:
         product: SettingsInfrastructure
       - package: SplitwayKit
         product: SettingsPresentation
+      - package: SplitwayKit
+        product: UpdatesInfrastructure
+      - package: SplitwayKit
+        product: UpdatesPresentation
       - package: SplitwayKit
         product: OnboardingInfrastructure
       - package: SplitwayKit

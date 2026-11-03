@@ -18,6 +18,8 @@ import TunnelImportInfrastructure
 import TunnelImportPresentation
 import TunnelLibraryInfrastructure
 import TunnelLibraryPresentation
+import UpdatesInfrastructure
+import UpdatesPresentation
 
 @MainActor
 struct AppComposition {
@@ -32,6 +34,7 @@ struct AppComposition {
     let tunnelExport: TunnelExportModel
     let logViewer: LogViewerPresenter
     let settings: SettingsPresenter
+    let updates: UpdatesModel?
     let onboarding: OnboardingModel
     let reportCollector: MetricKitReportCollector
     let shortcuts: TunnelShortcutActions
@@ -56,8 +59,11 @@ struct AppComposition {
         reportCollector = diagnostics.reportCollector
         reportCollector.start()
         onboarding = Self.onboarding(configuration: configuration)
+        let updates = configuration.startsUpdater ? UpdatesModel(updater: SparkleApplicationUpdater()) : nil
+        self.updates = updates
         settings = Self.settings(
             version: AppVersion(marketingVersion: configuration.version, build: configuration.build),
+            updates: updates,
             uninstall: Self.uninstall(configuration: configuration, services: services)
         )
         diagnostics.recorder(for: .application, category: "App").record(
@@ -114,11 +120,14 @@ struct AppComposition {
         )
     }
 
-    private static func settings(version: AppVersion, uninstall: UninstallModel?) -> SettingsPresenter {
+    private static func settings(version: AppVersion, updates: UpdatesModel?, uninstall: UninstallModel?)
+        -> SettingsPresenter
+    {
         SettingsPresenter(
             version: version,
             notices: ThirdPartyNoticesModel(loadNotices: SettingsAssembly().loadThirdPartyNotices),
             loginItem: loginItem,
+            updates: updates,
             uninstall: uninstall
         )
     }

@@ -7,6 +7,7 @@ import TunnelEditorPresentation
 import TunnelImportInfrastructure
 import TunnelImportPresentation
 import TunnelLibraryPresentation
+import UpdatesPresentation
 
 struct SplitwayRootScene: Scene {
     static let mainWindowIdentifier = "tunnels"
@@ -44,6 +45,9 @@ struct SplitwayRootScene: Scene {
         .handlesExternalEvents(matching: Self.everyExternalEvent)
         .commands {
             TunnelLibraryCommands(addition: addition, navigation: navigation)
+            if let updates = composition.updates {
+                UpdatesCommands(model: updates)
+            }
         }
     }
 

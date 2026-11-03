@@ -115,6 +115,7 @@ let sharedKernelTargets: [Target] = [
 ]
 
 let zipFoundation: Target.Dependency = .product(name: "ZIPFoundation", package: "ZIPFoundation")
+let sparkle: Target.Dependency = .product(name: "Sparkle", package: "Sparkle")
 
 let features: [FeatureModule] = [
     FeatureModule(
@@ -182,9 +183,17 @@ let features: [FeatureModule] = [
         providesTestSupport: true
     ),
     FeatureModule(
+        name: "Updates",
+        layers: [.core, .infrastructure, .presentation],
+        infrastructureDependencies: [sparkle],
+        presentationDependencies: ["DesignSystemPresentation"],
+        layersWithoutTests: [.core, .infrastructure],
+        providesTestSupport: true
+    ),
+    FeatureModule(
         name: "Settings",
         layers: [.core, .infrastructure, .presentation],
-        presentationDependencies: ["DesignSystemPresentation"],
+        presentationDependencies: ["DesignSystemPresentation", "UpdatesPresentation"],
         infrastructureResources: [.process("Resources")],
         providesTestSupport: true
     ),
@@ -282,6 +291,9 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.macOS(.v26)],
     products: [.library(name: "SharedKernel", targets: ["SharedKernel"])] + features.flatMap(\.products),
-    dependencies: [.package(url: "https://github.com/weichsel/ZIPFoundation.git", exact: "0.9.20")],
+    dependencies: [
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", exact: "0.9.20"),
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.1"),
+    ],
     targets: sharedKernelTargets + features.flatMap(\.targets)
 )

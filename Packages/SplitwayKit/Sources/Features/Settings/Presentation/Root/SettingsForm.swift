@@ -1,17 +1,22 @@
 import DesignSystemPresentation
 import Settings
 import SwiftUI
+import UpdatesPresentation
 
 struct SettingsForm: View {
     let version: AppVersion
     let notices: ThirdPartyNoticesModel
     let loginItem: LoginItemModel?
+    let updates: UpdatesModel?
     let uninstall: UninstallModel?
 
     var body: some View {
         Form {
             if let loginItem {
                 LoginItemSection(model: loginItem)
+            }
+            if let updates {
+                UpdatesSection(model: updates)
             }
             Section {
                 KeyValueRow(Text("Version", bundle: .module), value: Text(verbatim: version.marketingVersion))
