@@ -21,6 +21,7 @@ CI — GitHub Actions (решение D-47). Тяжёлые задания ид�
 - Состояние: `~/actions-runner/splitway/svc.sh status`; журналы — `~/Library/Logs/actions.runner.facelessdiplomat-splitway.splitway-mac`.
 - Переустановка: `./svc.sh stop && ./svc.sh uninstall`, затем `./config.sh remove --token <токен>` и регистрация заново с токеном из `gh api -X POST repos/facelessdiplomat/splitway/actions/runners/registration-token --jq .token`. После `./svc.sh install` ключ `SessionCreate` убирают снова: `plutil -remove SessionCreate` для plist службы, затем `launchctl bootout gui/$(id -u)/actions.runner.facelessdiplomat-splitway.splitway-mac` и `launchctl bootstrap gui/$(id -u)` с тем же plist.
 - В журналах заданий публичного репозитория видны имя раннера и имя компьютера (`Machine name`) — сетевое имя Mac, которое печатает `hostname`. Другое имя задаёт `sudo scutil --set HostName <имя>`, после чего службу перезапускают.
+- Сборки раннера лежат в `build.noindex`: `check.sh` и `release.sh` сами делают `build` ссылкой на эту папку (`Scripts/lib/build-directory.sh`), как `bootstrap.sh` в рабочей копии. Иначе Spotlight индексирует сборки в `_work`, и macOS показывает их среди приложений: 2026-11-03 вместо `/Applications/Splitway.app` так открылась неподписанная отладочная сборка из `check.sh`.
 
 ## Настройки репозитория
 

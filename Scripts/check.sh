@@ -3,6 +3,7 @@ set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$repository_root/Scripts/lib/xcode-environment.sh"
+source "$repository_root/Scripts/lib/build-directory.sh"
 cd "$repository_root"
 
 runs_benchmarks=false
