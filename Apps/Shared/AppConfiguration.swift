@@ -4,6 +4,8 @@ struct AppConfiguration {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
     private static let tunnelProviderInfoKey = "SplitwayTunnelProviderBundleIdentifier"
     private static let extensionMachServiceInfoKey = "SplitwayExtensionMachServiceName"
+    private static let startsUpdaterInfoKey = "SplitwayStartsUpdater"
+    private static let enabledInfoValue = "YES"
     private static let versionInfoKey = "CFBundleShortVersionString"
     private static let buildInfoKey = "CFBundleVersion"
     private static let storageDirectoryName = "Splitway"
@@ -20,6 +22,7 @@ struct AppConfiguration {
     let version: String
     let build: String
     let systemDescription: String
+    let startsUpdater: Bool
 
     init(bundle: Bundle) {
         if UserDefaults.standard.bool(forKey: Self.temporaryStorageArgument) {
@@ -41,6 +44,8 @@ struct AppConfiguration {
         version = bundle.object(forInfoDictionaryKey: Self.versionInfoKey) as? String ?? ""
         build = bundle.object(forInfoDictionaryKey: Self.buildInfoKey) as? String ?? ""
         systemDescription = Self.systemDescription(of: ProcessInfo.processInfo.operatingSystemVersion)
+        let startsUpdaterValue = bundle.object(forInfoDictionaryKey: Self.startsUpdaterInfoKey) as? String
+        startsUpdater = startsUpdaterValue == Self.enabledInfoValue
     }
 
     private static func systemDescription(of version: OperatingSystemVersion) -> String {

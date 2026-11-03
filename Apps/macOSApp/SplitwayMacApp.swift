@@ -18,6 +18,9 @@ struct SplitwayMacApp: App {
             lifecycle: AppKitApplicationLifecycle()
         )
         dockPresence.start()
+        if let updates = composition.updates {
+            Task { await updates.observe() }
+        }
     }
 
     var body: some Scene {

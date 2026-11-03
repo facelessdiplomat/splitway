@@ -28,6 +28,14 @@
     "textFile" : "gVisor"
   },
   {
+    "name" : "Sparkle",
+    "license" : "MIT",
+    "dependencies" : [
+      "sparkle"
+    ],
+    "textFile" : "Sparkle"
+  },
+  {
     "name" : "wireguard-go",
     "license" : "MIT",
     "dependencies" : [
