@@ -13,11 +13,7 @@ for tool in "${required_tools[@]}"; do
 done
 
 chmod +x Scripts/*.sh Scripts/git-hooks/* Scripts/tests/*.sh Packages/TunnelCore/Scripts/*.sh
-if [[ ! -e build ]]; then
-    mkdir -p build.noindex
-    ln -s build.noindex build
-    printf 'Build products go to build.noindex, which Spotlight does not index\n'
-fi
+source "$repository_root/Scripts/lib/build-directory.sh"
 git config core.hooksPath Scripts/git-hooks
 printf 'Git hooks installed from Scripts/git-hooks\n'
 
