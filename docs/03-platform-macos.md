@@ -47,7 +47,7 @@ SplitwayAppGroupIdentifier → App Group для журнала
 | `keychain-access-groups` | `8625S77CSU.com.facelessdiplomat.splitway.shared` | то же |
 | `com.apple.security.app-sandbox` | да, как требует Mac App Store (SP-10) | да, сетевые расширения обязаны быть в песочнице |
 | `com.apple.security.files.user-selected.read-write` | да: импорт, экспорт туннелей и журнала, «Добавить утилиту…» работают с файлами, которые выбрал человек | — |
-| `com.apple.security.network.client`, `com.apple.security.network.server` | — | да: без них песочница не даёт wireguard-go открыть сокет маршрутизации и UDP-сокет (`operation not permitted`), как и сетевому расширению официального WireGuard |
+| `com.apple.security.network.client`, `com.apple.security.network.server` | — | да: `network.client` — исходящие пакеты к серверу, `network.server` — `bind()` и приём пакетов на UDP-сокете wireguard-go, без него песочница отвечает `operation not permitted`. Те же права у сетевого расширения официального WireGuard. Автоматическая проверка App Review просит обосновать `network.server`: объяснение — в [заметках для ревью](app-store/review-notes.md) ([SystemExtension](features/SystemExtension.md)) |
 
 У приложения и системного расширения есть `PrivacyInfo.xcprivacy` (в `Contents/Resources`): без отслеживания и сбора данных, с причинами для API, которые использует бинарник. На macOS Apple эти причины не проверяет, манифесты — для отчёта о приватности и на будущее ([security.md](security.md), раздел 6).
 
