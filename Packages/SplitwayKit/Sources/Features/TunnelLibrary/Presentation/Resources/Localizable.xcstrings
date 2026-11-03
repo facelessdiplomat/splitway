@@ -471,16 +471,6 @@
         }
       }
     },
-    "Settings" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Настройки"
-          }
-        }
-      }
-    },
     "Show Log" : {
       "localizations" : {
         "ru" : {

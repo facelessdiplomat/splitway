@@ -44,18 +44,5 @@ struct TunnelListToolbar: ToolbarContent {
                 }
             }
         }
-        if let showSettings = navigation.showSettings {
-            ToolbarItem(placement: .secondaryAction) {
-                Button {
-                    showSettings()
-                } label: {
-                    Label {
-                        Text("Settings", bundle: .module)
-                    } icon: {
-                        Image(systemName: "gearshape")
-                    }
-                }
-            }
-        }
     }
 }
