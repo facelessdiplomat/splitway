@@ -26,4 +26,4 @@ CI — GitHub Actions (решение D-47). Тяжёлые задания ид�
 
 ## Настройки репозитория
 
-После открытия репозитория (M8-06): workflow из PR внешних участников запускаются только после одобрения владельца (Settings → Actions → General → «Require approval for all external contributors»), GitHub Pages публикует из GitHub Actions, включены закрытые сообщения об уязвимостях.
+Репозиторий открыт 2026-11-03 (M8-06). С тех пор workflow из PR внешних участников запускаются только после одобрения владельца (Settings → Actions → General → «Require approval for all external contributors»), GitHub Pages публикует из GitHub Actions, включены закрытые сообщения об уязвимостях.
