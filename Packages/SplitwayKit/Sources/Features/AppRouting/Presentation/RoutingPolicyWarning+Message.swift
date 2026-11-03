@@ -6,8 +6,6 @@ extension RoutingPolicyWarning {
         switch self {
         case .emptyApplicationSelection:
             Text("Choose at least one app, or no traffic will use the tunnel.", bundle: .module)
-        case .emptyServiceSelection:
-            Text("Choose at least one service, or no traffic will use the tunnel.", bundle: .module)
         }
     }
 }

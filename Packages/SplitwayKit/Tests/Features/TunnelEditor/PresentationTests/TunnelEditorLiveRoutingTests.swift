@@ -19,7 +19,7 @@ struct TunnelEditorLiveRoutingTests {
         )
         let browsing = try await environment.storeTunnel(named: "Browsing", routedBy: Self.applications)
         try await environment.controller.install(browsing)
-        let editor = environment.macOSEditor(for: browsing)
+        let editor = environment.editor(for: browsing)
         let selection = ApplicationSelection([try Self.browser()])
         editor.routing.setApplications(selection)
 
@@ -41,7 +41,7 @@ struct TunnelEditorLiveRoutingTests {
         )
         let browsing = try await environment.storeTunnel(named: "Browsing", routedBy: Self.applications)
         try await environment.controller.install(browsing)
-        let editor = environment.macOSEditor(for: browsing)
+        let editor = environment.editor(for: browsing)
         editor.routing.setApplications(ApplicationSelection([try Self.browser()]))
 
         await editor.save()

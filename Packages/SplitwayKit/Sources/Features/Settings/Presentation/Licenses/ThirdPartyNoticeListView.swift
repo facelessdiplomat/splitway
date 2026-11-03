@@ -8,9 +8,6 @@ struct ThirdPartyNoticeListView: View {
     var body: some View {
         content
             .navigationTitle(Text("Open Source Licenses", bundle: .module))
-            #if os(iOS)
-                .navigationBarTitleDisplayMode(.inline)
-            #endif
             .task { await model.load() }
     }
 

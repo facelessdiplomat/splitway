@@ -2,7 +2,6 @@ import AppRouting
 import AppRoutingPresentation
 import ApplicationCatalogPresentation
 import Observation
-import ServiceCatalogPresentation
 import TunnelConfiguration
 import TunnelEditor
 import TunnelLibrary
@@ -18,49 +17,41 @@ public final class TunnelEditorModel: Identifiable {
     public private(set) var isConfirmingRestart = false
     public private(set) var failure: TunnelEditorFailure?
     public internal(set) var applicationPicker: ApplicationPickerModel?
-    public internal(set) var servicePicker: ServicePickerModel?
     public let routing: RoutingSectionModel
 
     private let editedTunnel: Tunnel?
     private let actions: TunnelEditorActions
     let applicationPickerActions: ApplicationPickerActions?
-    let servicePickerActions: ServicePickerActions?
     private let didSave: @MainActor (Tunnel) async -> Void
 
     public init(
         newTunnelNamed name: String,
-        routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         applicationPicker: ApplicationPickerActions? = nil,
-        servicePicker: ServicePickerActions? = nil,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         var draft = TunnelDraft(name: name, text: "")
         draft.generatePrivateKey()
         self.draft = draft
         editedTunnel = nil
-        routing = RoutingSectionModel(policy: .default, platform: routingPlatform)
+        routing = RoutingSectionModel(policy: .default)
         self.actions = actions
         applicationPickerActions = applicationPicker
-        servicePickerActions = servicePicker
         self.didSave = didSave
         isPrivateKeyRevealed = true
     }
 
     public init(
         editing tunnel: Tunnel,
-        routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         applicationPicker: ApplicationPickerActions? = nil,
-        servicePicker: ServicePickerActions? = nil,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         draft = TunnelDraft(name: tunnel.name, configuration: tunnel.configuration)
         editedTunnel = tunnel
-        routing = RoutingSectionModel(policy: tunnel.routingPolicy, platform: routingPlatform)
+        routing = RoutingSectionModel(policy: tunnel.routingPolicy)
         self.actions = actions
         applicationPickerActions = applicationPicker
-        servicePickerActions = servicePicker
         self.didSave = didSave
     }
 

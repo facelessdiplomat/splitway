@@ -44,12 +44,7 @@ struct AppConfiguration {
     }
 
     private static func systemDescription(of version: OperatingSystemVersion) -> String {
-        #if os(macOS)
-            let system = "macOS"
-        #else
-            let system = "iOS"
-        #endif
-        return "\(system) \(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+        "macOS \(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
     }
 
     private static func groupContainer(of bundle: Bundle) -> URL? {

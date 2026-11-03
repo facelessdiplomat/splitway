@@ -3,21 +3,13 @@ import DiagnosticsInfrastructure
 import Foundation
 import PacketTunnel
 import PacketTunnelInfrastructure
-import ServiceCatalog
-import ServiceCatalogInfrastructure
+import SecretDeliveryInfrastructure
 import TunnelCoreAdapter
 import TunnelLibrary
-
-#if os(macOS)
-    import SecretDeliveryInfrastructure
-#else
-    import TunnelLibraryInfrastructure
-#endif
 
 struct PacketTunnelComposition: Sendable {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
     private static let logsPath = "Library/Logs/Splitway"
-    private static let storagePath = "Library/Application Support/Splitway"
     private static let fallbackSubsystem = "Splitway.PacketTunnel"
 
     let session: PacketTunnelSession
@@ -41,23 +33,13 @@ struct PacketTunnelComposition: Sendable {
             interfaceLocator: UtunDescriptorLocator(),
             endpointResolver: SystemEndpointResolver(),
             pathMonitor: NetworkPathObserver(),
-            routingPlanner: PlanTunnelRoutingUseCase(
-                serviceCatalog: LoadServiceCatalogUseCase(
-                    bundled: BundledServiceCatalogRepository.bundled,
-                    custom: FileCustomServiceRepository(
-                        directory: Self.groupDirectory(at: Self.storagePath, in: bundle))
-                )
-            )
+            routingPlanner: PlanTunnelRoutingUseCase()
         )
         loadActiveTunnel = LoadActiveTunnelUseCase(secrets: Self.secretStore)
     }
 
     private static var secretStore: any TunnelSecretStore {
-        #if os(macOS)
-            SystemKeychainSecretStore()
-        #else
-            KeychainTunnelSecretStore()
-        #endif
+        SystemKeychainSecretStore()
     }
 
     static func logDirectory(in bundle: Bundle) -> URL {

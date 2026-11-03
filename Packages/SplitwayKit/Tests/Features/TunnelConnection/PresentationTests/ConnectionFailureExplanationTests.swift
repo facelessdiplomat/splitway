@@ -15,7 +15,7 @@ struct ConnectionFailureExplanationTests {
         Expectation(
             failure: .permissionDenied,
             message: "Splitway isn’t allowed to add a VPN configuration. Allow it in Settings, then try again.",
-            action: .openSettings
+            action: .none
         ),
         Expectation(
             failure: .systemConfigurationUnavailable,

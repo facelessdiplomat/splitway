@@ -55,7 +55,6 @@ export_directory="$repository_root/build/release/$version-$build_number"
 
 scheme_for() {
     case "$1" in
-        iOS) printf 'iOSApp' ;;
         macOS) printf 'macOSApp' ;;
     esac
 }
@@ -101,7 +100,7 @@ Packages/TunnelCore/Scripts/build-xcframework.sh
 Scripts/generate-project.sh >/dev/null
 mkdir -p "$archive_directory"
 
-for platform in iOS macOS; do
+for platform in macOS; do
     archive="$archive_directory/Splitway $platform $version ($build_number).xcarchive"
     xcodebuild archive -project Splitway.xcodeproj -scheme "$(scheme_for "$platform")" -configuration Release \
         -destination "generic/platform=$platform" -archivePath "$archive" -allowProvisioningUpdates -quiet \

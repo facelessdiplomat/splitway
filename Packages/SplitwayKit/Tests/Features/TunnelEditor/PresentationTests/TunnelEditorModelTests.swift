@@ -139,10 +139,10 @@ struct TunnelEditorModelTests {
         let environment = TunnelEditorTestEnvironment()
         let editor = environment.editor(for: try await environment.storeTunnel(named: "Office"))
 
-        editor.routing.selectMode(.selectedServices)
+        editor.routing.selectMode(.selectedApplications)
         await editor.save()
 
-        #expect(environment.savedTunnels.map(\.routingPolicy.mode.kind) == [.selectedServices])
+        #expect(environment.savedTunnels.map(\.routingPolicy.mode.kind) == [.selectedApplications])
     }
 
     @Test
@@ -155,7 +155,7 @@ struct TunnelEditorModelTests {
             named: "Browsing",
             routedBy: RoutingPolicy(mode: .selectedApplications(selection))
         )
-        let editor = environment.macOSEditor(for: browsing)
+        let editor = environment.editor(for: browsing)
 
         editor.routing.selectMode(.allTraffic)
         await editor.save()

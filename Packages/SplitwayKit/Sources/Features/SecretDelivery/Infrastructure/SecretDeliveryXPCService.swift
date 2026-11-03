@@ -1,7 +1,5 @@
-#if os(macOS)
-    import Foundation
+import Foundation
 
-    @objc protocol SecretDeliveryXPCService {
-        func deliver(_ request: Data, withReply reply: @escaping @Sendable (Data) -> Void)
-    }
-#endif
+@objc protocol SecretDeliveryXPCService {
+    func deliver(_ request: Data, withReply reply: @escaping @Sendable (Data) -> Void)
+}

@@ -8,7 +8,7 @@ let strictSwiftSettings: [SwiftSetting] = [
 
 let package = Package(
     name: "TunnelCore",
-    platforms: [.iOS(.v26), .macOS(.v26)],
+    platforms: [.macOS(.v26)],
     products: [
         .library(name: "TunnelCoreAdapter", targets: ["TunnelCoreAdapter"])
     ],

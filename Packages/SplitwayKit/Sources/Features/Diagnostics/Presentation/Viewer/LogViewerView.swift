@@ -17,17 +17,15 @@ struct LogViewerView: View {
                 LogViewerEmptyStateView(state: emptyState)
             }
         }
-        #if os(macOS)
-            .safeAreaInset(edge: .top) {
-                HStack {
-                    LogViewerActionButton(action: .export, model: model, confirmClearing: confirmClearing)
-                    LogViewerActionButton(action: .sendReport, model: model, confirmClearing: confirmClearing)
-                    Spacer()
-                    LogViewerActionButton(action: .clear, model: model, confirmClearing: confirmClearing)
-                }
-                .padding()
+        .safeAreaInset(edge: .top) {
+            HStack {
+                LogViewerActionButton(action: .export, model: model, confirmClearing: confirmClearing)
+                LogViewerActionButton(action: .sendReport, model: model, confirmClearing: confirmClearing)
+                Spacer()
+                LogViewerActionButton(action: .clear, model: model, confirmClearing: confirmClearing)
             }
-        #endif
+            .padding()
+        }
         .searchable(text: searchText)
         .navigationTitle(Text("Log", bundle: .module))
         .toolbar {

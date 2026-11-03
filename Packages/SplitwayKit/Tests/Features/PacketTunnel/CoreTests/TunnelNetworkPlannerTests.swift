@@ -128,10 +128,10 @@ struct TunnelNetworkPlannerTests {
     @Test
     func rejectsRoutingModesThatThePacketTunnelDoesNotServe() throws {
         let configuration = try Self.configuration("Address = 10.14.0.2/16", peers: ["0.0.0.0/0"])
-        let services = RoutingPolicy(mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])))
+        let applications = RoutingPolicy(mode: .selectedApplications(ApplicationSelection([])))
 
-        #expect(throws: TunnelNetworkPlanError.routingModeNotSupported(.selectedServices)) {
-            try TunnelNetworkPlanner.plan(for: configuration, routedBy: services)
+        #expect(throws: TunnelNetworkPlanError.routingModeNotSupported(.selectedApplications)) {
+            try TunnelNetworkPlanner.plan(for: configuration, routedBy: applications)
         }
     }
 

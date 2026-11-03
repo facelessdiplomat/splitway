@@ -7,7 +7,6 @@ public struct TunnelRow: Identifiable, Sendable, Hashable {
     public let status: TunnelRowStatus
     public let routingMode: RoutingModeKind?
     public let routedApplicationNames: [String]
-    public let routedServiceNames: [String]
 
     public var isConnectionActive: Bool {
         status.isActive

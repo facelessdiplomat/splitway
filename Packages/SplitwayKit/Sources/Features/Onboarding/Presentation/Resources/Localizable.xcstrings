@@ -41,16 +41,6 @@
         }
       }
     },
-    "Import your WireGuard tunnel and choose which services use it. Everything else stays direct." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Импортируйте свой туннель WireGuard и выберите сервисы, которые пойдут через него. Остальное — напрямую."
-          }
-        }
-      }
-    },
     "No accounts, analytics or ads. Tunnels, keys and the log stay on this device until you share them." : {
       "localizations" : {
         "ru" : {
@@ -97,16 +87,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваши данные остаются у вас"
-          }
-        }
-      }
-    },
-    "iOS asks to add a VPN configuration on the first connection. The camera is only for QR codes." : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "При первом подключении iOS попросит добавить конфигурацию VPN. Камера нужна только для QR-кодов."
           }
         }
       }

@@ -24,11 +24,16 @@ final class FileTunnelRecordRepositoryTests {
               "id" : "7E1D9C44-2B3A-4F6E-8A90-5D4C3B2A1F02",
               "name" : "Prague",
               "routingPolicy" : {
-                "mode" : "selectedServices",
-                "schemaVersion" : 1,
-                "services" : [
-                  "telegram"
+                "applications" : [
+                  {
+                    "displayName" : "curl",
+                    "kind" : "commandLineTool",
+                    "path" : "/usr/bin/curl",
+                    "signingIdentifiers" : []
+                  }
                 ],
+                "mode" : "selectedApplications",
+                "schemaVersion" : 1,
                 "whenTunnelUnavailable" : "bypass"
               }
             }
@@ -184,7 +189,11 @@ final class FileTunnelRecordRepositoryTests {
                 id: TunnelIdentifier(try #require(UUID(uuidString: "7E1D9C44-2B3A-4F6E-8A90-5D4C3B2A1F02"))),
                 name: try TunnelName("Prague"),
                 routingPolicy: RoutingPolicy(
-                    mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])),
+                    mode: .selectedApplications(
+                        ApplicationSelection([
+                            try ApplicationIdentity(kind: .commandLineTool, displayName: "curl", path: "/usr/bin/curl")
+                        ])
+                    ),
                     whenTunnelUnavailable: .bypass
                 )
             ),

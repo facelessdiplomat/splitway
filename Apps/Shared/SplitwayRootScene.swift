@@ -31,9 +31,6 @@ struct SplitwayRootScene: Scene {
                 composition.onboarding.systemExtension,
                 isSuppressed: composition.onboarding.isPresented
             )
-            #if os(iOS)
-                .settingsSheet(composition.settings)
-            #endif
             .dropDestination(for: DroppedImportFile.self) { files, _ in
                 Task.immediate { await composition.tunnelImport.importDropped(files.map(\.payload)) }
                 return !files.isEmpty
@@ -67,10 +64,6 @@ struct SplitwayRootScene: Scene {
     }
 
     private var showSettings: (@MainActor @Sendable () -> Void)? {
-        #if os(iOS)
-            return { composition.settings.show() }
-        #else
-            return nil
-        #endif
+        return nil
     }
 }

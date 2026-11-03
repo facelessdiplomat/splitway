@@ -10,36 +10,11 @@ struct RoutingPolicyTests {
     }
 
     @Test
-    func warnsAboutEmptySelections() {
+    func warnsAboutAnEmptyApplicationSelection() {
         let noApplications = RoutingPolicy(mode: .selectedApplications(ApplicationSelection([])))
-        let noServices = RoutingPolicy(mode: .selectedServices(ServiceSelection([])))
 
         #expect(noApplications.warnings == [.emptyApplicationSelection])
-        #expect(noServices.warnings == [.emptyServiceSelection])
         #expect(RoutingPolicy.default.warnings.isEmpty)
-    }
-
-    @Test
-    func keepsModesThePlatformSupports() throws {
-        let applications = RoutingPolicy(mode: .selectedApplications(ApplicationSelection([try sampleApplication()])))
-        let services = RoutingPolicy(mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])))
-
-        #expect(applications.resolved(on: .macOS) == ResolvedRoutingPolicy(policy: applications, unsupportedMode: nil))
-        #expect(services.resolved(on: .iOS) == ResolvedRoutingPolicy(policy: services, unsupportedMode: nil))
-        #expect(RoutingPolicy.default.resolved(on: .iOS).unsupportedMode == nil)
-    }
-
-    @Test
-    func fallsBackToAllTrafficWhenThePlatformLacksTheMode() throws {
-        let applications = RoutingPolicy(
-            mode: .selectedApplications(ApplicationSelection([try sampleApplication()])),
-            whenTunnelUnavailable: .bypass
-        )
-
-        let resolved = applications.resolved(on: .iOS)
-
-        #expect(resolved.policy == RoutingPolicy(mode: .allTraffic, whenTunnelUnavailable: .bypass))
-        #expect(resolved.unsupportedMode == .selectedApplications)
     }
 
     @Test
@@ -50,16 +25,6 @@ struct RoutingPolicyTests {
 
         #expect(allTraffic.mode == .allTraffic)
         #expect(allTraffic.switchingMode(to: .selectedApplications).mode == .selectedApplications(selection))
-    }
-
-    @Test
-    func remembersTheServicesWhileAnotherModeIsChosen() throws {
-        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
-
-        let allTraffic = RoutingPolicy(mode: .selectedServices(selection)).switchingMode(to: .allTraffic)
-
-        #expect(allTraffic.mode == .allTraffic)
-        #expect(allTraffic.switchingMode(to: .selectedServices).mode == .selectedServices(selection))
     }
 
     @Test
@@ -79,16 +44,6 @@ struct RoutingPolicyTests {
 
         #expect(policy.mode == .allTraffic)
         #expect(policy.applicationSelection == selection)
-    }
-
-    @Test
-    func replacesTheServicesWithoutChangingTheMode() throws {
-        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
-
-        let policy = RoutingPolicy.default.replacingServiceSelection(with: selection)
-
-        #expect(policy.mode == .allTraffic)
-        #expect(policy.serviceSelection == selection)
     }
 
     @Test

@@ -2,9 +2,7 @@ package main
 
 import (
 	"golang.zx2c4.com/wireguard/device"
-	"splitway/tunnelcore/fdtunnel"
 	"splitway/tunnelcore/logbridge"
-	"splitway/tunnelcore/servicerouting"
 )
 
 type runningDevice interface {
@@ -37,22 +35,6 @@ func updateTunnelConfiguration(handle int32, configuration string) tunnelStatus 
 		return statusUnknownHandle
 	}
 	return statusOf(running.Apply(configuration))
-}
-
-func setServiceRouting(handle int32, planDocument string) tunnelStatus {
-	running, found := runningDevices.value(handle)
-	if !found {
-		return statusUnknownHandle
-	}
-	tunnel, isFileDescriptorTunnel := running.(*fdtunnel.Tunnel)
-	if !isFileDescriptorTunnel {
-		return statusInvalidArgument
-	}
-	plan, err := servicerouting.DecodePlan([]byte(planDocument))
-	if err != nil {
-		return statusConfigurationRejected
-	}
-	return statusOf(tunnel.RouteServices(plan))
 }
 
 func tunnelConfiguration(handle int32) (string, tunnelStatus) {

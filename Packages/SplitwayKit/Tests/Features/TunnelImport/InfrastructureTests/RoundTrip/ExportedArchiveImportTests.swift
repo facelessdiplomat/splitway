@@ -33,7 +33,7 @@ struct ExportedArchiveImportTests {
             records: InMemoryTunnelRecordRepository(),
             secrets: InMemoryTunnelSecretStore(),
             archiveReader: ZIPArchiveReader(),
-            fallbackNames: ImportFallbackNames(pastedText: .untitled, scannedCode: .untitled)
+            fallbackName: .untitled
         ).execute([.file(name: "Splitway Tunnels.zip", contents: archive.contents)])
 
         #expect(preview.candidates.map(\.configuration) == [office.configuration, lab.configuration])

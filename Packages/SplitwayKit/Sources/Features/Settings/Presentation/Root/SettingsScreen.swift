@@ -36,8 +36,6 @@ public struct SettingsScreen: View {
                 }
             }
         }
-        #if os(macOS)
-            .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
-        #endif
+        .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
     }
 }

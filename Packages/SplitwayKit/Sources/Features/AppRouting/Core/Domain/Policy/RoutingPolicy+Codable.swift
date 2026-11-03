@@ -1,11 +1,11 @@
 extension RoutingPolicy: Codable {
     private static let currentSchemaVersion = 1
+    private static let retiredServicesMode = "selectedServices"
 
     private enum CodingKeys: String, CodingKey {
         case schemaVersion
         case mode
         case applications
-        case services
         case whenTunnelUnavailable
     }
 
@@ -19,14 +19,11 @@ extension RoutingPolicy: Codable {
                 debugDescription: "Unsupported routing policy schema version \(schemaVersion)"
             )
         }
-        let modeKind = try container.decode(RoutingModeKind.self, forKey: .mode)
+        let modeKind = try Self.decodeModeKind(from: container)
         self.init(
             modeKind: modeKind,
             applicationSelection: ApplicationSelection(
-                try Self.decodeSelection(.applications, isRequired: modeKind == .selectedApplications, from: container)
-            ),
-            serviceSelection: ServiceSelection(
-                try Self.decodeSelection(.services, isRequired: modeKind == .selectedServices, from: container)
+                try Self.decodeApplications(isRequired: modeKind == .selectedApplications, from: container)
             ),
             whenTunnelUnavailable: try container.decodeIfPresent(
                 TunnelUnavailableBehavior.self,
@@ -43,19 +40,30 @@ extension RoutingPolicy: Codable {
         if mode.kind == .selectedApplications || !applicationSelection.isEmpty {
             try container.encode(applicationSelection.applications, forKey: .applications)
         }
-        if mode.kind == .selectedServices || !serviceSelection.isEmpty {
-            try container.encode(serviceSelection.services, forKey: .services)
-        }
     }
 
-    private static func decodeSelection<Element: Decodable>(
-        _ key: CodingKeys,
+    private static func decodeModeKind(from container: KeyedDecodingContainer<CodingKeys>) throws -> RoutingModeKind {
+        let name = try container.decode(String.self, forKey: .mode)
+        if name == retiredServicesMode {
+            return .allTraffic
+        }
+        guard let kind = RoutingModeKind(rawValue: name) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .mode,
+                in: container,
+                debugDescription: "Unknown routing mode \(name)"
+            )
+        }
+        return kind
+    }
+
+    private static func decodeApplications(
         isRequired: Bool,
         from container: KeyedDecodingContainer<CodingKeys>
-    ) throws -> [Element] {
+    ) throws -> [ApplicationIdentity] {
         guard isRequired else {
-            return try container.decodeIfPresent([Element].self, forKey: key) ?? []
+            return try container.decodeIfPresent([ApplicationIdentity].self, forKey: .applications) ?? []
         }
-        return try container.decode([Element].self, forKey: key)
+        return try container.decode([ApplicationIdentity].self, forKey: .applications)
     }
 }

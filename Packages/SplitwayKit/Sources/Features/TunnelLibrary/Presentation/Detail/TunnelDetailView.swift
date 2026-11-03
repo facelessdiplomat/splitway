@@ -58,15 +58,6 @@ struct TunnelDetailView: View {
                     Text("Apps through the tunnel", bundle: .module)
                 }
             }
-            if !row.routedServiceNames.isEmpty {
-                Section {
-                    ForEach(Array(row.routedServiceNames.enumerated()), id: \.offset) { _, name in
-                        Text(verbatim: name)
-                    }
-                } header: {
-                    Text("Services through the tunnel", bundle: .module)
-                }
-            }
             ForEach(peers) { peer in
                 PeerStatisticsSection(peer: peer)
             }

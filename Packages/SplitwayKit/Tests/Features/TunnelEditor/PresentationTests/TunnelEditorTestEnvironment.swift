@@ -2,7 +2,6 @@ import AppRouting
 import ApplicationCatalogPresentation
 import Foundation
 import ProviderMessaging
-import ServiceCatalogPresentation
 import Testing
 import TunnelConfiguration
 import TunnelConfigurationTestSupport
@@ -43,19 +42,13 @@ final class TunnelEditorTestEnvironment {
     }
 
     func newTunnelEditor() -> TunnelEditorModel {
-        TunnelEditorModel(newTunnelNamed: "New tunnel", routingPlatform: .iOS, actions: actions) { [weak self] tunnel in
+        TunnelEditorModel(newTunnelNamed: "New tunnel", actions: actions) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
     }
 
     func editor(for tunnel: Tunnel) -> TunnelEditorModel {
-        TunnelEditorModel(editing: tunnel, routingPlatform: .iOS, actions: actions) { [weak self] tunnel in
-            self?.savedTunnels.append(tunnel)
-        }
-    }
-
-    func macOSEditor(for tunnel: Tunnel) -> TunnelEditorModel {
-        TunnelEditorModel(editing: tunnel, routingPlatform: .macOS, actions: actions) { [weak self] tunnel in
+        TunnelEditorModel(editing: tunnel, actions: actions) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
     }
@@ -63,20 +56,8 @@ final class TunnelEditorTestEnvironment {
     func editor(for tunnel: Tunnel, choosingApplicationsWith picker: ApplicationPickerActions) -> TunnelEditorModel {
         TunnelEditorModel(
             editing: tunnel,
-            routingPlatform: .macOS,
             actions: actions,
             applicationPicker: picker
-        ) { [weak self] tunnel in
-            self?.savedTunnels.append(tunnel)
-        }
-    }
-
-    func editor(for tunnel: Tunnel, choosingServicesWith picker: ServicePickerActions) -> TunnelEditorModel {
-        TunnelEditorModel(
-            editing: tunnel,
-            routingPlatform: .iOS,
-            actions: actions,
-            servicePicker: picker
         ) { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }
@@ -101,7 +82,7 @@ final class TunnelEditorTestEnvironment {
 
 extension TunnelEditorTestEnvironment {
     func flow() -> TunnelEditorFlow {
-        TunnelEditorFlow(routingPlatform: .iOS, actions: actions) { _ in
+        TunnelEditorFlow(actions: actions) { _ in
         } didSave: { [weak self] tunnel in
             self?.savedTunnels.append(tunnel)
         }

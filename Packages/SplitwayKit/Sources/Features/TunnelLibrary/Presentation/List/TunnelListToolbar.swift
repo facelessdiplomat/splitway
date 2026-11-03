@@ -7,13 +7,6 @@ struct TunnelListToolbar: ToolbarContent {
     let navigation: TunnelLibraryNavigation
 
     var body: some ToolbarContent {
-        #if os(iOS)
-            if hasTunnels {
-                ToolbarItem(placement: .topBarLeading) {
-                    EditButton()
-                }
-            }
-        #endif
         if !addition.methods.isEmpty {
             ToolbarItem(placement: .primaryAction) {
                 Menu {

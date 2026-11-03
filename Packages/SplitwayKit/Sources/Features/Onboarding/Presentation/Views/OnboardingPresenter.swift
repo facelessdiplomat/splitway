@@ -7,16 +7,10 @@ struct OnboardingPresenter: ViewModifier {
     let model: OnboardingModel
 
     func body(content: Content) -> some View {
-        #if os(iOS)
-            content.fullScreenCover(isPresented: isPresented) {
-                OnboardingView(model: model)
-            }
-        #else
-            content.sheet(isPresented: isPresented) {
-                OnboardingView(model: model)
-                    .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
-            }
-        #endif
+        content.sheet(isPresented: isPresented) {
+            OnboardingView(model: model)
+                .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
+        }
     }
 
     private var isPresented: Binding<Bool> {

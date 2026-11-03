@@ -2,7 +2,6 @@ name: Splitway
 options:
   bundleIdPrefix: com.facelessdiplomat
   deploymentTarget:
-    iOS: "26.0"
     macOS: "26.0"
   createIntermediateGroups: true
   groupSortPosition: top
@@ -13,7 +12,6 @@ settings:
     CURRENT_PROJECT_VERSION: 1
     SWIFT_VERSION: "6.0"
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
-    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
     DEVELOPMENT_TEAM: 8625S77CSU
     CODE_SIGN_STYLE: Automatic
     GENERATE_INFOPLIST_FILE: YES
@@ -25,176 +23,6 @@ packages:
   TunnelCore:
     path: Packages/TunnelCore
 targets:
-  iOSApp:
-    type: application
-    platform: iOS
-    sources:
-      - path: Apps/iOSApp
-      - path: Apps/Shared
-    settings:
-      base:
-        PRODUCT_NAME: Splitway
-        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway
-        TARGETED_DEVICE_FAMILY: "1,2"
-        CODE_SIGN_ENTITLEMENTS: Apps/iOSApp/iOSApp.entitlements
-        INFOPLIST_FILE: Apps/iOSApp/Info.plist
-        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        INFOPLIST_KEY_CFBundleDisplayName: Splitway
-        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
-    dependencies:
-      - target: PacketTunnelExtension
-      - target: ControlsExtension
-      - package: SplitwayKit
-        product: TunnelLibraryPresentation
-      - package: SplitwayKit
-        product: TunnelLibraryInfrastructure
-      - package: SplitwayKit
-        product: TunnelConnectionInfrastructure
-      - package: SplitwayKit
-        product: Shortcuts
-      - package: SplitwayKit
-        product: ControlWidgets
-      - package: SplitwayKit
-        product: ControlWidgetsInfrastructure
-      - package: SplitwayKit
-        product: TunnelConnectionPresentation
-      - package: SplitwayKit
-        product: TunnelImportPresentation
-      - package: SplitwayKit
-        product: TunnelImportInfrastructure
-      - package: SplitwayKit
-        product: TunnelEditorPresentation
-      - package: SplitwayKit
-        product: ServiceCatalog
-      - package: SplitwayKit
-        product: ServiceCatalogInfrastructure
-      - package: SplitwayKit
-        product: ServiceCatalogPresentation
-      - package: SplitwayKit
-        product: ApplicationCatalogPresentation
-      - package: SplitwayKit
-        product: DiagnosticsInfrastructure
-      - package: SplitwayKit
-        product: DiagnosticsPresentation
-      - package: SplitwayKit
-        product: SettingsInfrastructure
-      - package: SplitwayKit
-        product: SettingsPresentation
-      - package: SplitwayKit
-        product: OnboardingInfrastructure
-      - package: SplitwayKit
-        product: OnboardingPresentation
-      - package: SplitwayKit
-        product: SystemExtensionPresentation
-    scheme:
-      testTargets:
-        - iOSIntegrationTests
-  PacketTunnelExtension:
-    type: app-extension
-    platform: iOS
-    sources:
-      - path: Apps/PacketTunnelExtension
-      - path: Apps/SharedTunnelProvider
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.packet-tunnel
-        INFOPLIST_FILE: Apps/PacketTunnelExtension/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Apps/PacketTunnelExtension/PacketTunnelExtension.entitlements
-        INFOPLIST_KEY_CFBundleDisplayName: Splitway Tunnel
-    dependencies:
-      - package: SplitwayKit
-        product: PacketTunnel
-      - package: SplitwayKit
-        product: PacketTunnelInfrastructure
-      - package: SplitwayKit
-        product: ProviderMessaging
-      - package: SplitwayKit
-        product: TunnelLibraryInfrastructure
-      - package: SplitwayKit
-        product: ServiceCatalog
-      - package: SplitwayKit
-        product: ServiceCatalogInfrastructure
-      - package: SplitwayKit
-        product: Diagnostics
-      - package: SplitwayKit
-        product: DiagnosticsInfrastructure
-      - package: TunnelCore
-        product: TunnelCoreAdapter
-  ControlsExtension:
-    type: app-extension
-    platform: iOS
-    sources:
-      - path: Apps/ControlsExtension
-      - path: Apps/Shared/AppConfiguration.swift
-      - path: Apps/Shared/Shortcuts/TunnelEntity.swift
-      - path: Apps/Shared/Shortcuts/TunnelEntityQuery.swift
-      - path: Apps/Shared/Shortcuts/TunnelShortcutFailure.swift
-      - path: Apps/Shared/Shortcuts/TunnelShortcutActions+Assembly.swift
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.controls
-        INFOPLIST_FILE: Apps/ControlsExtension/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Apps/ControlsExtension/ControlsExtension.entitlements
-        INFOPLIST_KEY_CFBundleDisplayName: Splitway Controls
-    dependencies:
-      - package: SplitwayKit
-        product: ControlWidgets
-      - package: SplitwayKit
-        product: ControlWidgetsInfrastructure
-      - package: SplitwayKit
-        product: Shortcuts
-      - package: SplitwayKit
-        product: TunnelLibraryInfrastructure
-      - package: SplitwayKit
-        product: TunnelConnectionInfrastructure
-      - package: SplitwayKit
-        product: TunnelConnectionPresentation
-      - package: SplitwayKit
-        product: Diagnostics
-      - package: SplitwayKit
-        product: DiagnosticsInfrastructure
-  iOSIntegrationTests:
-    type: bundle.unit-test
-    platform: iOS
-    sources:
-      - path: IntegrationTests
-    dependencies:
-      - target: iOSApp
-      - package: SplitwayKit
-        product: TunnelLibrary
-      - package: SplitwayKit
-        product: TunnelLibraryInfrastructure
-      - package: SplitwayKit
-        product: TunnelImport
-      - package: SplitwayKit
-        product: TunnelImportInfrastructure
-      - package: SplitwayKit
-        product: TunnelConnection
-      - package: SplitwayKit
-        product: ProviderMessaging
-      - package: SplitwayKit
-        product: Diagnostics
-      - package: SplitwayKit
-        product: DiagnosticsInfrastructure
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
-        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Splitway.app/Splitway
-  iOSUITests:
-    type: bundle.ui-testing
-    platform: iOS
-    sources:
-      - path: UITests
-    dependencies:
-      - target: iOSApp
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.ui-tests
-        TEST_TARGET_NAME: iOSApp
   macOSApp:
     type: application
     platform: macOS
@@ -235,8 +63,6 @@ targets:
         product: TunnelImportInfrastructure
       - package: SplitwayKit
         product: TunnelEditorPresentation
-      - package: SplitwayKit
-        product: ServiceCatalogPresentation
       - package: SplitwayKit
         product: ApplicationCatalogPresentation
       - package: SplitwayKit
@@ -297,18 +123,5 @@ targets:
         product: TransparentProxyInfrastructure
       - package: SplitwayKit
         product: SecretDeliveryInfrastructure
-      - package: SplitwayKit
-        product: ServiceCatalog
-      - package: SplitwayKit
-        product: ServiceCatalogInfrastructure
       - package: TunnelCore
         product: TunnelCoreAdapter
-schemes:
-  iOSUITests:
-    build:
-      targets:
-        iOSApp: all
-        iOSUITests: [test]
-    test:
-      targets:
-        - iOSUITests

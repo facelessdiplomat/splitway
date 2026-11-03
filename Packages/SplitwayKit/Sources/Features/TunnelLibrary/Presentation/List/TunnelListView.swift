@@ -42,20 +42,15 @@ struct TunnelListView: View {
             }
         }
         .navigationTitle(Text("Tunnels", bundle: .module))
-        #if os(iOS)
-            .navigationBarTitleDisplayMode(.large)
-        #endif
         .toolbar {
             TunnelListToolbar(
                 addition: addition, export: export, hasTunnels: !model.rows.isEmpty, navigation: navigation)
         }
-        #if os(macOS)
-            .onDeleteCommand {
-                if let row = selection.flatMap({ id in model.row(withID: id) }) {
-                    model.requestDeletion(of: row)
-                }
+        .onDeleteCommand {
+            if let row = selection.flatMap({ id in model.row(withID: id) }) {
+                model.requestDeletion(of: row)
             }
-        #endif
+        }
     }
 
     private var reorderAction: ((IndexSet, Int) -> Void)? {

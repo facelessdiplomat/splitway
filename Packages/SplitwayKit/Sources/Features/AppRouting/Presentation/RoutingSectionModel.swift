@@ -4,18 +4,14 @@ import Observation
 @MainActor
 @Observable
 public final class RoutingSectionModel {
-    private static let modeOrder: [RoutingModeKind] = [.allTraffic, .selectedApplications, .selectedServices]
-
     public private(set) var policy: RoutingPolicy
-    public let platform: RoutingPlatform
 
-    public init(policy: RoutingPolicy, platform: RoutingPlatform) {
+    public init(policy: RoutingPolicy) {
         self.policy = policy
-        self.platform = platform
     }
 
     public var availableModes: [RoutingModeKind] {
-        Self.modeOrder.filter(platform.supportedModes.contains)
+        RoutingModeKind.allCases
     }
 
     public var selectedMode: RoutingModeKind {
@@ -30,20 +26,8 @@ public final class RoutingSectionModel {
         policy.applicationSelection.applications.count
     }
 
-    public var selectedServiceCount: Int {
-        policy.serviceSelection.services.count
-    }
-
     public var applicationSelection: ApplicationSelection {
         policy.applicationSelection
-    }
-
-    public var serviceSelection: ServiceSelection {
-        policy.serviceSelection
-    }
-
-    public var offersUnavailableTunnelChoice: Bool {
-        platform == .macOS
     }
 
     public var blocksWhenTunnelUnavailable: Bool {
@@ -51,7 +35,6 @@ public final class RoutingSectionModel {
     }
 
     public func selectMode(_ kind: RoutingModeKind) {
-        guard platform.supportedModes.contains(kind) else { return }
         policy = policy.switchingMode(to: kind)
     }
 
@@ -61,9 +44,5 @@ public final class RoutingSectionModel {
 
     public func setApplications(_ selection: ApplicationSelection) {
         policy = policy.replacingApplicationSelection(with: selection)
-    }
-
-    public func setServices(_ selection: ServiceSelection) {
-        policy = policy.replacingServiceSelection(with: selection)
     }
 }
