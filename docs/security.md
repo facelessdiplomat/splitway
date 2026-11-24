@@ -110,6 +110,6 @@ flowchart LR
 
 ## 7. Как проверять
 
-- `SecretLeakScanTests` в `macOSIntegrationTests` (M8-07): файл со случайными ключами импортируется в настоящий Keychain и App Group, туннель ставится в слот, журнал экспортируется, затем тест ищет ключи в base64, hex и сырых байтах во всех файлах контейнера хоста и группы, в `UserDefaults` и в журнале. `SecretLeakScannerTests` подтверждает, что сканер находит ключ, нарочно записанный в файл контейнера. Тесты идут в хост-приложении `IntegrationTestHost` с подписью разработки, шаг «macOS integration tests» в `Scripts/check.sh`, на Mac владельца и на раннере CI.
+- `SecretLeakScanTests` в `macOSIntegrationTests` (M8-07): файл со случайными ключами импортируется в настоящий Keychain и App Group, туннель ставится в слот, журнал экспортируется, затем тест ищет ключи в base64, hex и сырых байтах во всех файлах контейнера хоста и группы, в `UserDefaults` и в журнале. `SecretLeakScannerTests` подтверждает, что сканер находит ключ, нарочно записанный в файл контейнера. Тесты идут в хост-приложении `IntegrationTestHost` с подписью разработки, шаг «macOS integration tests» в `Scripts/check.sh` на Mac разработчика.
 - Вручную на Mac: поиск ключа тестового туннеля в `~/Library/Containers/com.facelessdiplomat.splitway` и `~/Library/Group Containers/8625S77CSU.com.facelessdiplomat.splitway`.
 - Модульные тесты: `SecurityScopedFileReaderTests`, `TemporaryExportCopiesTests`, `TunnelExportModelTests`, тесты `LogRedactor`, `ZIPArchiveReader`, `ClientCodeRequirement` и `ProviderMessageDispatcher`.

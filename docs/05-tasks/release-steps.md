@@ -15,9 +15,9 @@ Splitway выходит образом DMG с подписью Developer ID и �
    ```
 
    Профиль сохранён, если в конце вывода есть `Credentials saved to Keychain`. Ошибка 401 значит, что вместо пароля приложения вставлен пароль Apple ID или в Apple ID опечатка, 403 — не принято соглашение.
-4. **Проверка:** `xcrun notarytool history --keychain-profile splitway-notary` отвечает без `Error`. Скрипт выпуска и раннер CI берут данные из этого профиля.
+4. **Проверка:** `xcrun notarytool history --keychain-profile splitway-notary` отвечает без `Error`. Скрипт выпуска берёт данные из этого профиля.
 
-Вместо пароля приложения подойдёт ключ App Store Connect API с доступом Developer: `xcrun notarytool store-credentials splitway-notary --key <путь к AuthKey.p8> --key-id <Key ID> --issuer <Issuer ID>`. Профиль `notarytool` хранит в защищённой связке ключей вашего сеанса, а не в файле `login.keychain`, поэтому раннер CI видит его, только когда работает в вашем сеансе ([ci.md](../ci.md), раздел «Раннер»).
+Вместо пароля приложения подойдёт ключ App Store Connect API с доступом Developer: `xcrun notarytool store-credentials splitway-notary --key <путь к AuthKey.p8> --key-id <Key ID> --issuer <Issuer ID>`. Профиль `notarytool` хранит в защищённой связке ключей вашего сеанса, а не в файле `login.keychain`, поэтому скрипт выпуска запускают в вашем сеансе, из Терминала.
 
 ## 2. Имя в подписи
 
@@ -25,13 +25,13 @@ Splitway выходит образом DMG с подписью Developer ID и �
 
 ## 3. Выпуск версии
 
-Описание выпуска на английском и русском лежит в `docs/releases/<версия>.md` и попадает в `master` до тега: без него скрипт выпуска не публикует релиз. Выпуск идёт по тегу:
+Описание выпуска на английском и русском лежит в `docs/releases/<версия>.md` и попадает в `master` до выпуска: без него скрипт выпуска не публикует релиз. CI нет (решение D-54), поэтому выпуск собирается на этом Mac из чистой копии `master`:
 
 ```bash
-git tag -a v1.0 -m "Splitway 1.0" && git push origin v1.0
+Scripts/release.sh 1.0 --publish
 ```
 
-Раннер на этом Mac собирает архив, экспортирует его с подписью Developer ID, нотаризует приложение и образ и создаёт релиз `v1.0` с `Splitway.dmg` и контрольной суммой. Без CI то же делает `Scripts/release.sh 1.0 --publish` из чистой копии `master`. Установку DMG в тестовой ВМ проверяю я. Так 2026-11-03 вышла 1.0 (сборка 452).
+Скрипт собирает архив, экспортирует его с подписью Developer ID, нотаризует приложение и образ и создаёт на GitHub тег и релиз `v1.0` с `Splitway.dmg`, контрольной суммой и лентой обновлений `appcast.xml`. Установку DMG в тестовой ВМ проверяю я. Так 2026-11-03 вышла 1.0 (сборка 452), тогда ещё по тегу через раннер CI.
 
 ## 4. Проверка на вашем Mac
 
@@ -65,6 +65,6 @@ App Store не используется. Запись «Splitway Tunnel» в App
    Packages/SplitwayKit/.build/artifacts/sparkle/Sparkle/bin/generate_keys --account splitway -x ~/Desktop/splitway-update-key.txt
    ```
 
-2. **После обновления Sparkle** первая подпись в выпуске спросит доступ к ключу: нажмите «Всегда разрешать». Пока вы не ответите, задание выпуска на раннере ждёт.
+2. **После обновления Sparkle** первая подпись в выпуске спросит доступ к ключу: нажмите «Всегда разрешать». Пока вы не ответите, скрипт выпуска ждёт.
 3. **На новом Mac** ключ возвращается командой `generate_keys --account splitway -f <файл из резервной копии>`.
 
