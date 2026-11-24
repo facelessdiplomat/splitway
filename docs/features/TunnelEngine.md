@@ -128,3 +128,4 @@ flowchart LR
 | 2026-11-01 | `tc_fd_tunnel_set_service_routing`, порт `RunningTunnelInterfaceDevice`, JSON плана выбора сервисов с общими фикстурами | M5-06 |
 | 2026-11-02 | Bind `udpbind` по одному датаграмму вместо стандартного: меньше CPU на гигабайт на Darwin и iOS | M7-03 |
 | 2026-11-03 | Убраны iOS и выбор сервисов: `tc_fd_tunnel_set_service_routing`, `ServiceRoutingTranslation` с кодировщиком, порт `RunningTunnelInterfaceDevice` (движок отдаёт `RunningWireGuardDevice`), обёртка `servicerouting` в `fdtunnel`, срезы iOS в xcframework | M8-02 |
+| 2026-11-24 | Срезы iOS для iPhone и симулятора вернулись в xcframework, iOS-сборка `fdtunnel` ограничивает память Go 30 МиБ (`memory_limit_ios.go`) | M9-02 |

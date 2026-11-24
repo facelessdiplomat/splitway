@@ -193,7 +193,7 @@ sequenceDiagram
 
 `Scripts/release.sh <версия> [--publish]` (M8-03):
 
-1. `build-xcframework.sh` собирает `TunnelCore` для `macos-arm64` и `macos-x86_64`.
+1. `build-xcframework.sh` собирает `TunnelCore` для `macos-arm64` и `macos-x86_64`, а заодно срезы iOS для личной сборки на iPhone (D-53); в выпуск идут только срезы macOS.
 2. Archive в Release с автоматической подписью разработки: App Sandbox у приложения и расширения (SP-10), Hardened Runtime, без get-task-allow. Версия — из аргумента, номер сборки — число коммитов.
 3. Экспорт способом `developer-id`: Xcode переподписывает бандлы сертификатом Developer ID и подставляет значения Network Extension с суффиксом `-systemextension`; скрипт проверяет, что они есть у приложения и расширения.
 4. Нотаризация приложения (`notarytool` с профилем связки ключей `splitway-notary`) и сшивание тикета, затем образ DMG с приложением и ссылкой на «Программы», подпись образа Developer ID, его нотаризация и сшивание. `spctl` проверяет приложение и образ, рядом пишется `Splitway.dmg.sha256`.
