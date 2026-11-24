@@ -5,6 +5,7 @@ import UpdatesPresentation
 @MainActor
 @Observable
 public final class SettingsPresenter {
+    public var isShowing = false
     let version: AppVersion
     let notices: ThirdPartyNoticesModel
     let loginItem: LoginItemModel?
@@ -23,5 +24,9 @@ public final class SettingsPresenter {
         self.loginItem = loginItem
         self.updates = updates
         self.uninstall = uninstall
+    }
+
+    public func show() {
+        isShowing = true
     }
 }

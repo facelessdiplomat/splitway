@@ -18,7 +18,11 @@ extension TunnelAdditionMethod {
     }
 
     private static var importShortcut: KeyboardShortcut? {
-        KeyboardShortcut("o")
+        #if os(iOS)
+            KeyboardShortcut("o", modifiers: [.command, .shift])
+        #else
+            KeyboardShortcut("o")
+        #endif
     }
 
     private var title: Text {

@@ -52,12 +52,14 @@ public struct TunnelConnectionAssembly: Sendable {
         } catch {
             failure = error
         }
-        do {
-            try await ProviderSlotRemoval<TransparentProxySlot>(providerBundleIdentifier: providerBundleIdentifier)
-                .removeConfigurations()
-        } catch {
-            failure = error
-        }
+        #if os(macOS)
+            do {
+                try await ProviderSlotRemoval<TransparentProxySlot>(providerBundleIdentifier: providerBundleIdentifier)
+                    .removeConfigurations()
+            } catch {
+                failure = error
+            }
+        #endif
         if let failure {
             throw failure
         }
@@ -69,19 +71,23 @@ public struct TunnelConnectionAssembly: Sendable {
         let packetTunnel = ProviderSlotController<PacketTunnelSlot>(providerBundleIdentifier: providerBundleIdentifier)
         let packetTunnelMessenger = ProviderSlotMessenger<PacketTunnelSlot>(
             providerBundleIdentifier: providerBundleIdentifier)
-        let slots = SlotSelectingTunnelController(
-            packetTunnel: packetTunnel,
-            transparentProxy: ProviderSlotController<TransparentProxySlot>(
-                providerBundleIdentifier: providerBundleIdentifier
+        #if os(macOS)
+            let slots = SlotSelectingTunnelController(
+                packetTunnel: packetTunnel,
+                transparentProxy: ProviderSlotController<TransparentProxySlot>(
+                    providerBundleIdentifier: providerBundleIdentifier
+                )
             )
-        )
-        let messenger = SlotSelectingMessenger(
-            selection: slots,
-            packetTunnel: packetTunnelMessenger,
-            transparentProxy: ProviderSlotMessenger<TransparentProxySlot>(
-                providerBundleIdentifier: providerBundleIdentifier
+            let messenger = SlotSelectingMessenger(
+                selection: slots,
+                packetTunnel: packetTunnelMessenger,
+                transparentProxy: ProviderSlotMessenger<TransparentProxySlot>(
+                    providerBundleIdentifier: providerBundleIdentifier
+                )
             )
-        )
-        return (slots, messenger)
+            return (slots, messenger)
+        #else
+            return (packetTunnel, packetTunnelMessenger)
+        #endif
     }
 }

@@ -19,5 +19,8 @@ struct ThirdPartyNoticeView: View {
             .padding()
         }
         .navigationTitle(Text(verbatim: notice.name))
+        #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 }

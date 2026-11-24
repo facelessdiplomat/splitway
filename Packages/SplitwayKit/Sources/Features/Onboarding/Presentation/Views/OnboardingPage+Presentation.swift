@@ -30,15 +30,29 @@ extension OnboardingPage {
     }
 
     private var welcomeMessage: Text {
-        Text(
-            "Import your WireGuard tunnel and choose which apps use it. Everything else stays direct.",
-            bundle: .module)
+        #if os(macOS)
+            Text(
+                "Import your WireGuard tunnel and choose which apps use it. Everything else stays direct.",
+                bundle: .module)
+        #else
+            Text(
+                "Import your WireGuard tunnel and choose which services use it. Everything else stays direct.",
+                bundle: .module
+            )
+        #endif
     }
 
     private var permissionsMessage: Text {
-        Text(
-            "macOS asks once to allow the Splitway network extension and to add a VPN configuration.",
-            bundle: .module
-        )
+        #if os(macOS)
+            Text(
+                "macOS asks once to allow the Splitway network extension and to add a VPN configuration.",
+                bundle: .module
+            )
+        #else
+            Text(
+                "iOS asks to add a VPN configuration on the first connection. The camera is only for QR codes.",
+                bundle: .module
+            )
+        #endif
     }
 }
