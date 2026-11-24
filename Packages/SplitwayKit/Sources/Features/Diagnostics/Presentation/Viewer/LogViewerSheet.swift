@@ -13,7 +13,9 @@ struct LogViewerSheet: ViewModifier {
                     presenter.isShowing = false
                 }
             }
-            .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
+            #if os(macOS)
+                .frame(minWidth: Self.minimumWidth, minHeight: Self.minimumHeight)
+            #endif
         }
     }
 }

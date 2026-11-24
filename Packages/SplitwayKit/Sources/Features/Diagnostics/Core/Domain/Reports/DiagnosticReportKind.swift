@@ -3,4 +3,5 @@ public enum DiagnosticReportKind: String, Sendable, Hashable, Codable, CaseItera
     case hang
     case cpuException
     case diskWriteException
+    case appLaunch
 }
