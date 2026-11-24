@@ -33,7 +33,7 @@ Network Extension доступен индивидуальному платном
 - Провайдер общий с macOS (фича `PacketTunnel`): `TunnelNetworkPlan` → `NEPacketTunnelNetworkSettings`, поиск дескриптора `utun`, `tc_fd_tunnel_start`.
 - **NAT64/DNS64**: в сотовых сетях только с IPv6 endpoint с IPv4-адресом синтезируется через `getaddrinfo`. Без этого туннель не поднимется у части операторов.
 - Смена сети (`NWPathMonitor`): Wi-Fi ↔ сотовая, переход в авиарежим → повторный резолвинг endpoint, `tc_tunnel_bump_sockets`.
-- **Память**: лимит расширения около 50 МБ. Меры: `debug.SetMemoryLimit` в Go (около 25 МБ на кучу Go), уменьшенные очереди wireguard-go (`queueconstants_ios.go`), ограниченные таблицы `servicerouting`, отсутствие SwiftUI в расширении. Цель — пик не выше 35 МБ под нагрузкой, проверка в Instruments (задачи M5-09 и M9-15).
+- **Память**: лимит расширения около 50 МБ. Меры: `debug.SetMemoryLimit` в Go (30 МиБ, `fdtunnel/memory_limit_ios.go`), уменьшенные очереди wireguard-go (`queueconstants_ios.go`), ограниченные таблицы `servicerouting`, отсутствие SwiftUI в расширении. Цель — пик не выше 35 МБ под нагрузкой, проверка в Instruments (задачи M5-09 и M9-15).
 - Ключи читаются из общей Keychain access group с доступностью `AfterFirstUnlockThisDeviceOnly`, поэтому туннель может переподключиться на заблокированном устройстве.
 
 ## 4. Режим «Только выбранные сервисы»
