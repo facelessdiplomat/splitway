@@ -7,6 +7,13 @@ struct TunnelListToolbar: ToolbarContent {
     let navigation: TunnelLibraryNavigation
 
     var body: some ToolbarContent {
+        #if os(iOS)
+            if hasTunnels {
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
+                }
+            }
+        #endif
         if !addition.methods.isEmpty {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -40,6 +47,19 @@ struct TunnelListToolbar: ToolbarContent {
                         Text("Export All Tunnels", bundle: .module)
                     } icon: {
                         Image(systemName: "square.and.arrow.up.on.square")
+                    }
+                }
+            }
+        }
+        if let showSettings = navigation.showSettings {
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    showSettings()
+                } label: {
+                    Label {
+                        Text("Settings", bundle: .module)
+                    } icon: {
+                        Image(systemName: "gearshape")
                     }
                 }
             }
