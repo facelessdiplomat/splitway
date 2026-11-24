@@ -289,7 +289,7 @@ let features: [FeatureModule] = [
 let package = Package(
     name: "SplitwayKit",
     defaultLocalization: "en",
-    platforms: [.macOS(.v26)],
+    platforms: [.iOS(.v26), .macOS(.v26)],
     products: [.library(name: "SharedKernel", targets: ["SharedKernel"])] + features.flatMap(\.products),
     dependencies: [
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", exact: "0.9.20"),

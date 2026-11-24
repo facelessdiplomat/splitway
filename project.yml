@@ -2,6 +2,7 @@ name: Splitway
 options:
   bundleIdPrefix: com.facelessdiplomat
   deploymentTarget:
+    iOS: "26.0"
     macOS: "26.0"
   createIntermediateGroups: true
   groupSortPosition: top
@@ -14,6 +15,7 @@ settings:
     CURRENT_PROJECT_VERSION: 1
     SWIFT_VERSION: "6.0"
     SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
     DEVELOPMENT_TEAM: 8625S77CSU
     CODE_SIGN_STYLE: Automatic
     GENERATE_INFOPLIST_FILE: YES
