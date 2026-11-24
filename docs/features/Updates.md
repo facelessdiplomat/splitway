@@ -48,7 +48,7 @@ flowchart LR
 - `Info.plist`: `SUFeedURL` и `SUPublicEDKey` из `project.yml`, `SUEnableInstallerLauncherService`, `SUVerifyUpdateBeforeExtraction`, `SURequireSignedFeed`. `SUEnableAutomaticChecks` не задан: Sparkle сам спрашивает согласие при втором запуске.
 - Права приложения: `network.client` и `com.apple.security.temporary-exception.mach-lookup.global-name` для `$(PRODUCT_BUNDLE_IDENTIFIER)-spks` и `-spki`, как требует Sparkle для приложений в песочнице.
 - Постоянный адрес ленты — `releases/latest/download/appcast.xml`: GitHub отдаёт файл последнего релиза, и выпуск не требует коммита в `master`.
-- Ключ подписи создан `generate_keys --account splitway`. ACL элемента разрешает расшифровку только `generate_keys` и `sign_update` этой версии Sparkle (по `cdhash`), поэтому раннер CI подписывает без вопросов, а другие процессы получают запрос macOS.
+- Ключ подписи создан `generate_keys --account splitway`. ACL элемента разрешает расшифровку только `generate_keys` и `sign_update` этой версии Sparkle (по `cdhash`), поэтому скрипт выпуска подписывает без вопросов, а другие процессы получают запрос macOS.
 - Заметки в ленте встроены, а не ссылкой: подписанная лента защищает и их, отдельная подпись файла заметок не нужна.
 
 ## Спорные решения
@@ -67,7 +67,7 @@ flowchart LR
 ## Ограничения и известные проблемы
 
 - Версии 1.0 и 1.0.1 Sparkle не содержат: на 1.1 пользователь переходит вручную.
-- После обновления Sparkle (новая версия `sign_update`) первая подпись спросит доступ к ключу в связке ключей: владелец разрешает один раз, иначе задание выпуска в CI ждёт ответа.
+- После обновления Sparkle (новая версия `sign_update`) первая подпись спросит доступ к ключу в связке ключей: владелец разрешает один раз, иначе скрипт выпуска ждёт ответа.
 - Ключ подписи нельзя восстановить: резервная копия у владельца с 2026-11-03 (`generate_keys --account splitway -x <файл>`, [шаги владельца](../05-tasks/release-steps.md)).
 - Если открыто знакомство с приложением, замену расширения после обновления запросит мастер, а не запуск: так устроено `activateSystemExtensionOnLaunch` ([Onboarding](Onboarding.md)).
 - Обновление при подключённом туннеле не проверялось: расширение перезапускается, и туннель переподключается заново ([отложенные проверки](../05-tasks/deferred-checks.md)).

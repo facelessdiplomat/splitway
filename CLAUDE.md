@@ -13,7 +13,7 @@
 
 ## Процесс
 
-- Удалённая копия — репозиторий `origin` на GitHub. Основная ветка — `master` (D-31): перед слиянием в неё должен пройти `Scripts/check.sh`, после слияния — `git push`. CI — GitHub Actions с раннером на Mac владельца (D-47, `docs/ci.md`): проверка после пуша в `master`, выпуск по тегу `v*`.
+- Удалённая копия — репозиторий `origin` на GitHub. Основная ветка — `master` (D-31): перед слиянием в неё должен пройти `Scripts/check.sh`, после слияния — `git push`. CI нет (D-54, `docs/ci.md`): единственная проверка — локальный `Scripts/check.sh`, перед слиянием его запускает хук `pre-merge-commit` (хуки включает `Scripts/bootstrap.sh`); выпуск — локально, `Scripts/release.sh <версия> --publish`.
 - Ветка на задачу `feature/<task-id>-<slug>`, слияние через `git merge --no-ff`.
 - Коммиты — Conventional Commits на английском, в теле `Task: <ID>`.
 - Закрытая задача отмечается чекбоксом в разделе «Статус» своего файла вехи в `docs/05-tasks/`.

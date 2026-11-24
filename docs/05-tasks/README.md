@@ -12,7 +12,7 @@
 | M5 | Выбор сервисов на iOS/iPadOS | Снята решением D-45: код и документы остались в теге `ios-final` и возвращаются в M9 | iOS, iPadOS |
 | M6 | [M6-integrations.md](M6-integrations.md) | Строка меню, настройки, Команды, Controls, iPadOS-полировка, автоподключение | все |
 | M7 | [M7-release.md](M7-release.md) | Безопасность, производительность, тесты утечек, выпуск | все |
-| M8 | [M8-open-source.md](M8-open-source.md) | Только macOS, открытый код под GPL-3.0, DMG в GitHub Releases, сайт на GitHub Pages, CI на GitHub Actions | macOS |
+| M8 | [M8-open-source.md](M8-open-source.md) | Только macOS, открытый код под GPL-3.0, DMG в GitHub Releases, сайт на GitHub Pages, CI на GitHub Actions (снят решением D-54) | macOS |
 | M9 | [M9-ios-personal-build.md](M9-ios-personal-build.md) | iOS и iPadOS для своих устройств: сборка из Xcode, «Весь трафик» и «Только выбранные сервисы» из тега `ios-final` | iOS, iPadOS |
 
 ## Что нужно от владельца

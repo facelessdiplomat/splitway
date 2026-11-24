@@ -50,7 +50,7 @@ Splitway подключается к вашему серверу WireGuard — �
 | [05. План задач](docs/05-tasks/README.md) | Вехи M0–M8 с критериями готовности |
 | [06. Правила разработки](docs/06-development-rules.md) | Обязательные правила кода, тестов, коммитов и документации |
 | [Безопасность](docs/security.md) | Модель угроз, аудит, принятые риски |
-| [CI](docs/ci.md) и [сайт](docs/site.md) | GitHub Actions, раннер, GitHub Pages |
+| [CI](docs/ci.md) и [сайт](docs/site.md) | локальная проверка, проверки PR в GitHub Actions, GitHub Pages |
 | [Документы фич](docs/features) | Как устроена каждая фича |
 
 ## Сборка из исходников
