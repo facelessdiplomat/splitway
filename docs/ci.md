@@ -15,7 +15,7 @@
 
 ## Сборки на Mac разработчика
 
-- Сборки лежат в `build.noindex`: `check.sh`, `release.sh` и `bootstrap.sh` делают `build` ссылкой на эту папку (`Scripts/lib/build-directory.sh`). Иначе Spotlight индексирует сборки, и macOS показывает их среди приложений: 2026-11-03 вместо `/Applications/Splitway.app` так открылась неподписанная отладочная сборка из `check.sh`, собранная раннером.
+- Сборки лежат в `build.noindex`: `check.sh`, `release.sh`, `install-ios-app.sh` и `bootstrap.sh` делают `build` ссылкой на эту папку (`Scripts/lib/build-directory.sh`). Иначе Spotlight индексирует сборки, и macOS показывает их среди приложений: 2026-11-03 вместо `/Applications/Splitway.app` так открылась неподписанная отладочная сборка из `check.sh`, собранная раннером.
 - Xcode регистрирует в LaunchServices каждое собранное приложение. Номер сборки у копии из `release.sh` такой же, как у установленного выпуска, а у сборки для ВМ больше, и по bundle ID («Команды», Siri, `open -b`) macOS открыла бы их вместо `/Applications/Splitway.app`. Поэтому `release.sh` при выходе и `macos-vm.sh install` после копирования снимают регистрацию своих сборок (`Scripts/lib/launch-services.sh`).
 
 ## Настройки репозитория

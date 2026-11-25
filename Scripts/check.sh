@@ -46,6 +46,9 @@ Scripts/tests/lint-rules-test.sh
 step "Git hook checks"
 Scripts/tests/git-hooks-test.sh
 
+step "iOS device choice"
+Scripts/tests/ios-devices-test.sh
+
 step "Site links"
 Scripts/check-site.sh
 
