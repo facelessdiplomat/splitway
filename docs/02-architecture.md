@@ -72,7 +72,7 @@ flowchart LR
 │   │   └── Tests/Features/<Feature>/{CoreTests,InfrastructureTests,PresentationTests}/
 │   └── TunnelCore/                  Go-движок и его Swift-адаптер
 │       ├── Package.swift            binaryTarget TunnelCoreFramework + target TunnelCoreAdapter
-│       ├── go/                      go.mod, пакеты по фичам: bridge, fdtunnel, usernet, udpbind, logbridge
+│       ├── go/                      go.mod, пакеты по фичам: bridge, fdtunnel, usernet, servicerouting, udpbind, logbridge
 │       └── Scripts/build-xcframework.sh
 ├── Scripts/                         check.sh, bootstrap, lint, git-хуки, проверка комментариев
 └── docs/                            эта документация + docs/features/*.md
@@ -191,6 +191,7 @@ Go-модуль разбит на пакеты по фичам:
 | `bridge` | Экспортируемые C-функции (`//export`), таблица хэндлов, обратные вызовы в Swift |
 | `fdtunnel` | WireGuard поверх файлового дескриптора `utun` (режим «Весь трафик») |
 | `usernet` | WireGuard поверх gVisor netstack: `DialTCP`, UDP-сокеты, DNS через туннель (выбор приложений) |
+| `servicerouting` | Пул фиктивных адресов, перехват DNS выбранных доменов, трансляция адресов (выбор сервисов на iOS, M9-07) |
 | `udpbind` | UDP-сокеты движка: одна датаграмма за вызов, буферы по 7 МБ (M7-03) |
 | `logbridge` | Передача логов wireguard-go в Swift |
 | `internal/testpeer`, `testpeer` | Пир WireGuard с эхо-серверами и DNS для тестов: пакет для Go-тестов, утилита — для тестов Swift. В ядро не входит |
@@ -202,6 +203,7 @@ C API (функции описаны в [TunnelEngine](features/TunnelEngine.md)
 ```
 tc_version() -> *char
 tc_fd_tunnel_start(tun_fd, uapi_config, &handle) -> status
+tc_fd_tunnel_set_service_routing(handle, routing_plan_json) -> status
 tc_usernet_start(uapi_config, addresses, dns_servers, mtu, &handle) -> status
 tc_usernet_dial_tcp(handle, address, port, timeout_ms, &connection) -> status
 tc_usernet_dial_udp(handle, address, port, &connection) -> status
@@ -224,7 +226,7 @@ tc_free(pointer)
 
 Горячие пути, где по правилам разрешены осознанные отступления ради скорости (с обоснованием в документе фичи и бенчмарком):
 
-1. Пакетный цикл в Go: `fdtunnel`, `udpbind`.
+1. Пакетный цикл в Go: `fdtunnel`, `servicerouting`, `udpbind`.
 2. Ретрансляция потоков на macOS: `TransparentProxy` (`TCPFlowRelay`, `UDPFlowRelay`) и `usernet`.
 3. Решение по потоку: `ApplicationMatcher`, `FlowRoutingDecider` (хэш-таблицы, кэш по процессу).
 
