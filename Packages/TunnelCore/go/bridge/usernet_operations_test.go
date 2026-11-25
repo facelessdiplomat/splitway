@@ -153,6 +153,14 @@ func TestRejectsNetworkOperationsOnOtherHandles(t *testing.T) {
 	}
 }
 
+func TestRejectsServiceRoutingOnAUserspaceNetwork(t *testing.T) {
+	network := startBridgeNetwork(t, testpeer.ServerAddress.String())
+
+	if status := setServiceRouting(network, planFixture(t)); status != statusInvalidArgument {
+		t.Fatalf("expected an invalid argument, got %d", status)
+	}
+}
+
 func TestTurnsAPanicIntoAnInternalFailure(t *testing.T) {
 	status := guarded(func() tunnelStatus { panic("unexpected") })
 
