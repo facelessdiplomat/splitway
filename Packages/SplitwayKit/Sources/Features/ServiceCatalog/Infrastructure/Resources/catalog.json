@@ -32,7 +32,7 @@
         "2001:b28:f23f::/48",
         "2a0a:f280::/32"
       ],
-      "notes": "Networks copied from https://core.telegram.org/resources/cidr.txt (fetched 2026-11-01); t.me, telegram.me and telegram.dog are the link domains listed in https://core.telegram.org/api/links, and telesco.pe is the media CDN that t.me pages load (cdn1/cdn4.telesco.pe). The apps reach data centers and call relays by IP, so the CIDR list, not DNS matching, is what routes MTProto traffic."
+      "notes": "Networks copied from https://core.telegram.org/resources/cidr.txt (fetched 2026-11-01, unchanged on 2026-11-25); t.me, telegram.me and telegram.dog are the link domains listed in https://core.telegram.org/api/links, and telesco.pe is the media CDN that t.me pages load (cdn1/cdn4.telesco.pe). The apps reach data centers and call relays by IP, so the CIDR list, not DNS matching, is what routes MTProto traffic."
     },
     {
       "id": "whatsapp",
@@ -137,7 +137,7 @@
       ],
       "ipv4Networks": [],
       "ipv6Networks": [],
-      "notes": "youtube.com, youtu.be, youtube-nocookie.com, s.ytimg.com, youtubei.googleapis.com and youtube.googleapis.com come from Google's https://support.google.com/a/answer/6214622, while googlevideo.com (video streams) and the avatar hosts yt3.ggpht.com and yt3.googleusercontent.com were observed on youtube.com pages (unofficial). Sign-in and shared assets use google.com, gstatic.com and other googleapis.com hosts (not listed), and Google only publishes company-wide ranges (goog.json), so there is no YouTube IP list."
+      "notes": "youtube.com, youtu.be, youtube-nocookie.com, s.ytimg.com, youtubei.googleapis.com and youtube.googleapis.com come from Google's https://knowledge.workspace.google.com/admin/youtube/control-youtube-content-available-to-users (formerly https://support.google.com/a/answer/6214622, checked 2026-11-25), while googlevideo.com (video streams) and the avatar hosts yt3.ggpht.com and yt3.googleusercontent.com were observed on youtube.com pages (unofficial). Sign-in and shared assets use google.com, gstatic.com and other googleapis.com hosts (not listed), and Google only publishes company-wide ranges (goog.json), so there is no YouTube IP list."
     },
     {
       "id": "x",
@@ -185,11 +185,12 @@
         "openai.com",
         "oaistatic.com",
         "oaiusercontent.com",
-        "oaistatsig.com"
+        "oaistatsig.com",
+        "cdn.openaimerge.com"
       ],
       "ipv4Networks": [],
       "ipv6Networks": [],
-      "notes": "Domains are the OpenAI-owned entries of https://help.openai.com/en/articles/9247338 (its third-party WorkOS, Intercom, Stripe, Sentry, Datadog, SendGrid, Cloudflare challenge and Apple App Attest hosts are not listed). Web and API traffic sits behind Cloudflare, so DNS matching is what routes it. The ChatGPT Voice servers (UDP 3478) are published only as a continuously updated list of Azure addresses, https://openai.com/chatgpt-voice.json, so the catalog does not bundle them and voice conversations may bypass the tunnel."
+      "notes": "Domains are the OpenAI-owned entries of https://help.openai.com/en/articles/9247338 (checked 2026-11-25, when it also listed cdn.openaimerge.com; its third-party WorkOS, Intercom, Stripe, Sentry, Datadog, SendGrid, Cloudflare challenge and Apple App Attest hosts are not listed). Web and API traffic sits behind Cloudflare, so DNS matching is what routes it. The ChatGPT Voice servers (UDP 3478) are published only as a continuously updated list of Azure addresses, https://openai.com/chatgpt-voice.json, so the catalog does not bundle them and voice conversations may bypass the tunnel."
     },
     {
       "id": "claude",
@@ -205,12 +206,13 @@
         "claudemcpcontent.com"
       ],
       "ipv4Networks": [
-        "160.79.104.0/23"
+        "160.79.104.0/23",
+        "153.61.224.0/22"
       ],
       "ipv6Networks": [
         "2607:6bc0::/48"
       ],
-      "notes": "Domains from https://code.claude.com/docs/en/network-config (claude.ai, claude.com, api/mcp-proxy/assets-proxy.anthropic.com, *.claudeusercontent.com, *.claudemcpcontent.com); networks are the inbound ranges from https://platform.claude.com/docs/en/api/ip-addresses, into which claude.ai and api.anthropic.com resolve (the outbound 160.79.104.0/21 is egress only). downloads.claude.ai and assets.claude.ai are on Google Cloud and are covered only by DNS matching; storage.googleapis.com and the public CDNs that artifacts load are not listed."
+      "notes": "Domains from https://code.claude.com/docs/en/network-config (claude.ai, claude.com, api/mcp-proxy/assets-proxy.anthropic.com, *.claudeusercontent.com, *.claudemcpcontent.com); networks are the inbound ranges from https://platform.claude.com/docs/en/api/ip-addresses (fetched 2026-11-25, when claude.ai and api.anthropic.com resolved into 160.79.104.0/23; the outbound 160.79.104.0/21 and 153.61.208.0/20 are egress only). downloads.claude.ai and assets.claude.ai are on Google Cloud and are covered only by DNS matching; storage.googleapis.com and the public CDNs that artifacts load are not listed."
     },
     {
       "id": "spotify",
@@ -271,21 +273,46 @@
         "githubassets.com",
         "github.dev",
         "github.io",
-        "githubcopilot.com"
+        "githubcopilot.com",
+        "production-copilot-host.webpubsub.azure.com",
+        "production-copilot-host-centralus.webpubsub.azure.com",
+        "production-copilot-host-centralus-02.webpubsub.azure.com",
+        "production-copilot-host-westus.webpubsub.azure.com",
+        "production-copilot-host-westus3.webpubsub.azure.com",
+        "production-copilot-host-eastasia.webpubsub.azure.com",
+        "production-copilot-host-austriaeast.webpubsub.azure.com"
       ],
       "ipv4Networks": [
+        "4.149.173.80/28",
+        "4.158.254.48/28",
+        "4.159.108.160/28",
+        "4.159.197.192/28",
+        "4.163.8.144/28",
+        "4.186.157.192/28",
+        "4.187.247.160/28",
+        "4.195.217.80/28",
+        "4.196.32.112/28",
+        "4.207.215.240/28",
         "4.208.26.193/32",
         "4.208.26.197/32",
         "4.208.26.198/32",
         "4.208.26.200/32",
+        "4.209.111.112/28",
+        "4.209.112.0/28",
         "4.225.11.194/32",
         "4.225.11.199/32",
         "4.225.11.200/32",
         "4.225.11.201/32",
+        "4.225.187.240/28",
+        "4.225.189.240/28",
         "4.228.31.144/32",
         "4.228.31.145/32",
         "4.228.31.149/32",
         "4.228.31.150/32",
+        "4.234.31.32/28",
+        "4.234.31.128/28",
+        "4.234.47.112/28",
+        "4.236.95.112/28",
         "4.237.22.34/32",
         "4.237.22.36/32",
         "4.237.22.38/32",
@@ -293,10 +320,14 @@
         "4.249.131.163/32",
         "4.249.131.164/32",
         "4.249.131.166/32",
+        "20.6.7.16/28",
+        "20.26.58.32/28",
+        "20.26.68.64/28",
         "20.26.156.210/32",
         "20.26.156.213/32",
         "20.26.156.214/32",
         "20.26.156.215/32",
+        "20.27.163.208/28",
         "20.27.177.113/32",
         "20.27.177.116/32",
         "20.27.177.118/32",
@@ -305,10 +336,13 @@
         "20.29.134.19/32",
         "20.29.134.22/32",
         "20.29.134.23/32",
+        "20.64.190.224/28",
         "20.87.245.0/32",
         "20.87.245.2/32",
         "20.87.245.4/32",
         "20.87.245.6/32",
+        "20.169.109.160/28",
+        "20.172.24.160/28",
         "20.175.192.146/32",
         "20.175.192.147/32",
         "20.175.192.149/32",
@@ -319,9 +353,6 @@
         "20.200.245.245/32",
         "20.200.245.247/32",
         "20.200.245.248/32",
-        "20.201.28.148/32",
-        "20.201.28.151/32",
-        "20.201.28.152/32",
         "20.205.243.160/32",
         "20.205.243.161/32",
         "20.205.243.166/32",
@@ -330,6 +361,7 @@
         "20.207.73.82/32",
         "20.207.73.83/32",
         "20.207.73.85/32",
+        "20.208.89.80/28",
         "20.217.135.0/32",
         "20.217.135.1/32",
         "20.217.135.4/32",
@@ -338,21 +370,46 @@
         "20.233.83.146/32",
         "20.233.83.148/32",
         "20.233.83.149/32",
+        "20.247.166.64/28",
         "20.250.119.67/32",
         "20.250.119.68/32",
         "20.250.119.72/32",
+        "20.254.76.112/28",
+        "40.121.125.32/28",
+        "40.121.125.128/28",
+        "40.121.125.144/28",
+        "40.121.125.160/28",
+        "40.121.125.176/28",
+        "40.121.125.192/28",
+        "40.121.125.208/28",
+        "48.200.82.112/28",
+        "48.202.10.80/28",
+        "48.202.91.176/28",
         "48.202.248.38/32",
         "48.202.248.39/32",
         "48.202.248.40/32",
         "48.204.201.2/32",
         "48.204.201.5/32",
         "48.204.201.6/32",
+        "57.155.223.240/28",
+        "57.166.80.144/28",
+        "74.158.248.0/28",
+        "74.161.79.192/28",
+        "135.235.149.144/28",
         "140.82.112.0/20",
         "143.55.64.0/20",
+        "172.130.18.192/28",
+        "172.130.45.112/28",
+        "172.130.99.48/28",
+        "172.130.153.16/28",
+        "172.130.201.80/28",
+        "172.139.64.112/28",
         "172.182.252.130/32",
         "172.182.252.133/32",
         "172.182.252.135/32",
         "172.182.252.137/32",
+        "172.194.155.208/28",
+        "172.194.218.192/28",
         "185.199.108.0/22",
         "192.30.252.0/22"
       ],
@@ -360,7 +417,7 @@
         "2606:50c0::/32",
         "2a0a:a440::/29"
       ],
-      "notes": "Domains from the domains.website and domains.copilot keys of https://api.github.com/meta (github.io also covers every GitHub Pages site); networks are the deduplicated union of its web, api and git keys (fetched 2026-11-01). Packages and Actions storage on *.blob.core.windows.net, ghcr.io, githubapp.com and Copilot's default.exp-tas.com are not listed."
+      "notes": "Domains from the domains.website and domains.copilot keys of https://api.github.com/meta (github.io also covers every GitHub Pages site); networks are the deduplicated union of its web, api and git keys (fetched 2026-11-25). Copilot's production-copilot-host*.webpubsub.azure.com hosts are listed one by one, since webpubsub.azure.com is shared Azure. Packages and Actions storage on *.blob.core.windows.net, ghcr.io, githubapp.com and Copilot's default.exp-tas.com are not listed."
     }
   ]
 }
