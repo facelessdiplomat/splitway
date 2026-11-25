@@ -114,6 +114,10 @@ targets:
       - package: SplitwayKit
         product: TunnelLibraryInfrastructure
       - package: SplitwayKit
+        product: ServiceCatalog
+      - package: SplitwayKit
+        product: ServiceCatalogInfrastructure
+      - package: SplitwayKit
         product: Diagnostics
       - package: SplitwayKit
         product: DiagnosticsInfrastructure
