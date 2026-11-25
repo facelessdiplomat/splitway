@@ -1,21 +1,21 @@
 # 02. Общая архитектура
 
-Документ описывает общую архитектуру Splitway. Особенности macOS — в [03-platform-macos.md](03-platform-macos.md), iOS и iPadOS — в [04-platform-ios-ipados.md](04-platform-ios-ipados.md). Решение D-45 сняло iOS и iPadOS, решение D-53 вернуло их личной сборкой: код возвращается из тега `ios-final` вехой [M9](05-tasks/M9-ios-personal-build.md), и разделы ниже описывают iOS по мере его возвращения.
+Документ описывает общую архитектуру Splitway. Особенности macOS — в [03-platform-macos.md](03-platform-macos.md), iOS и iPadOS — в [04-platform-ios-ipados.md](04-platform-ios-ipados.md). Решение D-45 сняло iOS и iPadOS, решение D-53 вернуло их личной сборкой: код вернулся из тега `ios-final` вехой [M9](05-tasks/M9-ios-personal-build.md), и разделы ниже описывают обе платформы. iPad не проверяется (решение D-55).
 
 ## 1. Технологический стек
 
 | Область | Выбор | Причина |
 |---|---|---|
 | Язык приложения | Swift 6 (strict concurrency), инструменты Swift 6.4 / Xcode 27 | Безопасность потоков на уровне компилятора. |
-| UI | SwiftUI + Observation (`@Observable`) | Нативный вид, декларативный код интерфейса. |
-| Тесты | Swift Testing (`import Testing`) | Параметризованные тесты, быстрый запуск через `swift test`. |
-| VPN-движок | wireguard-go (MIT) + gVisor netstack (Apache-2.0) из `golang.zx2c4.com/wireguard/tun/netstack`, Go 1.27 | Эталонная реализация. Userspace-стек нужен для выбора приложений. |
+| UI | SwiftUI + Observation (`@Observable`) | Один код интерфейса для Mac, iPhone и iPad, нативный вид. |
+| Тесты | Swift Testing (`import Testing`) для unit и интеграционных тестов; XCTest и XCUITest — для UI-тестов и живых тестов iOS | Параметризованные тесты, быстрый запуск через `swift test`. Swift Testing не умеет управлять приложением. |
+| VPN-движок | wireguard-go (MIT) + gVisor netstack (Apache-2.0) из `golang.zx2c4.com/wireguard/tun/netstack`, Go 1.27 | Эталонная реализация. Userspace-стек нужен для выбора приложений на macOS. |
 | Мост Go ↔ Swift | Свой C ABI (`go build -buildmode=c-archive`) → `TunnelCore.xcframework` | Полный контроль над API, без gomobile и без WireGuardKit. |
-| Системные API | NetworkExtension, SystemExtensions (macOS), Security (Keychain, подписи кода), Network, OSLog, AppIntents | — |
+| Системные API | NetworkExtension, SystemExtensions (macOS), Security (Keychain, подписи кода), Network, OSLog, AppIntents; на iOS ещё WidgetKit (Controls), VisionKit и Vision (QR-коды) | — |
 | Проект | XcodeGen (`project.yml`) + локальные SPM-пакеты | XcodeGen уже установлен. Нет конфликтов в `.pbxproj`, весь код живёт в пакетах. |
-| Сторонние Swift-зависимости | ZIPFoundation (MIT), только для `.zip`; Sparkle 2 (MIT) — автообновление, только в приложении (решение D-52) | Минимум зависимостей; см. ADR-08, ADR-16 и ADR-18. |
+| Сторонние Swift-зависимости | ZIPFoundation (MIT), только для `.zip`; Sparkle 2 (MIT) — автообновление, только в приложении macOS (решение D-52) | Минимум зависимостей; см. ADR-08, ADR-16 и ADR-18. |
 | Линтинг | SwiftLint (кастомное правило «нет комментариев» и правила слоёв), `swift format`, `go vet`, `gofmt`, свой чекер комментариев для Go | Правила разработки проверяются автоматически. |
-| Проверки | `Scripts/check.sh` и git-хуки, без CI (решение D-54) | Один скрипт запускает линтеры, тесты и сборку. |
+| Проверки | `Scripts/check.sh` и git-хуки, без CI (решение D-54) | Один скрипт запускает линтеры, тесты и сборку macOS и iOS; UI-тесты iOS — с флагом `--ui`. |
 | Диагностика | OSLog, кольцевой журнал, MetricKit. Всё хранится локально, отчёт отправляет только сам пользователь (решение D-22) | Обещание «никаких запросов к серверам разработчика». |
 
 ## 2. Процессы и компоненты
@@ -28,7 +28,7 @@ flowchart LR
   end
   subgraph Ext["Сетевое расширение"]
     PT[PacketTunnelProvider]
-    TP[TransparentProxyProvider]
+    TP["TransparentProxyProvider<br/>(только macOS)"]
     Engine[TunnelCoreAdapter]
     PT --> Engine
     TP --> Engine
@@ -36,6 +36,7 @@ flowchart LR
   subgraph Go["TunnelCore (Go)"]
     WG[wireguard-go]
     NS[gVisor netstack]
+    SR["servicerouting<br/>(iOS)"]
   end
   Ports -- "NE managers / сообщения провайдеру" --> Ext
   Ports -- "Keychain / App Group" --> Store[(Хранилище)]
@@ -43,14 +44,16 @@ flowchart LR
   Engine -- C ABI --> Go
 ```
 
-| Компонент | Где живёт |
-|---|---|
-| Приложение | `macOSApp` (окно + строка меню) |
-| Пакетный туннель («Весь трафик») | `NetworkSystemExtension` (system extension) |
-| Выбор приложений | `NetworkSystemExtension`, класс `TransparentProxyProvider` |
-| DNS выбранных приложений | `NetworkSystemExtension`, тот же `TransparentProxyProvider` (решение D-34) |
+| Компонент | iOS и iPadOS | macOS |
+|---|---|---|
+| Приложение | `iOSApp`, универсальное для iPhone и iPad | `macOSApp` (окно + строка меню) |
+| Пакетный туннель («Весь трафик») | `PacketTunnelExtension` (app extension) | `NetworkSystemExtension` (system extension) |
+| Выбор приложений | — | `NetworkSystemExtension`, класс `TransparentProxyProvider` |
+| DNS выбранных приложений | — | `NetworkSystemExtension`, тот же `TransparentProxyProvider` (решение D-34) |
+| Выбор сервисов | `PacketTunnelExtension` + `servicerouting` в Go | — |
+| Controls | `ControlsExtension` | — |
 
-Оба провайдера живут **в одном** системном расширении, и пользователь одобряет одно расширение. Отдельного DNS-прокси нет: DNS-запросы выбранных приложений приходят в transparent proxy от их имени, и он отправляет их через свой `usernet` (решение D-34, спайки SP-2 и SP-9).
+Провайдер пакетного туннеля и его composition root общие для обеих платформ (`Apps/SharedTunnelProvider`). На macOS оба провайдера живут **в одном** системном расширении, и пользователь одобряет одно расширение. Отдельного DNS-прокси нет: DNS-запросы выбранных приложений приходят в transparent proxy от их имени, и он отправляет их через свой `usernet` (решение D-34, спайки SP-2 и SP-9).
 
 ## 3. Структура репозитория
 
@@ -59,10 +62,13 @@ flowchart LR
 ├── CLAUDE.md, README.md
 ├── project.yml                      XcodeGen: таргеты, entitlements, Info.plist
 ├── Apps/                            тонкие оболочки, только точки входа и composition root
+│   ├── iOSApp/
 │   ├── macOSApp/
-│   ├── Shared/                      composition root и корневая сцена приложения
-│   ├── SharedTunnelProvider/        провайдер пакетного туннеля и его composition root
-│   └── NetworkSystemExtension/
+│   ├── Shared/                      общий composition root и корневая сцена приложений iOS и macOS
+│   ├── SharedTunnelProvider/        провайдер пакетного туннеля и его composition root, общие для iOS и macOS
+│   ├── PacketTunnelExtension/       пакетный туннель iOS
+│   ├── NetworkSystemExtension/
+│   └── ControlsExtension/           Controls iOS
 ├── Packages/
 │   ├── SplitwayKit/                 весь Swift-код фич (без Go)
 │   │   ├── Package.swift
@@ -74,7 +80,10 @@ flowchart LR
 │       ├── Package.swift            binaryTarget TunnelCoreFramework + target TunnelCoreAdapter
 │       ├── go/                      go.mod, пакеты по фичам: bridge, fdtunnel, usernet, servicerouting, udpbind, logbridge
 │       └── Scripts/build-xcframework.sh
-├── Scripts/                         check.sh, bootstrap, lint, git-хуки, проверка комментариев
+├── IntegrationTests/                интеграционные тесты: Keychain и поиск утечек ключей, iOS и macOS
+├── IntegrationTestHost/             хост-приложение интеграционных тестов на macOS
+├── UITests/                         UI-тесты iOS и живые тесты на iPhone (XCUITest)
+├── Scripts/                         check.sh, bootstrap, lint, git-хуки, проверка комментариев, установка на iPhone
 └── docs/                            эта документация + docs/features/*.md
 ```
 
@@ -96,36 +105,39 @@ flowchart LR
 1. `Core` не знает ни о UI, ни об инфраструктуре. Компилятор гарантирует это, потому что у таргета нет таких зависимостей.
 2. `Presentation` не обращается к `Infrastructure`: только к use cases и доменным типам.
 3. Связывание (composition root) выполняется только в `Apps/*`. У каждой фичи есть небольшой `<Feature>Assembly` в таргете `Infrastructure`, который собирает её граф. Общего «контейнера на всё» нет.
-4. Сетевые расширения (пакетный туннель, системное расширение) линкуют только `Core` и `Infrastructure` нужных фич, **никогда** `Presentation`. SwiftUI не попадает в их процесс.
+4. Сетевые расширения (пакетный туннель, системное расширение) линкуют только `Core` и `Infrastructure` нужных фич, **никогда** `Presentation`. SwiftUI не попадает в их процесс, что экономит память пакетного туннеля на iOS. Расширение `ControlsExtension` само рисует контролы на SwiftUI; из слоёв `Presentation` оно берёт только тексты объяснений отказов (`TunnelConnectionPresentation`, без SwiftUI).
 5. Фичи общаются через публичные типы `Core`. Циклические зависимости между фичами запрещены и ловятся сборкой SPM.
 6. Фейки портов для тестов лежат в таргете `<Feature>TestSupport` (`Tests/Features/<Feature>/TestSupport`). Им пользуются тесты самой фичи и зависящих от неё фич.
 
 ## 5. Фичи (bounded contexts)
 
-| Фича | Ответственность | Используется в расширении |
-|---|---|---|
-| `SharedKernel` | `IPAddress`, `IPNetwork` (CIDR), `IPNetworkSet`, `NetworkPort`, `DomainName`, `ByteCount`, `WallClock` | да |
-| `DesignSystem` | Общие UI-компоненты: бейдж статуса, строка «ключ–значение», пустое состояние (только слой `Presentation`) | нет |
-| `TunnelConfiguration` | Модель конфига WireGuard, парсер и сериализатор wg-quick, валидация, ключи, «исключить локальные сети» | да |
-| `TunnelLibrary` | Коллекция туннелей: создание, импорт, изменение, удаление, дублирование, экспорт; хранение | да (чтение) |
-| `TunnelImport` | Источники импорта: файл, `.zip`, буфер, «Открыть в…», перетаскивание | нет |
-| `TunnelEditor` | Черновик редактирования с валидацией полей, экран редактора | нет |
-| `AppRouting` | Политика маршрутизации туннеля, идентичность приложения, решение по потоку, снимок правил для расширения | да |
-| `ApplicationCatalog` | Поиск установленных приложений и CLI-утилит, чтение подписи кода, иконки | нет |
-| `TunnelEngine` | Порт движка WireGuard и кодирование конфигурации в UAPI, разбор статистики | да |
-| `PacketTunnel` | Логика пакетного туннеля: сетевые настройки, резолвинг endpoint, реакция на смену сети | да |
-| `TransparentProxy` | Перехват потоков, определение приложения-источника, TCP/UDP-ретрансляция | да |
-| `DNSProxy` | Решения и ответы DNS для transparent proxy: сервер через туннель, ответ `REFUSED` (провайдера DNS-прокси нет, решение D-34) | да |
-| `TunnelConnection` | Подключение, отключение, статус, статистика, последняя ошибка | нет |
-| `ProviderMessaging` | Типизированный протокол сообщений «приложение ↔ расширение» с версионированием | да |
-| `SystemExtension` | Установка и обновление системного расширения, мастер одобрения | нет |
-| `SecretDelivery` | Доставка секретов туннелей в системное расширение: требование к подписи клиента XPC, версионированные сообщения, зеркальная копия и доставка перед активацией | да (обработчик запросов) |
-| `Diagnostics` | Журнал (кольцевой буфер в App Group), маскирование секретов, экспорт, локальные отчёты MetricKit, ручная отправка отчёта | да |
-| `Settings` | Настройки приложения: «О приложении», лицензии открытого ПО с проверкой полноты, запуск при входе, иконка в Dock, удаление Splitway | нет |
-| `MenuBar` | Меню в строке меню | нет |
-| `Shortcuts` | App Intents: подключить, отключить, переключить; сущность туннеля | нет |
-| `Onboarding` | Первый запуск, объяснение разрешений | нет |
-| `OnDemand` (v1.x) | Правила автоподключения и их компиляция в `NEOnDemandRule` | нет |
+| Фича | Ответственность | Платформы | Используется в расширении |
+|---|---|---|---|
+| `SharedKernel` | `IPAddress`, `IPNetwork` (CIDR), `IPNetworkSet`, `NetworkPort`, `DomainName`, `ByteCount`, `WallClock` | все | да |
+| `DesignSystem` | Общие UI-компоненты: бейдж статуса, строка «ключ–значение», пустое состояние (только слой `Presentation`) | все | нет |
+| `TunnelConfiguration` | Модель конфига WireGuard, парсер и сериализатор wg-quick, валидация, ключи, «исключить локальные сети» | все | да |
+| `TunnelLibrary` | Коллекция туннелей: создание, импорт, изменение, удаление, дублирование, экспорт; хранение | все | да (чтение) |
+| `TunnelImport` | Источники импорта: файл, `.zip`, буфер, QR, «Открыть в…», перетаскивание | все (QR — iOS) | нет |
+| `TunnelEditor` | Черновик редактирования с валидацией полей, экран редактора | все | нет |
+| `AppRouting` | Политика маршрутизации туннеля, идентичность приложения, решение по потоку, снимок правил для расширения | все (выбор приложений — macOS, выбор сервисов — iOS) | да |
+| `ApplicationCatalog` | Поиск установленных приложений и CLI-утилит, чтение подписи кода, иконки | macOS | нет |
+| `ServiceCatalog` | Каталог сервисов, свои сервисы, компиляция выбора в план маршрутизации | iOS | да |
+| `TunnelEngine` | Порт движка WireGuard и кодирование конфигурации в UAPI, разбор статистики | все | да |
+| `PacketTunnel` | Логика пакетного туннеля: сетевые настройки, резолвинг endpoint, реакция на смену сети | все | да |
+| `TransparentProxy` | Перехват потоков, определение приложения-источника, TCP/UDP-ретрансляция | macOS | да |
+| `DNSProxy` | Решения и ответы DNS для transparent proxy: сервер через туннель, ответ `REFUSED` (провайдера DNS-прокси нет, решение D-34) | macOS | да |
+| `TunnelConnection` | Подключение, отключение, статус, статистика, последняя ошибка | все | да (`ControlsExtension`) |
+| `ProviderMessaging` | Типизированный протокол сообщений «приложение ↔ расширение» с версионированием | все | да |
+| `SystemExtension` | Установка и обновление системного расширения, мастер одобрения | macOS | нет |
+| `SecretDelivery` | Доставка секретов туннелей в системное расширение: требование к подписи клиента XPC, версионированные сообщения, зеркальная копия и доставка перед активацией | macOS | да (обработчик запросов) |
+| `Diagnostics` | Журнал (кольцевой буфер в App Group), маскирование секретов, экспорт, локальные отчёты MetricKit, ручная отправка отчёта | все | да |
+| `Settings` | Настройки приложения: «О приложении», лицензии открытого ПО с проверкой полноты, запуск при входе, иконка в Dock, удаление Splitway | все (вход, Dock и удаление — macOS) | нет |
+| `Updates` | Проверка и установка обновлений через Sparkle | macOS | нет |
+| `MenuBar` | Меню в строке меню | macOS | нет |
+| `Shortcuts` | App Intents: подключить, отключить, переключить; сущность туннеля | все | да (`ControlsExtension`) |
+| `ControlWidgets` | Переключатель туннеля в Пункте управления и на экране блокировки | iOS | да (`ControlsExtension`) |
+| `Onboarding` | Первый запуск, объяснение разрешений | все | нет |
+| `OnDemand` (v1.x) | Правила автоподключения и их компиляция в `NEOnDemandRule` | все | нет |
 
 ## 6. Ключевая доменная модель
 
@@ -152,7 +164,8 @@ Tunnel                                  сущность (aggregate root фич�
 
 RoutingPolicy
 ├── mode: .allTraffic
-│       | .selectedApplications(ApplicationSelection)
+│       | .selectedApplications(ApplicationSelection)   macOS
+│       | .selectedServices(ServiceSelection)           iOS
 └── whenTunnelUnavailable: .bypass | .block
 ```
 
@@ -165,8 +178,9 @@ RoutingPolicy
 | Данные | Где хранится | Кто читает |
 |---|---|---|
 | Метаданные туннелей: id, имя, порядок, политика маршрутизации | JSON в контейнере App Group, атомарная запись, версия схемы с миграциями | приложение; расширение — только активный туннель |
-| Конфиг wg-quick целиком, с ключами | Keychain приложения с общей access group; для системного расширения — см. [03-platform-macos.md](03-platform-macos.md), раздел 5 | приложение, расширение |
-| Системная конфигурация VPN | По одному «слоту» на тип провайдера: `NETunnelProviderManager` и `NETransparentProxyManager`. В `providerConfiguration` лежит только id активного туннеля и снимок политики маршрутизации, без секретов | система, расширение |
+| Конфиг wg-quick целиком, с ключами | Keychain с общей access group `…splitway.shared`, `AfterFirstUnlockThisDeviceOnly`: на iOS из неё читают и приложение, и пакетный туннель. Для системного расширения macOS — см. [03-platform-macos.md](03-platform-macos.md), раздел 5 | приложение, расширение |
+| Системная конфигурация VPN | По одному «слоту» на тип провайдера: `NETunnelProviderManager`, на macOS ещё `NETransparentProxyManager`. В `providerConfiguration` лежит только id активного туннеля и снимок политики маршрутизации, без секретов | система, расширение |
+| Свои сервисы (iOS) | `custom-services.json` в контейнере App Group; встроенный каталог — ресурс фичи `ServiceCatalog` | приложение, пакетный туннель |
 | Журнал | Кольцевой файл в App Group (до 2 МБ) + OSLog | приложение, расширение |
 | Настройки приложения | `UserDefaults` приложения (флаг пройденного онбординга) | приложение |
 
@@ -180,7 +194,8 @@ RoutingPolicy
 - **Статус**: `NEVPNStatusDidChange` → доменный `ConnectionState`.
 - **Ошибки запуска**: `NEVPNConnection.fetchLastDisconnectError`. Запасной вариант — файл последней ошибки в App Group.
 - **Изменение конфигурации активного туннеля**: изменение политики маршрутизации применяется на лету сообщением. Изменение параметров WireGuard перезапускает туннель (как в официальном клиенте).
-- **XPC**: системное расширение дополнительно публикует XPC-сервис (`NEMachServiceName`) для операций без запущенного туннеля, например для передачи секретов (раздел 5 документа macOS).
+- **Controls (iOS)**: intent контрола в процессе `ControlsExtension` сам записывает туннель в слот и запускает его, приложение не открывается ([ControlWidgets](features/ControlWidgets.md), спайк SP-8).
+- **XPC (только macOS)**: на iOS пакетный туннель читает секреты из общей группы связки ключей сам. Системное расширение macOS дополнительно публикует XPC-сервис (`NEMachServiceName`) для операций без запущенного туннеля, например для передачи секретов (раздел 5 документа macOS).
 
 ## 9. TunnelCore (Go)
 
@@ -189,14 +204,14 @@ Go-модуль разбит на пакеты по фичам:
 | Пакет | Назначение |
 |---|---|
 | `bridge` | Экспортируемые C-функции (`//export`), таблица хэндлов, обратные вызовы в Swift |
-| `fdtunnel` | WireGuard поверх файлового дескриптора `utun` (режим «Весь трафик») |
-| `usernet` | WireGuard поверх gVisor netstack: `DialTCP`, UDP-сокеты, DNS через туннель (выбор приложений) |
+| `fdtunnel` | WireGuard поверх файлового дескриптора `utun` (режим «Весь трафик» и выбор сервисов на iOS) |
+| `usernet` | WireGuard поверх gVisor netstack: `DialTCP`, UDP-сокеты, DNS через туннель (выбор приложений на macOS) |
 | `servicerouting` | Пул фиктивных адресов, перехват DNS выбранных доменов, трансляция адресов (выбор сервисов на iOS, M9-07) |
 | `udpbind` | UDP-сокеты движка: одна датаграмма за вызов, буферы по 7 МБ (M7-03) |
 | `logbridge` | Передача логов wireguard-go в Swift |
 | `internal/testpeer`, `testpeer` | Пир WireGuard с эхо-серверами и DNS для тестов: пакет для Go-тестов, утилита — для тестов Swift. В ядро не входит |
 
-Go-пакеты документируются так же, как Swift-фичи: например, [UserspaceNetwork](features/UserspaceNetwork.md) описывает `usernet`.
+Go-пакеты документируются так же, как Swift-фичи: например, [UserspaceNetwork](features/UserspaceNetwork.md) описывает `usernet`, а [ServiceRouting](features/ServiceRouting.md) — `servicerouting`.
 
 C API (функции описаны в [TunnelEngine](features/TunnelEngine.md) и [UserspaceNetwork](features/UserspaceNetwork.md)):
 
@@ -242,12 +257,13 @@ tc_free(pointer)
 
 | Уровень | Что тестируем | Чем |
 |---|---|---|
-| Домен | Парсер и сериализатор (табличные тесты, round-trip), value objects, CIDR-алгебра, «исключить локальные сети», политика маршрутизации, `FlowRoutingDecider`, `ApplicationMatcher`, кодирование UAPI, разбор статистики, редактор-черновик, маскирование секретов | Swift Testing, `swift test` |
+| Домен | Парсер и сериализатор (табличные тесты, round-trip), value objects, CIDR-алгебра, «исключить локальные сети», политика маршрутизации, `FlowRoutingDecider`, `ApplicationMatcher`, компиляция плана сервисов, кодирование UAPI, разбор статистики, редактор-черновик, маскирование секретов | Swift Testing, `swift test` |
 | Use cases | Сценарии с фейковыми портами: импорт с конфликтами имён, активация при уже активном туннеле, применение политики на лету | Swift Testing + фейки |
 | Модели представления | Маппинг состояния в отображение, реакция на действия пользователя | Swift Testing |
-| Инфраструктура | Keychain, JSON-репозиторий, миграции, кодек сообщений провайдера, чтение подписи кода | Swift Testing на хосте |
-| Go | Ретрансляция через netstack на паре локальных WireGuard-устройств, UDP-сокеты движка | `go test`, бенчмарки `go test -bench` |
-| Сквозные | Реальные сервер и устройства, тесты утечек, смена сетей | Чек-лист M7 + скрипты |
+| Инфраструктура | Keychain, JSON-репозиторий, миграции, кодек сообщений провайдера, чтение подписи кода | Swift Testing на хосте; интеграционные тесты — в хост-приложении на Mac и в симуляторе iPhone |
+| Go | Ретрансляция через netstack на паре локальных WireGuard-устройств, UDP-сокеты движка, трансляция адресов, перехват DNS и пул адресов `servicerouting` | `go test`, бенчмарки `go test -bench` |
+| UI (iOS) | Дымовые сценарии, выбор сервисов, переводы подписей, аудит доступности | XCUITest в симуляторе iPhone, `Scripts/check.sh --ui` |
+| Сквозные | Реальные сервер и устройства, тесты утечек, смена сетей; на iPhone — живые UI-тесты туннеля, режима сервисов, Controls и скорости | [Проверки Mac](05-tasks/mac-checks.md), [проверки iPhone](05-tasks/ios-checks.md) и скрипты |
 
 Не покрываем тестами вёрстку SwiftUI и тонкие обёртки над системными API без собственной логики.
 
@@ -257,8 +273,8 @@ tc_free(pointer)
 |---|---|---|---|
 | ADR-01 | macOS: выбор приложений через `NETransparentProxyProvider` и userspace WireGuard (netstack) | Per-app VPN (`NETunnelProviderManager.forPerAppVPN()` + `NEAppRule`); PF + группы процессов; Endpoint Security + доп. интерфейс | Документация Apple называет per-app VPN функцией MDM, а работа без MDM не документирована. Решение D-11: per-app VPN не используем, даже если он заработает без MDM, поэтому спайк SP-1 отменён. PF и Endpoint Security требуют root-хелперов и не видят WebKit. |
 | ADR-02 | iOS: выбор сервисов через перехват DNS выбранных доменов, фиктивные адреса и трансляцию в Go | Статические маршруты; динамическое добавление маршрутов после DNS-ответа | Без MDM выбирать приложения нельзя. Динамические маршруты требуют частых `setTunnelNetworkSettings`, что ломает соединения. Трансляция адресов работает без пересоздания интерфейса. SP-4 подтвердил подход на iPhone 13 Pro: выбранные домены идут через туннель, остальные напрямую, пик памяти расширения — 12,2 МБ. Снято вместе с iOS решением D-45 и возвращено решением D-53 (веха M9). |
-| ADR-03 | Свой Go-мост над wireguard-go вместо WireGuardKit | WireGuardKit (wireguard-apple) | Нужны два режима (fd и netstack) и своя архитектура. Полезные идеи WireGuardKit (MIT) переносятся с сохранением лицензии. |
-| ADR-04 | Источник истины — свой репозиторий, одна системная конфигурация на тип провайдера | Одна системная конфигурация на каждый туннель (как в официальном клиенте) | Два типа провайдеров, единая модель, проще миграции. Минус: в системных настройках VPN виден один пункт, а не список туннелей. |
+| ADR-03 | Свой Go-мост над wireguard-go вместо WireGuardKit | WireGuardKit (wireguard-apple) | Нужны два режима (fd и netstack), трансляция адресов для выбора сервисов на iOS и своя архитектура. Полезные идеи WireGuardKit (MIT) переносятся с сохранением лицензии. |
+| ADR-04 | Источник истины — свой репозиторий, одна системная конфигурация на тип провайдера | Одна системная конфигурация на каждый туннель (как в официальном клиенте) | Два типа провайдеров на macOS, единая модель на обеих платформах, проще миграции. Минус: в системных настройках VPN виден один пункт, а не список туннелей. |
 | ADR-05 | XcodeGen + локальные SPM-пакеты | Ручной `.xcodeproj`, Tuist | XcodeGen уже установлен; проект описывается текстом и воспроизводим. |
 | ADR-06 | Swift Testing вместо XCTest для unit-тестов | XCTest | Современный API, параметризация, параллельность. |
 | ADR-07 | MVVM + use cases без архитектурных фреймворков | TCA и аналоги | Меньше зависимостей и порог входа, слои и так разделены таргетами. |
