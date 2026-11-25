@@ -1,4 +1,3 @@
-import ApplicationCatalogInfrastructure
 import ApplicationCatalogPresentation
 import Diagnostics
 import DiagnosticsInfrastructure
@@ -10,7 +9,6 @@ import SettingsInfrastructure
 import SettingsPresentation
 import Shortcuts
 import SystemExtension
-import SystemExtensionInfrastructure
 import SystemExtensionPresentation
 import TunnelConnectionInfrastructure
 import TunnelEditorPresentation
@@ -18,8 +16,13 @@ import TunnelImportInfrastructure
 import TunnelImportPresentation
 import TunnelLibraryInfrastructure
 import TunnelLibraryPresentation
-import UpdatesInfrastructure
 import UpdatesPresentation
+
+#if os(macOS)
+    import ApplicationCatalogInfrastructure
+    import SystemExtensionInfrastructure
+    import UpdatesInfrastructure
+#endif
 
 @MainActor
 struct AppComposition {
@@ -59,7 +62,7 @@ struct AppComposition {
         reportCollector = diagnostics.reportCollector
         reportCollector.start()
         onboarding = Self.onboarding(configuration: configuration)
-        let updates = configuration.startsUpdater ? UpdatesModel(updater: SparkleApplicationUpdater()) : nil
+        let updates = Self.updates(configuration: configuration)
         self.updates = updates
         settings = Self.settings(
             version: AppVersion(marketingVersion: configuration.version, build: configuration.build),
@@ -112,12 +115,24 @@ struct AppComposition {
     }
 
     private static func systemExtensionWizard(configuration: AppConfiguration) -> SystemExtensionWizardModel? {
-        SystemExtensionWizardModel(
-            activate: EnsureSystemExtensionActivatedUseCase(
-                activator: OSSystemExtensionActivator(
-                    extensionIdentifier: configuration.tunnelProviderBundleIdentifier)
+        #if os(macOS)
+            SystemExtensionWizardModel(
+                activate: EnsureSystemExtensionActivatedUseCase(
+                    activator: OSSystemExtensionActivator(
+                        extensionIdentifier: configuration.tunnelProviderBundleIdentifier)
+                )
             )
-        )
+        #else
+            nil
+        #endif
+    }
+
+    private static func updates(configuration: AppConfiguration) -> UpdatesModel? {
+        #if os(macOS)
+            configuration.startsUpdater ? UpdatesModel(updater: SparkleApplicationUpdater()) : nil
+        #else
+            nil
+        #endif
     }
 
     private static func settings(version: AppVersion, updates: UpdatesModel?, uninstall: UninstallModel?)
@@ -133,11 +148,19 @@ struct AppComposition {
     }
 
     private static func uninstall(configuration: AppConfiguration, services: AppTunnelServices) -> UninstallModel? {
-        AppUninstall.model(configuration: configuration, services: services)
+        #if os(macOS)
+            AppUninstall.model(configuration: configuration, services: services)
+        #else
+            nil
+        #endif
     }
 
     private static var loginItem: LoginItemModel? {
-        LoginItemModel(loginItem: MainAppLoginItem())
+        #if os(macOS)
+            LoginItemModel(loginItem: MainAppLoginItem())
+        #else
+            nil
+        #endif
     }
 
     private static func tunnelList(services: AppTunnelServices) -> TunnelListModel {
@@ -195,13 +218,17 @@ struct AppComposition {
     }
 
     private static var applicationPicker: ApplicationPickerActions? {
-        let catalog = ApplicationCatalogAssembly()
-        return ApplicationPickerActions(
-            loadApplications: catalog.loadInstalledApplications,
-            resolveIdentity: catalog.resolveApplicationIdentity,
-            fileReader: catalog.fileReader,
-            fileAccess: catalog.fileAccess,
-            iconLoader: catalog.iconLoader
-        )
+        #if os(macOS)
+            let catalog = ApplicationCatalogAssembly()
+            return ApplicationPickerActions(
+                loadApplications: catalog.loadInstalledApplications,
+                resolveIdentity: catalog.resolveApplicationIdentity,
+                fileReader: catalog.fileReader,
+                fileAccess: catalog.fileAccess,
+                iconLoader: catalog.iconLoader
+            )
+        #else
+            return nil
+        #endif
     }
 }
