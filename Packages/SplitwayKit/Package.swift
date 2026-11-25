@@ -267,8 +267,9 @@ let features: [FeatureModule] = [
     ),
     FeatureModule(
         name: "ServiceCatalog",
-        layers: [.core, .infrastructure],
+        layers: [.core, .infrastructure, .presentation],
         coreDependencies: ["AppRouting", "TunnelConfiguration"],
+        presentationDependencies: ["AppRouting", "TunnelConfiguration", "DesignSystemPresentation"],
         testDependencies: ["TunnelConfigurationTestSupport"],
         infrastructureResources: [.process("Resources")],
         providesTestSupport: true
