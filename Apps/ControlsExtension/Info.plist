@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SplitwayAppGroupIdentifier</key>
+	<string>group.$(SPLITWAY_BUNDLE_ID_PREFIX).splitway</string>
+	<key>SplitwayTunnelProviderBundleIdentifier</key>
+	<string>$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.packet-tunnel</string>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.widgetkit-extension</string>
+	</dict>
+</dict>
+</plist>

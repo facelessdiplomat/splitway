@@ -37,6 +37,9 @@ struct AppComposition {
     let onboarding: OnboardingModel
     let reportCollector: MetricKitReportCollector
     let shortcuts: TunnelShortcutActions
+    #if os(iOS)
+        let controlRefresh: Task<Void, Never>
+    #endif
 
     init(configuration: AppConfiguration) {
         let diagnostics = DiagnosticsAssembly(
@@ -49,26 +52,31 @@ struct AppComposition {
         )
         let (library, connection) = (services.library, services.connection)
         shortcuts = Self.registeredShortcuts(library: library, connection: connection)
+        #if os(iOS)
+            controlRefresh = Self.refreshingControls(connection: connection)
+        #endif
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
-        let tunnelList = Self.tunnelList(services: services)
-        self.tunnelList = tunnelList
+        tunnelList = Self.tunnelList(services: services)
         statistics = TunnelStatisticsPolling(fetchStatistics: connection.fetchStatistics)
         tunnelExport = TunnelExportModel(exportTunnels: library.exportTunnels, abandonedCopies: TemporaryExportCopies())
         logViewer = Self.logViewer(diagnostics: diagnostics, configuration: configuration)
         reportCollector = diagnostics.reportCollector
         reportCollector.start()
         onboarding = Self.onboarding(configuration: configuration)
-        let updates = Self.updates(configuration: configuration)
-        self.updates = updates
+        updates = Self.updates(configuration: configuration)
         settings = Self.settings(
             version: AppVersion(marketingVersion: configuration.version, build: configuration.build),
             updates: updates,
             uninstall: Self.uninstall(configuration: configuration, services: services)
         )
-        diagnostics.recorder(for: .application, category: "App").record(
-            .info, "Splitway \(configuration.version) started")
+        Self.recordLaunch(of: configuration, in: diagnostics)
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
         tunnelEditor = Self.tunnelEditor(services: services, clipboard: importer.clipboard, tunnelList: tunnelList)
+    }
+
+    private static func recordLaunch(of configuration: AppConfiguration, in diagnostics: DiagnosticsAssembly) {
+        diagnostics.recorder(for: .application, category: "App")
+            .record(.info, "Splitway \(configuration.version) started")
     }
 
     private static func logViewer(diagnostics: DiagnosticsAssembly, configuration: AppConfiguration)
