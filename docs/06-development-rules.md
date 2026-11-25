@@ -96,7 +96,7 @@
 - Тесты детерминированы: время через `WallClock`, никакой реальной сети в unit-тестах, никаких `sleep`.
 - Структура «подготовка → действие → проверка» видна по пустым строкам, а не по комментариям.
 - Один тест — одно поведение. Имя теста — это его документация.
-- UI-тесты есть только у iOS-версии и идут в симуляторах iPhone и iPad на английском и русском: `Scripts/check.sh --ui` (M9-13). Курсор Mac они не забирают (D-32), но идут долго, поэтому хук `pre-merge-commit` их не запускает: их запускают перед слиянием изменений интерфейса iOS. UI-тестам macOS негде работать без системного расширения. Доступность Mac-версии (VoiceOver, клавиатура) проверяется вручную. Живые проверки туннеля и тесты утечек на Mac — по [проверкам Mac](05-tasks/mac-checks.md) в тестовой ВМ (`Scripts/leak-test-macos.sh`).
+- UI-тесты есть только у iOS-версии и идут в симуляторе iPhone на английском и русском: `Scripts/check.sh --ui` (M9-13); iPad не проверяется (D-55). Курсор Mac они не забирают (D-32), но идут долго, поэтому хук `pre-merge-commit` их не запускает: их запускают перед слиянием изменений интерфейса iOS. UI-тестам macOS негде работать без системного расширения. Доступность Mac-версии (VoiceOver, клавиатура) проверяется вручную. Живые проверки туннеля и тесты утечек на Mac — по [проверкам Mac](05-tasks/mac-checks.md) в тестовой ВМ (`Scripts/leak-test-macos.sh`).
 
 ### DDD
 
@@ -186,6 +186,6 @@
 | Форматирование | `swift format`, `gofmt` | хук `pre-commit`, `Scripts/check.sh` |
 | Strict concurrency | Swift 6 language mode | сборка |
 | Тесты | `swift test`, `xcodebuild test`, `go test` | `Scripts/check.sh`, хук `pre-merge-commit` |
-| UI-тесты iOS | `xcodebuild test` схемы `iOSUITests` в симуляторах iPhone и iPad | `Scripts/check.sh --ui` |
+| UI-тесты iOS | `xcodebuild test` схемы `iOSUITests` в симуляторе iPhone | `Scripts/check.sh --ui` |
 | Скорость горячего пути | `go test -bench` против базовой линии (`Scripts/benchmark-check`): регресс скорости больше 10 % — ошибка | `Scripts/check.sh --bench` |
 | Формат коммитов и отсутствие ИИ-трейлеров | хук `commit-msg`: Conventional Commits, отклоняет `Co-Authored-By` с ИИ и «Generated with» | хук `commit-msg` |
