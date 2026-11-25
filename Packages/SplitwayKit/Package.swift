@@ -214,9 +214,9 @@ let features: [FeatureModule] = [
         name: "PacketTunnel",
         layers: [.core, .infrastructure],
         coreDependencies: [
-            "TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging",
+            "TunnelConfiguration", "AppRouting", "TunnelEngine", "TunnelLibrary", "ProviderMessaging", "ServiceCatalog",
         ],
-        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport"]
+        testDependencies: ["TunnelConfigurationTestSupport", "TunnelLibraryTestSupport", "ServiceCatalogTestSupport"]
     ),
     FeatureModule(
         name: "TransparentProxy",

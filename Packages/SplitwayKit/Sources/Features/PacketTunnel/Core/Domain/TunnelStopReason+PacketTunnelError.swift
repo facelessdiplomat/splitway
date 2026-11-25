@@ -4,7 +4,7 @@ import TunnelEngine
 extension TunnelStopReason {
     public init?(packetTunnelError error: PacketTunnelError) {
         switch error {
-        case .configurationUnavailable, .invalidNetworkPlan(.missingInterfaceAddress):
+        case .configurationUnavailable, .invalidNetworkPlan(.missingInterfaceAddress), .serviceCatalogUnavailable:
             self = .configurationUnavailable
         case .invalidNetworkPlan(.routingModeNotSupported), .routingModeChangeNeedsRestart:
             self = .unsupportedRoutingMode
