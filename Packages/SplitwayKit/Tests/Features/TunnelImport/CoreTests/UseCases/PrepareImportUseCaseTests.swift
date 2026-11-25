@@ -20,6 +20,16 @@ struct PrepareImportUseCaseTests {
     }
 
     @Test
+    func namesAScannedCodeAsScannedAndShowsWhereItCameFrom() async throws {
+        let preview = try await ImportTestEnvironment().prepareImport().execute([.qrCode(WgQuickFixtures.minimal)])
+
+        let candidate = try #require(preview.candidates.only)
+        #expect(candidate.source == .qrCode)
+        #expect(candidate.proposedName.description == ImportTestEnvironment.scannedName)
+        #expect(candidate.isImportable)
+    }
+
+    @Test
     func namesAFileWithoutExtensionAfterTheFile() async throws {
         let preview = try await ImportTestEnvironment().prepareImport()
             .execute([.file(name: "office", contents: Data(WgQuickFixtures.minimal.utf8))])

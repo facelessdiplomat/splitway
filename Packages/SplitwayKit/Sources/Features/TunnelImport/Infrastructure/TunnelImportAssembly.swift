@@ -16,19 +16,31 @@ public struct TunnelImportAssembly: Sendable {
     }
 
     public var fileReader: SecurityScopedFileReader {
-        SecurityScopedFileReader()
+        #if os(iOS)
+            SecurityScopedFileReader(inbox: ReceivedFileInbox(applicationContainer: URL(filePath: NSHomeDirectory())))
+        #else
+            SecurityScopedFileReader()
+        #endif
     }
 
     public var clipboard: SystemClipboard {
         SystemClipboard()
     }
 
-    public func prepareImport(fallbackName: TunnelName) -> PrepareImportUseCase {
+    public var cameraAccess: SystemCameraAccess {
+        SystemCameraAccess()
+    }
+
+    public var qrCodeDecoder: VisionQRCodeDecoder {
+        VisionQRCodeDecoder()
+    }
+
+    public func prepareImport(fallbackNames: ImportFallbackNames) -> PrepareImportUseCase {
         PrepareImportUseCase(
             records: records,
             secrets: secrets,
             archiveReader: ZIPArchiveReader(),
-            fallbackName: fallbackName
+            fallbackNames: fallbackNames
         )
     }
 }

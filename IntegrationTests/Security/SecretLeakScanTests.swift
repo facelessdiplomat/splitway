@@ -52,7 +52,8 @@ final class SecretLeakScanTests {
         let importer = TunnelImportAssembly(records: library.records, secrets: library.secrets)
         let receivedCopy = try workspace.receive(fixture.configurationText, named: Self.receivedFileName)
         let batch = await importer.fileReader.read([receivedCopy])
-        let preview = try await importer.prepareImport(fallbackName: .untitled).execute(batch.payloads)
+        let fallbackNames = ImportFallbackNames(pastedText: .untitled, scannedCode: .untitled)
+        let preview = try await importer.prepareImport(fallbackNames: fallbackNames).execute(batch.payloads)
         return try await importer.confirmImport.execute(ImportSelection(preview: preview))
     }
 

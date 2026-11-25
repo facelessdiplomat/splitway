@@ -26,10 +26,6 @@ import UpdatesPresentation
 
 @MainActor
 struct AppComposition {
-    static var additionMethods: [TunnelAdditionMethod] {
-        [.importFromFile, .pasteFromClipboard, .createFromScratch]
-    }
-
     let tunnelList: TunnelListModel
     let statistics: TunnelStatisticsPolling
     let tunnelImport: TunnelImportModel
@@ -73,17 +69,6 @@ struct AppComposition {
             .info, "Splitway \(configuration.version) started")
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
         tunnelEditor = Self.tunnelEditor(services: services, clipboard: importer.clipboard, tunnelList: tunnelList)
-    }
-
-    func add(_ method: TunnelAdditionMethod) {
-        switch method {
-        case .importFromFile:
-            tunnelImport.pickFiles()
-        case .pasteFromClipboard:
-            Task.immediate { await tunnelImport.importClipboard() }
-        case .createFromScratch:
-            tunnelEditor.createTunnel()
-        }
     }
 
     private static func logViewer(diagnostics: DiagnosticsAssembly, configuration: AppConfiguration)
@@ -184,10 +169,12 @@ struct AppComposition {
     private static func tunnelImport(importer: TunnelImportAssembly, tunnelList: TunnelListModel) -> TunnelImportModel {
         TunnelImportModel(
             actions: TunnelImportActions(
-                prepareImport: importer.prepareImport(fallbackName: TunnelImportModel.fallbackName),
+                prepareImport: importer.prepareImport(fallbackNames: TunnelImportModel.fallbackNames),
                 confirmImport: importer.confirmImport,
                 fileReader: importer.fileReader,
-                clipboard: importer.clipboard
+                clipboard: importer.clipboard,
+                cameraAccess: importer.cameraAccess,
+                qrCodeDecoder: importer.qrCodeDecoder
             )
         ) {
             await tunnelList.load()

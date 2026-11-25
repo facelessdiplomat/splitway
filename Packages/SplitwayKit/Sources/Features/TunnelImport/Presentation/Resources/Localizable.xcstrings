@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Allow camera access in Settings to scan QR codes, or choose a photo." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешите доступ к камере в Настройках, чтобы сканировать QR-коды, или выберите фото."
+          }
+        }
+      }
+    },
     "Already in the library as “%@”" : {
       "localizations" : {
         "ru" : {
@@ -11,12 +21,82 @@
         }
       }
     },
+    "Camera access is restricted" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ к камере ограничен"
+          }
+        }
+      }
+    },
+    "Camera scanning is unavailable" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сканирование камерой недоступно"
+          }
+        }
+      }
+    },
+    "Camera use is restricted on this device. Choose a photo of the QR code instead." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На этом устройстве использование камеры ограничено. Выберите фото QR-кода."
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отменить"
+          }
+        }
+      }
+    },
+    "Choose Photo" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбрать фото"
+          }
+        }
+      }
+    },
+    "Choose a photo of the QR code instead." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите фото QR-кода."
+          }
+        }
+      }
+    },
+    "Choose a photo where the whole QR code is visible." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите фото, на котором QR-код виден целиком."
+          }
+        }
+      }
+    },
+    "Choose another photo or scan the code with the camera." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите другое фото или отсканируйте код камерой."
           }
         }
       }
@@ -111,6 +191,26 @@
         }
       }
     },
+    "No QR code in the photo" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На фото нет QR-кода"
+          }
+        }
+      }
+    },
+    "No access to the camera" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет доступа к камере"
+          }
+        }
+      }
+    },
     "Not imported" : {
       "localizations" : {
         "ru" : {
@@ -141,12 +241,52 @@
         }
       }
     },
+    "Open Settings" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть Настройки"
+          }
+        }
+      }
+    },
     "Pasted tunnel" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Туннель из буфера"
+          }
+        }
+      }
+    },
+    "QR code" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR-код"
+          }
+        }
+      }
+    },
+    "Scan QR Code" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сканировать QR-код"
+          }
+        }
+      }
+    },
+    "Scanned tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отсканированный туннель"
           }
         }
       }
@@ -197,6 +337,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не удалось прочитать файл."
+          }
+        }
+      }
+    },
+    "The photo can’t be read" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать фото"
           }
         }
       }
