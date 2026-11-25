@@ -170,7 +170,8 @@ struct AppComposition {
                 loadTunnels: library.loadTunnels,
                 deleteTunnel: library.deleteTunnel(stoppingActiveTunnelWith: connection.activityProbe),
                 duplicateTunnel: library.duplicateTunnel,
-                reorderTunnels: library.reorderTunnels
+                reorderTunnels: library.reorderTunnels,
+                loadServiceNames: services.serviceCatalog.loadServiceNames
             ),
             connection: TunnelConnectionActions(
                 activateTunnel: connection.activateTunnel,
@@ -209,7 +210,8 @@ struct AppComposition {
                 deactivateTunnel: connection.deactivateTunnel,
                 applyRoutingPolicy: connection.applyRoutingPolicy
             ),
-            applicationPicker: applicationPicker
+            applicationPicker: applicationPicker,
+            servicePicker: services.serviceCatalog.picker
         ) { text in
             clipboard.copy(text)
         } didSave: { _ in

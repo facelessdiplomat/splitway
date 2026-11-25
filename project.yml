@@ -68,6 +68,12 @@ targets:
       - package: SplitwayKit
         product: ApplicationCatalogPresentation
       - package: SplitwayKit
+        product: ServiceCatalog
+      - package: SplitwayKit
+        product: ServiceCatalogInfrastructure
+      - package: SplitwayKit
+        product: ServiceCatalogPresentation
+      - package: SplitwayKit
         product: DiagnosticsInfrastructure
       - package: SplitwayKit
         product: DiagnosticsPresentation
@@ -189,6 +195,8 @@ targets:
         product: ApplicationCatalogPresentation
       - package: SplitwayKit
         product: ApplicationCatalogInfrastructure
+      - package: SplitwayKit
+        product: ServiceCatalogPresentation
       - package: SplitwayKit
         product: DiagnosticsInfrastructure
       - package: SplitwayKit

@@ -12,11 +12,13 @@ import TunnelLibraryInfrastructure
 struct AppTunnelServices {
     let library: TunnelLibraryAssembly
     let connection: TunnelConnectionAssembly
+    let serviceCatalog: AppServiceCatalog
     #if os(macOS)
         let secretsUninstall: TunnelSecretsUninstallAction
     #endif
 
     init(configuration: AppConfiguration, log: LogRecorder) {
+        serviceCatalog = AppServiceCatalog(storageDirectory: configuration.storageDirectory)
         #if os(macOS)
             let local = KeychainTunnelSecretStore()
             let channel = XPCExtensionSecretChannel(machServiceName: configuration.extensionMachServiceName)
