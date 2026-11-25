@@ -3,7 +3,7 @@ import TunnelConfiguration
 import TunnelLibrary
 
 public enum LiveRoutingChange {
-    private static let modesChangingLive: Set<RoutingModeKind> = [.selectedApplications]
+    private static let modesChangingLive: Set<RoutingModeKind> = [.selectedApplications, .selectedServices]
 
     public static func isPossible(
         from tunnel: Tunnel,

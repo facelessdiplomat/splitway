@@ -1,20 +1,62 @@
 import AppRouting
+import ServiceCatalog
 import TunnelConfiguration
+import TunnelEngine
 
 public struct PlanTunnelRoutingUseCase: Sendable {
-    public init() {}
+    private let serviceCatalog: LoadServiceCatalogUseCase?
+    private let compiler: ServiceRoutingPlanCompiler
+
+    public init(
+        serviceCatalog: LoadServiceCatalogUseCase? = nil,
+        compiler: ServiceRoutingPlanCompiler = ServiceRoutingPlanCompiler()
+    ) {
+        self.serviceCatalog = serviceCatalog
+        self.compiler = compiler
+    }
 
     public func execute(
         configuration: TunnelConfiguration,
         policy: RoutingPolicy
-    ) throws(PacketTunnelError) -> TunnelRouting {
-        do {
+    ) async throws(PacketTunnelError) -> TunnelRouting {
+        guard case .selectedServices(let selection) = policy.mode, let serviceCatalog else {
             return TunnelRouting(
                 mode: policy.mode.kind,
-                networkPlan: try TunnelNetworkPlanner.plan(for: configuration, routedBy: policy)
+                networkPlan: try fullTunnelPlan(for: configuration, routedBy: policy),
+                translation: nil
+            )
+        }
+        let catalog = try await loadedCatalog(from: serviceCatalog)
+        let servicePlan = compiler.compile(selection: selection, catalog: catalog, configuration: configuration)
+        do {
+            return TunnelRouting(
+                mode: .selectedServices,
+                networkPlan: try SelectedServicesNetworkPlanner.plan(for: servicePlan, configuration: configuration),
+                translation: ServiceRoutingTranslation(servicePlan)
             )
         } catch {
             throw .invalidNetworkPlan(error)
+        }
+    }
+
+    private func fullTunnelPlan(
+        for configuration: TunnelConfiguration,
+        routedBy policy: RoutingPolicy
+    ) throws(PacketTunnelError) -> TunnelNetworkPlan {
+        do {
+            return try TunnelNetworkPlanner.plan(for: configuration, routedBy: policy)
+        } catch {
+            throw .invalidNetworkPlan(error)
+        }
+    }
+
+    private func loadedCatalog(
+        from serviceCatalog: LoadServiceCatalogUseCase
+    ) async throws(PacketTunnelError) -> ServiceCatalog {
+        do {
+            return try await serviceCatalog.execute()
+        } catch {
+            throw .serviceCatalogUnavailable
         }
     }
 }
