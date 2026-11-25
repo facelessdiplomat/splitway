@@ -2,21 +2,21 @@
 
 | | |
 |---|---|
-| Статус | в работе: экран, «О приложении» и лицензии готовы; на macOS открытие при входе и удаление Splitway проверены в тестовой ВМ (2026-11-01), деактивацию расширения с паролем администратора подтверждает владелец |
-| Платформы | macOS |
-| Задачи | M3-13, M6-02 (открытие при входе, удаление) |
+| Статус | в работе: экран, «О приложении» и лицензии готовы на macOS и iOS; на macOS открытие при входе и удаление Splitway проверены в тестовой ВМ (2026-11-01), деактивацию расширения с паролем администратора подтверждает владелец; на iOS лист настроек проходит аудит доступности UI-теста в симуляторе iPhone (M9-13) |
+| Платформы | macOS; iOS — личная сборка (D-53), iPad не проверяется (D-55); открытие при входе, обновления и удаление — только macOS |
+| Задачи | M3-13, M6-02 (открытие при входе, удаление), M9-03 (лист настроек на iOS) |
 | Таргеты | `Settings`, `SettingsInfrastructure`, `SettingsPresentation`, `SettingsTestSupport` |
 
 ## Назначение
 
-Экран настроек приложения. Сейчас он показывает версию и сборку приложения и лицензии открытого ПО, которое входит в приложение. Тест следит, чтобы у каждой зависимости проекта была запись в списке лицензий.
+Экран настроек приложения. Сейчас он показывает версию и сборку приложения и лицензии открытого ПО, которое входит в приложение, а на macOS ещё открытие при входе, обновления ([Updates](Updates.md)) и удаление Splitway. Тест следит, чтобы у каждой зависимости проекта была запись в списке лицензий.
 
 ## Зависимости
 
 | Тип | Что | Зачем |
 |---|---|---|
-| Фичи проекта | `SharedKernel`; в `Presentation` — `DesignSystemPresentation`. Шаги удаления поверх `TunnelConnection`, `TunnelLibrary`, `SecretDelivery` и `SystemExtension` собирает composition root приложения macOS, сама фича о них не знает | общее ядро; строка «ключ–значение» и пустое состояние |
-| Системные фреймворки | Foundation, Dispatch; в `Infrastructure` — ServiceManagement (`SMAppService`), AppKit (`NSWorkspace`, `NSApplication`); в `Presentation` — SwiftUI, Observation | ресурсы пакета и JSON; очередь чтения; открытие при входе; Корзина и завершение; экран настроек |
+| Фичи проекта | `SharedKernel`; в `Presentation` — `DesignSystemPresentation` и `UpdatesPresentation`. Шаги удаления поверх `TunnelConnection`, `TunnelLibrary`, `SecretDelivery` и `SystemExtension` собирает composition root приложения macOS, сама фича о них не знает | общее ядро; строка «ключ–значение» и пустое состояние; раздел «Обновления» без Sparkle: Sparkle лежит в `UpdatesInfrastructure`, которой нет в iOS-сборке |
+| Системные фреймворки | Foundation, Dispatch; в `Infrastructure` на macOS — ServiceManagement (`SMAppService`), AppKit (`NSWorkspace`, `NSApplication`); в `Presentation` — SwiftUI, Observation | ресурсы пакета и JSON; очередь чтения; открытие при входе; Корзина и завершение; экран настроек |
 | Сторонние библиотеки | нет | |
 
 ## Принцип работы
@@ -38,18 +38,21 @@
   - wireguard-go (MIT);
   - gVisor (Apache-2.0) и его зависимость btree (Apache-2.0) — стек netstack для `usernet`;
   - ZIPFoundation (MIT);
+  - Sparkle (MIT) — обновления Mac-версии ([Updates](Updates.md));
   - WireGuardKit (MIT): поиск дескриптора `utun` в `UtunDescriptorLocator` повторяет подход `WireGuardAdapter` из WireGuardKit.
 
 **Экран.**
 
-- `SettingsScreen` — форма в `NavigationStack`: раздел «О приложении» (версия и сборка из `AppVersion`) и переход к «Лицензиям открытого ПО».
+- `SettingsScreen` — форма в `NavigationStack`: раздел «О приложении» (версия и сборка из `AppVersion`) и переход к «Лицензиям открытого ПО». Разделы открытия при входе, обновлений и удаления форма показывает, только если composition root передал их модели (`LoginItemModel`, `UpdatesModel`, `UninstallModel`). Их передаёт только приложение macOS, поэтому на iOS в настройках только «О приложении» и лицензии.
 - `ThirdPartyNoticesModel` загружает список при открытии и хранит состояние `ThirdPartyNoticesState`: загрузка, список или «Лицензии недоступны». Текст лицензии открывается отдельным экраном, его можно выделить.
-**Открытие при входе.**
+- На iOS настройки открываются листом (`View.settingsSheet(_:)`, `SettingsPresenter.show()`) из пункта «Настройки» меню «⋯» списка туннелей или командой ⌘, с внешней клавиатуры, у листа есть кнопка закрытия. На macOS это сцена `Settings` приложения: пункт «Настройки…» меню приложения и ⌘,.
+
+**Открытие при входе (macOS).**
 
 - Порт `LoginItem` сообщает состояние `LoginItemState` (включено, выключено, ждёт разрешения в Системных настройках), включает, выключает и открывает раздел «Объекты входа». Адаптер `MainAppLoginItem` — `SMAppService.mainApp`.
 - `LoginItemModel` показывает переключатель «Open at Login» в разделе «General». Отказ системы даёт сообщение, а переключатель показывает настоящее состояние. Если macOS ждёт разрешения, под переключателем есть объяснение и кнопка «Open Login Items Settings…».
 
-**Удаление.**
+**Удаление (macOS).**
 
 - `UninstallUseCase` выполняет шаги `UninstallStep` в постоянном порядке, в каком бы порядке их ни передали:
   1. остановить туннель;
@@ -60,13 +63,11 @@
   6. деактивировать сетевое расширение.
 - Шаг — порт `UninstallAction`. Неудачный шаг не останавливает следующие, а `UninstallReport` называет, что удалить не удалось.
 - Шаги поверх других фич собирает composition root (`Apps/macOSApp/Uninstall`): `DeactivateTunnelUseCase`, удаление конфигураций `TunnelConnectionAssembly`, стирание секретов `ErasableTunnelSecretStore` и сообщением `removeAll` расширению ([SecretDelivery](SecretDelivery.md)), `DeactivateSystemExtensionUseCase` ([SystemExtension](SystemExtension.md)). В фиче — `LoginItemUninstallAction` и `StoredDataUninstallAction`.
-- `UninstallModel` ведёт экран: вопрос «Uninstall Splitway?» → «Uninstalling…» → итог. Итог предлагает «Show in Finder» или «Quit» и просит перенести Splitway в Корзину; если что-то осталось, итог перечисляет, что именно. «Show in Finder» — порт `ApplicationRemoval`, адаптер `WorkspaceApplicationRemoval` (`NSWorkspace.activateFileViewerSelecting`, затем `terminate`): Finder открывает «Программы» с выделенным Splitway. Переместить себя в Корзину приложение из App Store не может: песочница не даёт писать в `/Applications` (SP-10).
-
-- Настройки — сцена `Settings` приложения: пункт «Настройки…» меню приложения и ⌘,.
+- `UninstallModel` ведёт экран: вопрос «Uninstall Splitway?» → «Uninstalling…» → итог. Итог предлагает «Show in Finder» или «Quit» и просит перенести Splitway в Корзину; если что-то осталось, итог перечисляет, что именно. «Show in Finder» — порт `ApplicationRemoval`, адаптер `WorkspaceApplicationRemoval` (`NSWorkspace.activateFileViewerSelecting`, затем `terminate`): Finder открывает «Программы» с выделенным Splitway. Переместить себя в Корзину приложение не может: песочница не даёт писать в `/Applications` (SP-10).
 
 ## Публичный API
 
-`ThirdPartyNotice` (с `paragraphs`), `AppVersion`, `ThirdPartyNoticeSource`, `ThirdPartyNoticeError`, `LoadThirdPartyNoticesUseCase`; открытие при входе — `LoginItem`, `LoginItemState`, `LoginItemError`, `MainAppLoginItem`, `LoginItemModel`; удаление — `UninstallStep`, `UninstallReport`, `UninstallAction`, `UninstallStepFailure`, `UninstallUseCase`, `LoginItemUninstallAction`, `ApplicationRemoval`, `ApplicationRemovalError`, `StoredDataUninstallAction`, `WorkspaceApplicationRemoval`, `UninstallModel`, `UninstallPhase`; адаптеры `BundledThirdPartyNoticeSource`, `SettingsAssembly`; экран — `SettingsScreen`, `SettingsPresenter`, `ThirdPartyNoticesModel`, `ThirdPartyNoticesState`.
+`ThirdPartyNotice` (с `paragraphs`), `AppVersion`, `ThirdPartyNoticeSource`, `ThirdPartyNoticeError`, `LoadThirdPartyNoticesUseCase`; открытие при входе — `LoginItem`, `LoginItemState`, `LoginItemError`, `MainAppLoginItem`, `LoginItemModel`; удаление — `UninstallStep`, `UninstallReport`, `UninstallAction`, `UninstallStepFailure`, `UninstallUseCase`, `LoginItemUninstallAction`, `ApplicationRemoval`, `StoredDataUninstallAction`, `WorkspaceApplicationRemoval`, `UninstallModel`, `UninstallPhase`; адаптеры `BundledThirdPartyNoticeSource`, `SettingsAssembly`; экран — `SettingsScreen`, `SettingsPresenter`, `ThirdPartyNoticesModel`, `ThirdPartyNoticesState`, модификатор `settingsSheet(_:)`.
 
 ## Решения
 
@@ -78,16 +79,18 @@
 - Секреты стираются по имени сервиса, а не по списку туннелей: так не остаются и секреты без записей, например после сбоя импорта. Каждое хранилище отвечает за свой Keychain, а неудача любого делает шаг неудачным.
 - Неудачный шаг не отменяет остальные: человеку важнее убрать всё, что получилось, и узнать, что осталось.
 - Зависимости, которых нет в собранном приложении, перечислены в тесте явно: `go.uber.org/goleak` нужен только тестам, а `golang.zx2c4.com/wintun` — только Windows.
+- Разделы только для Mac необязательны: их модели передаёт composition root, а `SettingsPresentation` зависит от `UpdatesPresentation`, в котором нет Sparkle. Поэтому Sparkle не попадает в iOS-сборку, а `MainAppLoginItem` и `WorkspaceApplicationRemoval` собираются только для macOS (M9-03).
 
 ## Спорные решения
 
 | Решение | Альтернативы | Почему так | Когда пересмотреть |
 |---|---|---|---|
-| Записи появляются вместе с зависимостями: gVisor — с движком, Sparkle — с обновлениями (M8-08) | Добавить их заранее, как перечислено в плане M3-13 | Экран показывает только то, что реально входит в приложение: тест падает, как только зависимость появляется в манифестах без записи. Sparkle не появится: обновления приходят из App Store (решение D-39) | Нет |
+| Записи появляются вместе с зависимостями: gVisor — с движком, Sparkle — с обновлениями (M8-08) | Добавить их заранее, как перечислено в плане M3-13 | Экран показывает только то, что реально входит в сборки Splitway: тест падает, как только зависимость появляется в манифестах без записи. Список один на обе платформы, поэтому на iOS в нём есть и компоненты только Mac-версии | Если на iOS понадобится список только её компонентов |
 | Тест падает и на «лишней» записи, которая больше не покрывает ни одной зависимости | Проверять только отсутствие записей | Удалённая зависимость не должна оставаться на экране лицензий | Нет |
-| Тексты показываются абзацами, а не как в файле | Моноширинный текст с исходными переносами | Исходные переносы ломают строки посередине, если окно уже строки файла, а абзацы переносятся по ширине окна | Если лицензия с таблицей или отступами окажется нечитаемой |
+| Тексты показываются абзацами, а не как в файле | Моноширинный текст с исходными переносами | Исходные переносы ломают строки посередине, если экран уже строки файла, как на iPhone, а абзацы переносятся по ширине окна | Если лицензия с таблицей или отступами окажется нечитаемой |
 | Деактивация расширения просит пароль администратора, удаление его ждёт | Деактивировать расширение без вопроса; оставить расширение до очистки Корзины | Без пароля macOS сетевое расширение не снимает: это защита системы. Если человек отказал, итог называет расширение, и его можно снять позже в Системных настройках | Нет |
-| Версия и сборка, без копирайта приложения | Строка копирайта в «О приложении» | Копирайт показывает стандартное окно «О программе» (`NSHumanReadableCopyright`) | Нет |
+| Удаление — только в настройках macOS | Пункт и на iOS | На iOS приложение удаляет система, и расширение уходит вместе с ним | Нет |
+| Версия и сборка, без копирайта приложения | Строка копирайта в «О приложении» | На macOS копирайт показывает стандартное окно «О программе» (`NSHumanReadableCopyright`) | Если копирайт понадобится и на iOS |
 
 ## Отступления от правил разработки
 
@@ -95,7 +98,8 @@
 
 ## Ограничения и известные проблемы
 
-- Окно настроек macOS проверено в тестовой ВМ: оно открывается пунктом «Настройки…» строки меню (M6-01).
+- Окно настроек macOS проверено в тестовой ВМ: оно открывается пунктом «Настройки…» строки меню (M6-01). На iOS лист настроек, список лицензий и текст лицензии проходят аудит доступности UI-теста в симуляторе iPhone на `en` и `ru` (M9-13), а VoiceOver на iPhone 13 Pro пройден по подтверждению владельца (M9-15).
+- Список лицензий общий для обеих платформ: на iOS в нём есть Sparkle, gVisor и btree, которых в iOS-сборке нет. Sparkle нужен только обновлениям Mac, а gVisor и btree — `usernet`, который в срезы iOS не входит (M9-02).
 - Иконка в Dock — в фиче [MenuBar](MenuBar.md).
 - Проверено в тестовой ВМ (2026-11-01): переключатель «Open at Login» добавляет и убирает объект входа (`sfltool dumpbtm`); удаление убирает конфигурацию VPN (`scutil --nc list`), секрет из System Keychain, объект входа, папки Splitway в контейнере App Group и настройки, а итог при отказе в пароле называет только расширение. «Move to Trash» перемещал приложение в Корзину и завершал его. С песочницей (2026-11-02, SP-10) все шаги удаления в ВМ работают так же, а перемещение в Корзину отказывает, поэтому его заменила кнопка «Show in Finder»: Finder открывает «Программы» с выделенным Splitway, приложение завершается.
 - Деактивация расширения с паролем администратора в ВМ не проверялась: пароль вводит только владелец. Перетаскивание приложения в Корзину расширение не снимает.
@@ -113,8 +117,9 @@
   - у каждой записи есть лицензия и строка копирайта.
   Тест покрытия проверен на сломанном манифесте: он падает, если убрать запись ZIPFoundation или добавить запись о несуществующей зависимости.
 - 11 тестов в `SettingsPresentationTests`: список по названию после загрузки, недоступные лицензии; открытие при входе (состояние, включение, выключение, отказ системы, ожидание разрешения); удаление (вопрос и отмена, удаление с итогом, неудачные шаги, показ в Finder и завершение).
+- UI-тест `AccessibilityAuditTests.testSettingsAndLicensesPassTheAccessibilityAudit` в симуляторе iPhone на `en` и `ru` (M9-13): лист настроек из меню «⋯», список лицензий и текст лицензии Go проходят аудит доступности.
 
-Запуск: `swift test --package-path Packages/SplitwayKit --filter Settings`.
+Запуск: `swift test --package-path Packages/SplitwayKit --filter Settings`; UI-тесты — `Scripts/check.sh --ui`.
 
 ## История изменений
 
@@ -125,3 +130,6 @@
 | 2026-11-01 | Открытие при входе и удаление Splitway на macOS | M6-02 |
 | 2026-11-02 | Последний шаг удаления — «Show in Finder» вместо «Move to Trash»: в песочнице App Store приложение не может переместить себя в Корзину | SP-10 |
 | 2026-11-03 | Убраны iOS и iPadOS: лист настроек из меню «⋯» списка туннелей и проверка в симуляторе iPhone; настройки открываются только сценой `Settings` | M8-02 |
+| 2026-11-03 | Раздел «Обновления» из `UpdatesPresentation` и лицензия Sparkle | M8-08 |
+| 2026-11-24 | На iOS вернулся лист настроек из меню «⋯» списка туннелей и по ⌘,; открытие при входе и удаление собираются только для macOS, раздел «Обновления» необязателен, и Sparkle в iOS-сборку не попадает | M9-03 |
+| 2026-11-25 | Аудит доступности настроек и лицензий в UI-тестах iOS в симуляторе iPhone | M9-13 |

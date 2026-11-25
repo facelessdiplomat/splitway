@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Статус | в работе: режимы fd и netstack готовы; режим fd проверен в системном расширении на Mac (M2-14) и в пакетном туннеле на iPhone (M9-04) |
+| Статус | в работе: режимы fd и netstack готовы; режим fd проверен в системном расширении на Mac (M2-14) и в пакетном туннеле на iPhone (M9-04), выбор сервисов — на iPhone (M9-09, M9-15); iPad не проверяется (D-55) |
 | Платформы | macOS, iOS (личная сборка, D-53) |
-| Задачи | M2-01, M2-02, M2-03, M2-04, M2-13, M4-06, M4-10 (`TunnelEngineTestSupport`), M5-06, M7-03 (`udpbind`), M9-07 |
-| Таргеты | `TunnelEngine` (SplitwayKit); `TunnelCoreAdapter`, `TunnelCoreFramework` (TunnelCore); Go-пакеты `bridge`, `fdtunnel`, `logbridge`, `udpbind`, `servicerouting`; режим netstack — в [UserspaceNetwork](UserspaceNetwork.md) |
+| Задачи | M2-01, M2-02, M2-03, M2-04, M2-13, M4-06, M4-10 (`TunnelEngineTestSupport`), M5-06, M7-03 (`udpbind`), M9-02 (срезы iOS, лимит памяти Go), M9-07 |
+| Таргеты | `TunnelEngine` (SplitwayKit); `TunnelCoreAdapter`, `TunnelCoreFramework` (TunnelCore); Go-пакеты `bridge`, `fdtunnel`, `logbridge`, `udpbind`; пакет `servicerouting` — в [ServiceRouting](ServiceRouting.md), режим netstack — в [UserspaceNetwork](UserspaceNetwork.md) |
 
 ## Назначение
 
@@ -39,13 +39,15 @@ flowchart LR
 - **Защита текста UAPI.** Текст содержит приватный ключ, поэтому `description`, `debugDescription` и `Mirror` его не показывают.
 - **Статистика.** `UAPIRuntimeStatisticsParser` читает ответ `get=1`: байты пиров, время последнего рукопожатия (`0` → `nil`) и `errno`. `RuntimeStatistics.hasUnansweredFirstHandshake` говорит, что сервер не отвечает: ни у одного пира не было рукопожатия, а пир уже отправил не меньше трёх попыток (решение D-38). До первого рукопожатия wireguard-go отправляет только попытки по 148 байт, и каждая входит в отправленные байты пира, поэтому три попытки — это 444 байта.
 - **Порты.** `WireGuardDeviceEngine` запускает устройство на дескрипторе utun и отдаёт `RunningTunnelInterfaceDevice`. Общий порт `RunningWireGuardDevice` применяет конфигурацию, отдаёт статистику, пересоздаёт сокеты и останавливается. `RunningTunnelInterfaceDevice` добавляет к нему `applyServiceRouting`: выбор сервисов работает только на utun, поэтому порт режима netstack `RunningUserspaceNetwork` этого метода не получает. Порты режима netstack (`UserspaceNetworkEngine` и другие) описаны в [UserspaceNetwork](UserspaceNetwork.md).
-- **Выбор сервисов.** `ServiceRoutingTranslation` — то, что нужно движку из плана выбора сервисов: виртуальный DNS, резолвер для пересылки и фиктивные сети IPv4 и IPv6 (IPv6 необязательна). `ServiceRoutingTranslationEncoder` кодирует её в JSON с версией через `Encodable`-документ `ServiceRoutingTranslationDocument`: ключи по алфавиту, без экранирования `/`, сеть IPv6 без значения не пишется. Адаптер передаёт JSON в `tc_fd_tunnel_set_service_routing`, а Go разбирает его в `servicerouting.Plan`. Перехват DNS, фиктивные адреса и трансляция пакетов описаны в [документе платформы iOS](../04-platform-ios-ipados.md), раздел 4.
+- **Выбор сервисов.** `ServiceRoutingTranslation` — то, что нужно движку из плана выбора сервисов: виртуальный DNS, резолвер для пересылки и фиктивные сети IPv4 и IPv6 (IPv6 необязательна). `ServiceRoutingTranslationEncoder` кодирует её в JSON с версией через `Encodable`-документ `ServiceRoutingTranslationDocument`: ключи по алфавиту, без экранирования `/`, сеть IPv6 без значения не пишется. Адаптер передаёт JSON в `tc_fd_tunnel_set_service_routing`, а Go разбирает его в `servicerouting.Plan`. Перехват DNS, фиктивные адреса и трансляция пакетов описаны в [ServiceRouting](ServiceRouting.md).
 - **Go-сторона.**
   - `fdtunnel` дублирует дескриптор (`unix.Dup`, неблокирующий режим), создаёт `tun.CreateTUNFromFile` и `device.NewDevice` с bind `udpbind`, применяет UAPI и поднимает устройство.
   - В iOS-сборке (тег `ios`) `fdtunnel.Start` ставит между utun и wireguard-go обёртку `servicerouting.TranslatingDevice`. Пока плана нет, пакеты проходят без изменений; `Tunnel.RouteServices` передаёт план обёртке, а неверный план возвращает `ErrConfigurationRejected`. На Mac utun уходит в wireguard-go напрямую, а `RouteServices` отвечает `ErrServiceRoutingUnavailable`. `StartRoutingServices` ставит обёртку на любой платформе: так её проверяют тесты на Mac.
+  - В iOS-сборке `fdtunnel` ограничивает память Go 30 МиБ (`debug.SetMemoryLimit` в `memory_limit_ios.go`): пакетному туннелю iOS отведено около 50 МБ на всё расширение ([документ платформы iOS](../04-platform-ios-ipados.md), раздел 3). wireguard-go в сборке для iOS сам берёт буферы по 1700 байт вместо 64 КиБ и ограничивает их пулы 1024 элементами (`device/queueconstants_ios.go`). Пик памяти расширения на iPhone — в [бенчмарках](../benchmarks.md).
   - `udpbind` — транспорт UDP устройства для Darwin и iOS, где пакетного ввода-вывода нет. Он слушает IPv4 и IPv6 на одном порту, ставит сокетам буферы по 7 МБ, как стандартный bind, и каждым вызовом принимает или отправляет один датаграмм через `ReadFromUDPAddrPort` и `WriteToUDPAddrPort`, без пулов сообщений и адресов. Адрес отправителя IPv4 приходит без префикса IPv6, а чужой тип endpoint отклоняется `ErrWrongEndpointType`.
   - В режиме netstack `usernet` ставит между стеком gVisor и устройством wireguard-go обёртку `coalescingDevice`, которая прореживает исходящие подтверждения TCP ([UserspaceNetwork](UserspaceNetwork.md)).
   - `bridge` хранит устройства обоих режимов в одной таблице хэндлов: Go-указатели в C не попадают. Экспортные функции только преобразуют типы и выполняются внутри `guarded`, поэтому паника превращается в `TCStatusInternalFailure`.
+- **Сборка.** `Packages/TunnelCore/Scripts/build-xcframework.sh` собирает `TunnelCoreFramework.xcframework` со срезами `ios-arm64`, `ios-arm64-simulator` и `macos-arm64_x86_64`. Срезы iOS собираются с `GOOS=ios`: отсюда тег `ios` у файлов только для iOS и `!ios` у файлов моста режима netstack, которого на iOS нет.
 - **Адаптер.** `TunnelCoreWireGuardDevice` владеет хэндлом и останавливает туннель в `deinit`. Строку `tc_tunnel_get_config` он освобождает через `tc_free`, а коды `TCStatus` переводит в `TunnelEngineError`.
 - **Логи.** `TunnelCoreLogRouting.route(to:)` направляет логи wireguard-go в `LogRecorder`: verbose → `debug`, error → `error`. Маскирование выполняет `LogEntry`. Если устройство не запустилось, мост пишет причину уровнем error (`tunnel failed to start: …`), а у отклонённой конфигурации — только сам отказ, без подробностей с её значениями.
 
@@ -63,12 +65,12 @@ flowchart LR
 | `tc_tunnel_stop(handle)` | останавливает устройство; повторный вызов → `TCStatusUnknownHandle` |
 | `tc_set_log_callback(callback, context)` | логи wireguard-go; обратный вызов приходит из любых потоков |
 
-`TCStatus`: `OK`, `InvalidArgument`, `UnknownHandle`, `TunnelInterfaceUnavailable`, `ConfigurationRejected`, `DeviceUnavailable`, `InternalFailure`, а для режима netstack ещё `ConnectionFailed`, `TimedOut`, `LookupFailed`, `NetworkStopped`, `ConnectionClosed`. Функции `tc_tunnel_*` принимают хэндлы обоих режимов; функции `tc_usernet_*` и `tc_connection_*` описаны в [UserspaceNetwork](UserspaceNetwork.md). `TCLogLevel`: `Verbose`, `Error`. Оба перечисления закрытые и объявлены в `TunnelCoreTypes.h`, а Go берёт значения из того же заголовка через cgo.
+`TCStatus`: `OK`, `InvalidArgument`, `UnknownHandle`, `TunnelInterfaceUnavailable`, `ConfigurationRejected`, `DeviceUnavailable`, `InternalFailure`, а для режима netstack ещё `ConnectionFailed`, `TimedOut`, `LookupFailed`, `NetworkStopped`, `ConnectionClosed`. Функции `tc_tunnel_*` принимают хэндлы обоих режимов; функции `tc_usernet_*` и `tc_connection_*` описаны в [UserspaceNetwork](UserspaceNetwork.md), в срезах iOS их нет. `TCLogLevel`: `Verbose`, `Error`. Оба перечисления закрытые и объявлены в `TunnelCoreTypes.h`, а Go берёт значения из того же заголовка через cgo.
 
 ## Публичный API
 
 - **SplitwayKit:** `UAPIConfigurationEncoder`, `UAPIConfiguration`, `ResolvedEndpoint`, `UAPIRuntimeStatisticsParser`, `UAPIResponseError`, `RuntimeStatistics`, `PeerRuntimeStatistics`, `ServiceRoutingTranslation`, `ServiceRoutingTranslationEncoder`, `WireGuardDeviceEngine`, `RunningWireGuardDevice`, `RunningTunnelInterfaceDevice`, `TunnelEngineError`; порты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md).
-- **TunnelCore:** `TunnelCoreWireGuardEngine`, `TunnelCoreUserspaceNetworkEngine`, `TunnelCoreLogRouting`, `TunnelCoreBuildInfo`.
+- **TunnelCore:** `TunnelCoreWireGuardEngine`, `TunnelCoreUserspaceNetworkEngine` (macOS), `TunnelCoreLogRouting`, `TunnelCoreBuildInfo`.
 
 ## Решения
 
@@ -81,7 +83,7 @@ flowchart LR
 | Решение | Альтернативы | Почему так | Когда пересмотреть |
 |---|---|---|---|
 | Сервер не отвечает, если пир без рукопожатия отправил три попытки (444 байта) | Срок от момента подключения, как 15 с у прозрачного прокси | Туннель с частью сетей без трафика не делает рукопожатий, и срок от подключения дал бы ложное предупреждение; по байтам видно, что попытки были и остались без ответа. Правило опирается на размер попытки рукопожатия из протокола WireGuard | Если wireguard-go начнёт отправлять до рукопожатия что-то ещё |
-| Свой bind `udpbind` вместо стандартного `conn.StdNetBind` | Стандартный bind; форк wireguard-go | Стандартный bind готовит пакетный ввод-вывод для Linux, а на Darwin всё равно шлёт по одному датаграмму. При этом на каждый датаграмм он берёт из пула массив на 128 сообщений и обнуляет его весь, берёт мьютекс и адрес из пула и ходит через `sendmsg` и `recvmsg`. В профиле расширения на iPhone одно обнуление (`putMessages`) заняло 4,4 % CPU. `udpbind` делает то, что делал стандартный bind до пакетной переделки 2023 года, на котором работает официальное iOS-приложение 1.0.16. Стенд из двух устройств wireguard-go в одном процессе: CPU на гигабайт −3,5 % на 150 Мбит/с и −4,7 % на максимуме, пиковая скорость 621 → 655 Мбит/с. Бенчмарк доставки датаграмма — 23,8 против 25,2 мкс, 1 аллокация вместо 4. Форк противоречит правилу о стороннем коде без изменений | Если wireguard-go перестанет готовить пакет сообщений на платформах без пакетного ввода-вывода или Splitway понадобится Linux |
+| Свой bind `udpbind` вместо стандартного `conn.StdNetBind` | Стандартный bind; форк wireguard-go | Стандартный bind готовит пакетный ввод-вывод для Linux, а на Darwin и iOS всё равно шлёт по одному датаграмму. При этом на каждый датаграмм он берёт из пула массив на 128 сообщений и обнуляет его весь, берёт мьютекс и адрес из пула и ходит через `sendmsg` и `recvmsg`. В профиле расширения на iPhone одно обнуление (`putMessages`) заняло 4,4 % CPU. `udpbind` делает то, что делал стандартный bind до пакетной переделки 2023 года, на котором работает официальное iOS-приложение 1.0.16. Стенд из двух устройств wireguard-go в одном процессе: CPU на гигабайт −3,5 % на 150 Мбит/с и −4,7 % на максимуме, пиковая скорость 621 → 655 Мбит/с. Бенчмарк доставки датаграмма — 23,8 против 25,2 мкс, 1 аллокация вместо 4. Форк противоречит правилу о стороннем коде без изменений | Если wireguard-go перестанет готовить пакет сообщений на платформах без пакетного ввода-вывода или Splitway понадобится Linux |
 | wireguard-go закреплён на свежем `b3bc704` (2026-10-25) | Выдержанный коммит двухнедельной давности | В нём и предыдущем коммите исправления рукопожатия и разбора пакетов, источник — каноничный репозиторий | При каждом обновлении зависимостей |
 | Один файл `fdtunnel/testdata/full.uapi` для Swift-теста кодировщика и Go-теста wireguard-go | Две копии фикстуры | Так доказано, что wireguard-go принимает ровно то, что выдаёт Swift | Если пакеты разъедутся по репозиториям |
 | План выбора сервисов — те же общие фикстуры: `servicerouting/testdata/plan.json` и `plan-without-ipv6.json` | Схема JSON и проверка по ней | Swift-тест сравнивает свой JSON с файлом побайтно, Go-тест разбирает тот же файл: контракт проверяют обе стороны без третьего инструмента | Если план начнут читать другие клиенты |
@@ -96,14 +98,14 @@ flowchart LR
 
 ## Ограничения и известные проблемы
 
-- Успешный старт, конфигурация и статистика через адаптер проверяются только в системном расширении на Mac (M2-14) и в пакетном туннеле на iPhone (M9-04). План выбора сервисов через адаптер на устройстве проверит M9-09.
+- Успешный старт, конфигурация и статистика через адаптер проверяются только в системном расширении на Mac (M2-14) и в пакетном туннеле на iPhone (M9-04). План выбора сервисов через адаптер проверен на iPhone владельцем (M9-09) и живым тестом `LiveServiceRoutingTests` (M9-15, [PacketTunnel](PacketTunnel.md)). На iPad движок не проверяется (решение D-55).
 - Ответ `get=1` содержит приватный ключ. Его нельзя писать в журнал; `LogRedactor` его замаскирует, но лучше не передавать вовсе.
 
 ## Тесты
 
 - `TunnelEngineTestSupport` даёт фейки режима netstack `InMemoryUserspaceNetwork` и `InMemoryUserspaceConnection`: они записывают запись, кредит и закрытия и отдают данные получателю по команде теста. Ими проверяются насосы `TransparentProxy`.
 - 18 тестов в `TunnelEngineTests`: JSON плана выбора сервисов совпадает с фикстурами Go с сетью IPv6 и без неё; сервер не отвечает после трёх попыток рукопожатия, но не раньше и не после ответа хотя бы одного пира; keepalive для пиров без своего и ничего для пиров со своим; снимок UAPI для фикстур, пропуск неразрезолвленных endpoint, `allowed_ip` без битов хоста, скрытие текста UAPI, разбор статистики, `errno`, повреждённые ответы.
-- 26 Go-тестов режима fd (тесты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md)):
+- 26 Go-тестов режима fd (тесты режима netstack — в [UserspaceNetwork](UserspaceNetwork.md), пакета `servicerouting` — в [ServiceRouting](ServiceRouting.md)):
   - рукопожатие и доставка пакета между двумя wireguard-go на `tuntest`;
   - обёртка выбора сервисов стоит на пути пакетов: до плана пакет к фиктивному адресу доходит до второго туннеля, после плана отбрасывается, а пакет к настоящему адресу доходит; неверный план отклоняется; `Start` ставит обёртку только в iOS-сборке;
   - план через мост: применяется к туннелю с обёрткой; неизвестная версия, неверный JSON и неверный план → `ConfigurationRejected`; неизвестный хэндл; хэндл режима netstack и туннель без обёртки → `InvalidArgument`;
@@ -138,3 +140,4 @@ flowchart LR
 | 2026-11-03 | Убраны iOS и выбор сервисов: `tc_fd_tunnel_set_service_routing`, `ServiceRoutingTranslation` с кодировщиком, порт `RunningTunnelInterfaceDevice` (движок отдаёт `RunningWireGuardDevice`), обёртка `servicerouting` в `fdtunnel`, срезы iOS в xcframework | M8-02 |
 | 2026-11-24 | Срезы iOS для iPhone и симулятора вернулись в xcframework, iOS-сборка `fdtunnel` ограничивает память Go 30 МиБ (`memory_limit_ios.go`) | M9-02 |
 | 2026-11-25 | Вернулись из `ios-final` пакет `servicerouting` с бенчмарками, `tc_fd_tunnel_set_service_routing`, порт `RunningTunnelInterfaceDevice` и `ServiceRoutingTranslation` с кодировщиком. Обёртка выбора сервисов стоит только в iOS-сборке `fdtunnel` | M9-07 |
+| 2026-11-25 | Документ снова описывает iOS-сборку ядра: срезы и теги `ios`, лимит памяти Go и константы wireguard-go для iOS, функции режима netstack только в срезах macOS; пакет `servicerouting` описан в ServiceRouting, план выбора сервисов проверен на iPhone (M9-09, M9-15) | M9-16 |
