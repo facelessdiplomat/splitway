@@ -1,7 +1,7 @@
 import Synchronization
 import TunnelEngine
 
-final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningWireGuardDevice {
+final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningTunnelInterfaceDevice {
     private let log: SessionEventLog
     private let startFailure: TunnelEngineError?
     private let configurations = Mutex<[UAPIConfiguration]>([])
@@ -18,7 +18,7 @@ final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningWireGuardDevice {
     func startDevice(
         tunnelFileDescriptor: Int32,
         configuration: UAPIConfiguration
-    ) throws(TunnelEngineError) -> any RunningWireGuardDevice {
+    ) throws(TunnelEngineError) -> any RunningTunnelInterfaceDevice {
         if let startFailure {
             throw startFailure
         }
@@ -30,6 +30,10 @@ final class FakeWireGuardDevice: WireGuardDeviceEngine, RunningWireGuardDevice {
     func apply(_ configuration: UAPIConfiguration) throws(TunnelEngineError) {
         configurations.withLock { configurations in configurations.append(configuration) }
         log.record(.appliedConfiguration)
+    }
+
+    func applyServiceRouting(_ translation: ServiceRoutingTranslation) throws(TunnelEngineError) {
+        log.record(.appliedServiceRouting)
     }
 
     func runtimeStatistics() throws(TunnelEngineError) -> RuntimeStatistics {
