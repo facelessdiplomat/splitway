@@ -5,7 +5,7 @@ public enum RoutingPlatform: Sendable, Hashable {
     public var supportedModes: Set<RoutingModeKind> {
         switch self {
         case .macOS: [.allTraffic, .selectedApplications]
-        case .iOS: [.allTraffic]
+        case .iOS: [.allTraffic, .selectedServices]
         }
     }
 }

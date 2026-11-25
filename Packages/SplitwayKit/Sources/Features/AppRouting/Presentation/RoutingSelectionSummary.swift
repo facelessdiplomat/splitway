@@ -11,6 +11,9 @@ struct RoutingSelectionSummary: View {
         case .selectedApplications:
             Text("\(model.selectedApplicationCount) apps selected", bundle: .module)
                 .foregroundStyle(.supportingText)
+        case .selectedServices:
+            Text("\(model.selectedServiceCount) services selected", bundle: .module)
+                .foregroundStyle(.supportingText)
         }
         ForEach(model.warnings, id: \.self) { warning in
             Label {

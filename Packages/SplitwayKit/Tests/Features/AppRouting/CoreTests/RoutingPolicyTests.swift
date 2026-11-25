@@ -18,6 +18,43 @@ struct RoutingPolicyTests {
     }
 
     @Test
+    func warnsAboutAnEmptyServiceSelection() {
+        let noServices = RoutingPolicy(mode: .selectedServices(ServiceSelection([])))
+
+        #expect(noServices.warnings == [.emptyServiceSelection])
+    }
+
+    @Test
+    func remembersTheServicesWhileAnotherModeIsChosen() throws {
+        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
+
+        let allTraffic = RoutingPolicy(mode: .selectedServices(selection)).switchingMode(to: .allTraffic)
+
+        #expect(allTraffic.mode == .allTraffic)
+        #expect(allTraffic.switchingMode(to: .selectedServices).mode == .selectedServices(selection))
+    }
+
+    @Test
+    func replacesTheServicesWithoutChangingTheMode() throws {
+        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
+
+        let policy = RoutingPolicy.default.replacingServiceSelection(with: selection)
+
+        #expect(policy.mode == .allTraffic)
+        #expect(policy.serviceSelection == selection)
+    }
+
+    @Test
+    func keepsTheApplicationsWhenTheServicesChange() throws {
+        let applications = ApplicationSelection([try sampleApplication()])
+        let policy = RoutingPolicy(mode: .selectedApplications(applications))
+
+        let changed = policy.replacingServiceSelection(with: ServiceSelection([try ServiceIdentifier("telegram")]))
+
+        #expect(changed.mode == .selectedApplications(applications))
+    }
+
+    @Test
     func remembersTheApplicationsWhileAnotherModeIsChosen() throws {
         let selection = ApplicationSelection([try sampleApplication()])
 

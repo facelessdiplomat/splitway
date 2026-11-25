@@ -3,6 +3,7 @@ extension RoutingPolicy {
         RoutingPolicy(
             modeKind: kind,
             applicationSelection: applicationSelection,
+            serviceSelection: serviceSelection,
             whenTunnelUnavailable: whenTunnelUnavailable
         )
     }
@@ -11,6 +12,16 @@ extension RoutingPolicy {
         RoutingPolicy(
             modeKind: mode.kind,
             applicationSelection: selection,
+            serviceSelection: serviceSelection,
+            whenTunnelUnavailable: whenTunnelUnavailable
+        )
+    }
+
+    public func replacingServiceSelection(with selection: ServiceSelection) -> RoutingPolicy {
+        RoutingPolicy(
+            modeKind: mode.kind,
+            applicationSelection: applicationSelection,
+            serviceSelection: selection,
             whenTunnelUnavailable: whenTunnelUnavailable
         )
     }
@@ -19,6 +30,7 @@ extension RoutingPolicy {
         RoutingPolicy(
             modeKind: mode.kind,
             applicationSelection: applicationSelection,
+            serviceSelection: serviceSelection,
             whenTunnelUnavailable: behavior
         )
     }
