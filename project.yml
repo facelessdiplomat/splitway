@@ -188,6 +188,17 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/Splitway.app/Splitway
+  iOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: iOSApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.ui-tests
+        TEST_TARGET_NAME: iOSApp
   macOSApp:
     type: application
     platform: macOS
@@ -343,3 +354,12 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(SPLITWAY_BUNDLE_ID_PREFIX).splitway.integration-tests
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/SplitwayIntegrationTestHost.app/Contents/MacOS/SplitwayIntegrationTestHost
         BUNDLE_LOADER: $(TEST_HOST)
+schemes:
+  iOSUITests:
+    build:
+      targets:
+        iOSApp: all
+        iOSUITests: [test]
+    test:
+      targets:
+        - iOSUITests
