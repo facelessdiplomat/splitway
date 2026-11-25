@@ -9,7 +9,7 @@ struct RoutingPlatformTests {
     }
 
     @Test
-    func routesOnlyAllTrafficOnIPhoneAndIPad() {
-        #expect(RoutingPlatform.iOS.supportedModes == [.allTraffic])
+    func routesAllTrafficOrSelectedServicesOnIPhoneAndIPad() {
+        #expect(RoutingPlatform.iOS.supportedModes == [.allTraffic, .selectedServices])
     }
 }

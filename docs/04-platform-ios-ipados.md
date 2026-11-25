@@ -104,11 +104,12 @@ sequenceDiagram
 
 ### 4.6. Каталог сервисов
 
-- Формат: `Resources/ServiceCatalog/catalog.json` с версией схемы. Запись: `id`, `displayName`, `category`, `iconAsset`, `domainSuffixes`, `ipv4Networks`, `ipv6Networks`, `notes`.
+- Формат: `catalog.json` в ресурсах `ServiceCatalogInfrastructure` с версией схемы. Запись: `id`, `displayName`, `category`, `monogram`, `tint`, `domainSuffixes`, `ipv4Networks`, `ipv6Networks`, `notes` (откуда взяты домены и сети).
 - Стартовый набор (решение D-15): Telegram, WhatsApp, Signal, Instagram, Facebook, Threads, YouTube, X, Discord, ChatGPT, Claude, Spotify, Netflix, LinkedIn, GitHub.
 - Иконки нейтральные: монограмма или SF Symbol в цвете сервиса, без логотипов (решение D-16).
 - Свои правила: пользователь создаёт «свой сервис» со списком доменов и подсетей. Валидация — доменными value objects (`DomainName`, `IPNetwork`).
-- Тест каталога в `Scripts/check.sh`: JSON валиден, домены и подсети корректны, нет дубликатов `id`.
+- Тесты каталога (`BundledCatalogContentTests`, их запускает `Scripts/check.sh`): 15 стартовых сервисов по порядку, у каждого есть домены и источник, каждый собирается в план без предупреждений для туннеля «Весь трафик»; разбор JSON отклоняет чужую версию схемы и называет запись с неверным доменом.
+- Сверка с источниками из `notes` — 2026-11-25 (M9-08): у GitHub 131 сеть вместо 83 и хосты Copilot на Azure Web PubSub, у Claude новый входящий диапазон `153.61.224.0/22`, у ChatGPT `cdn.openaimerge.com`, справка Google о YouTube переехала. Сети Telegram не изменились. Страницы WhatsApp и Signal не открылись для автоматической проверки; их домены оставлены как в `ios-final`.
 - Обновление каталога по сети (подписанный JSON) — бэклог: так в продукте появился бы сетевой запрос к серверу разработчика, а это противоречит принципу «никаких запросов».
 
 ## 5. Интерфейс iPhone

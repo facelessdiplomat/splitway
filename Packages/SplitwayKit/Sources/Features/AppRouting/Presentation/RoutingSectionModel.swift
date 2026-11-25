@@ -28,6 +28,10 @@ public final class RoutingSectionModel {
         policy.applicationSelection.applications.count
     }
 
+    public var selectedServiceCount: Int {
+        policy.serviceSelection.services.count
+    }
+
     public var applicationSelection: ApplicationSelection {
         policy.applicationSelection
     }

@@ -47,7 +47,25 @@ struct RoutingPolicyCodingTests {
         + #""signingIdentifiers":[]}],"mode":"allTraffic","schemaVersion":1,"whenTunnelUnavailable":"block"}"#
 
     @Test
-    func readsTheRetiredServicesModeAsAllTraffic() throws {
+    func writesTheChosenServices() throws {
+        let policy = RoutingPolicy(
+            mode: .selectedServices(
+                ServiceSelection([try ServiceIdentifier("telegram"), try ServiceIdentifier("youtube")])
+            ),
+            whenTunnelUnavailable: .bypass
+        )
+
+        let json = try Self.sortedJSON(of: policy)
+
+        #expect(json == Self.servicesDocument)
+    }
+
+    private static let servicesDocument =
+        #"{"mode":"selectedServices","schemaVersion":1,"services":["telegram","youtube"],"#
+        + #""whenTunnelUnavailable":"bypass"}"#
+
+    @Test
+    func readsTheServicesModeOfATunnelSavedOnIPhone() throws {
         let json = Data(
             (#"{"schemaVersion":1,"mode":"selectedServices","services":["telegram"],"#
                 + #""whenTunnelUnavailable":"bypass"}"#).utf8
@@ -55,11 +73,17 @@ struct RoutingPolicyCodingTests {
 
         let policy = try JSONDecoder().decode(RoutingPolicy.self, from: json)
 
-        #expect(policy == RoutingPolicy(mode: .allTraffic, whenTunnelUnavailable: .bypass))
+        #expect(
+            policy
+                == RoutingPolicy(
+                    mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])),
+                    whenTunnelUnavailable: .bypass
+                )
+        )
     }
 
     @Test
-    func ignoresTheServicesRememberedByTheRetiredMode() throws {
+    func remembersTheServicesWhileApplicationsAreChosen() throws {
         let json = Data(
             (#"{"schemaVersion":1,"mode":"selectedApplications","services":["telegram"],"#
                 + #""applications":[{"kind":"commandLineTool","displayName":"curl","path":"/usr/bin/curl"}]}"#).utf8
@@ -67,7 +91,8 @@ struct RoutingPolicyCodingTests {
 
         let policy = try JSONDecoder().decode(RoutingPolicy.self, from: json)
 
-        #expect(policy == RoutingPolicy(mode: .selectedApplications(ApplicationSelection([try Self.curl()]))))
+        #expect(policy.mode == .selectedApplications(ApplicationSelection([try Self.curl()])))
+        #expect(policy.serviceSelection == ServiceSelection([try ServiceIdentifier("telegram")]))
     }
 
     @Test(arguments: try samplePolicies())
@@ -88,6 +113,8 @@ struct RoutingPolicyCodingTests {
         #"{"schemaVersion":2,"mode":"allTraffic"}"#,
         #"{"schemaVersion":1,"mode":"selectedDomains"}"#,
         #"{"schemaVersion":1,"mode":"selectedApplications"}"#,
+        #"{"schemaVersion":1,"mode":"selectedServices"}"#,
+        #"{"schemaVersion":1,"mode":"selectedServices","services":["Not Valid"]}"#,
         #"{"mode":"allTraffic"}"#,
     ])
     func rejectsDocumentsItCannotTrust(_ json: String) {
@@ -110,6 +137,12 @@ struct RoutingPolicyCodingTests {
             RoutingPolicy(mode: .selectedApplications(ApplicationSelection([application, tool]))),
             RoutingPolicy(mode: .selectedApplications(ApplicationSelection([tool])), whenTunnelUnavailable: .bypass),
             RoutingPolicy(mode: .selectedApplications(ApplicationSelection([tool]))).switchingMode(to: .allTraffic),
+            RoutingPolicy(
+                mode: .selectedServices(ServiceSelection([try ServiceIdentifier("telegram")])),
+                whenTunnelUnavailable: .bypass
+            ),
+            RoutingPolicy(mode: .selectedServices(ServiceSelection([try ServiceIdentifier("youtube")])))
+                .switchingMode(to: .allTraffic),
         ]
     }
 

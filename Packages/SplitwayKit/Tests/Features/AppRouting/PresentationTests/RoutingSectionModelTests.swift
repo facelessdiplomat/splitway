@@ -13,19 +13,38 @@ struct RoutingSectionModelTests {
     }
 
     @Test
-    func offersOnlyAllTrafficOnIPhoneAndIPad() {
+    func offersSelectedServicesOnIPhoneAndIPad() {
         let model = RoutingSectionModel(policy: .default, platform: .iOS)
 
-        #expect(model.availableModes == [.allTraffic])
+        #expect(model.availableModes == [.allTraffic, .selectedServices])
+    }
+
+    @Test(arguments: [(RoutingPlatform.iOS, RoutingModeKind.selectedApplications), (.macOS, .selectedServices)])
+    func ignoresAModeThePlatformDoesNotSupport(platform: RoutingPlatform, mode: RoutingModeKind) {
+        let model = RoutingSectionModel(policy: .default, platform: platform)
+
+        model.selectMode(mode)
+
+        #expect(model.selectedMode == .allTraffic)
     }
 
     @Test
-    func ignoresAModeThePlatformDoesNotSupport() {
+    func warnsAboutAnEmptyServiceSelection() {
         let model = RoutingSectionModel(policy: .default, platform: .iOS)
 
-        model.selectMode(.selectedApplications)
+        model.selectMode(.selectedServices)
 
-        #expect(model.selectedMode == .allTraffic)
+        #expect(model.warnings == [.emptyServiceSelection])
+        #expect(model.policy.mode == .selectedServices(ServiceSelection([])))
+    }
+
+    @Test
+    func countsTheSelectedServices() throws {
+        let selection = ServiceSelection([try ServiceIdentifier("telegram"), try ServiceIdentifier("youtube")])
+
+        let model = RoutingSectionModel(policy: RoutingPolicy(mode: .selectedServices(selection)), platform: .iOS)
+
+        #expect(model.selectedServiceCount == 2)
     }
 
     @Test(arguments: [(RoutingPlatform.macOS, true), (.iOS, false)])
