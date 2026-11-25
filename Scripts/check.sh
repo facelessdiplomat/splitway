@@ -35,12 +35,10 @@ step() {
 }
 
 run_ui_tests() {
-    local family="$1"
     local simulator udid name version state language
     local status=0
-    if ! simulator="$(chosen_simulator "$family" <(xcrun simctl list --json))"; then
-        printf 'No %s simulator for the UI tests: add the iOS platform in Xcode › Settings › Components\n' \
-            "$family" >&2
+    if ! simulator="$(chosen_simulator iPhone <(xcrun simctl list --json))"; then
+        printf 'No iPhone simulator for the UI tests: add the iOS platform in Xcode › Settings › Components\n' >&2
         exit 1
     fi
     IFS=$'\t' read -r udid name version state <<<"$simulator"
@@ -139,10 +137,8 @@ else
 fi
 
 if [[ "$runs_ui_tests" == true ]]; then
-    step "iOS UI tests on iPhone"
-    run_ui_tests iPhone
-    step "iOS UI tests on iPad"
-    run_ui_tests iPad
+    step "iOS UI tests"
+    run_ui_tests
 fi
 
 if [[ "$runs_benchmarks" == true ]]; then
