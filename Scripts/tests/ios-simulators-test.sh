@@ -44,8 +44,9 @@ simulators_are() {
 expect_choice() {
     local description="$1"
     local expected="$2"
+    local family="${3:-iPhone}"
     local chosen
-    if ! chosen="$(chosen_iphone_simulator "$simulator_list")"; then
+    if ! chosen="$(chosen_simulator "$family" "$simulator_list")"; then
         record_failure "$description: no simulator was chosen"
     elif [[ "$chosen" != "$expected" ]]; then
         record_failure "$description: chose '$chosen' instead of '$expected'"
@@ -54,8 +55,9 @@ expect_choice() {
 
 expect_no_choice() {
     local description="$1"
+    local family="${2:-iPhone}"
     local chosen
-    if chosen="$(chosen_iphone_simulator "$simulator_list")"; then
+    if chosen="$(chosen_simulator "$family" "$simulator_list")"; then
         record_failure "$description: chose '$chosen'"
     fi
 }
@@ -104,6 +106,22 @@ expect_choice "tells that the simulator is already booted" $'udid iPhone 17\tiPh
     simulator "Apple Watch" 27.0 watchOS
 } | simulators_are
 expect_no_choice "chooses nothing without an iPhone simulator"
+
+{
+    runtime 26.0
+    runtime 27.2
+    simulator "iPad Air" 26.0
+    simulator "iPad Pro" 27.2
+    simulator "iPad mini" 27.2
+    simulator "iPhone 17" 27.2
+} | simulators_are
+expect_choice "picks an iPad on the newest runtime for the iPad family" $'udid iPad Pro\tiPad Pro\t27.2\tShutdown' iPad
+
+{
+    runtime 27.2
+    simulator "iPhone 17" 27.2
+} | simulators_are
+expect_no_choice "chooses nothing without a simulator of the family" iPad
 
 printf '{}\n' >"$simulator_list"
 expect_no_choice "chooses nothing when the simulator list is empty"

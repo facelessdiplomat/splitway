@@ -93,7 +93,7 @@ else
 fi
 
 step "iOS build and integration tests"
-if iphone_simulator="$(chosen_iphone_simulator <(xcrun simctl list --json))"; then
+if iphone_simulator="$(chosen_simulator iPhone <(xcrun simctl list --json))"; then
     IFS=$'\t' read -r simulator_udid simulator_name simulator_version simulator_state <<<"$iphone_simulator"
     printf 'On the %s simulator with iOS %s\n' "$simulator_name" "$simulator_version"
     ios_status=0

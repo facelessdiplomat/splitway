@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
-chosen_iphone_simulator() {
-    local simulator_list="$1"
+chosen_simulator() {
+    local family="$1"
+    local simulator_list="$2"
     local chosen
-    chosen="$(jq -r '
+    chosen="$(jq -r --arg family "$family" '
         (.devices // {}) as $devices
         | [ (.runtimes // [])[]
             | select(.platform == "iOS" and .isAvailable)
             | . as $runtime
             | ($devices[$runtime.identifier] // [])[]
-            | select(.isAvailable and (.deviceTypeIdentifier | test("\\.iPhone")))
+            | select(.isAvailable and (.deviceTypeIdentifier | test("\\." + $family + "-")))
             | {
                 udid,
                 name,
