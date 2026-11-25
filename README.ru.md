@@ -66,7 +66,7 @@ Scripts/bootstrap.sh
 Scripts/check.sh
 ```
 
-`bootstrap.sh` ставит git-хуки, собирает `TunnelCore.xcframework` и генерирует `Splitway.xcodeproj`, `check.sh` запускает линтеры, тесты Go и Swift и сборку macOS. Чтобы собрать свою подписанную копию, укажите в `project.yml` свою команду и префикс bundle ID (`DEVELOPMENT_TEAM`, `SPLITWAY_BUNDLE_ID_PREFIX`): сетевому системному расширению нужна подпись с возможностями Network Extension и System Extension, а активируется оно только из `/Applications`.
+`bootstrap.sh` ставит git-хуки, собирает `TunnelCore.xcframework` и генерирует `Splitway.xcodeproj`, `check.sh` запускает линтеры, тесты Go и Swift, сборку macOS, а если в Xcode есть симулятор iPhone — ещё и сборку iOS с интеграционными тестами. Чтобы собрать свою подписанную копию, укажите в `project.yml` свою команду и префикс bundle ID (`DEVELOPMENT_TEAM`, `SPLITWAY_BUNDLE_ID_PREFIX`): сетевому системному расширению нужна подпись с возможностями Network Extension и System Extension, а активируется оно только из `/Applications`.
 
 ## Сборка для iPhone
 

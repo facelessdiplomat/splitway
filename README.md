@@ -51,7 +51,7 @@ Scripts/bootstrap.sh
 Scripts/check.sh
 ```
 
-`bootstrap.sh` installs the git hooks, builds `TunnelCore.xcframework` and generates `Splitway.xcodeproj`; `check.sh` runs the linters, Go and Swift tests and the macOS build. To run your own signed build, set your team and bundle ID prefix (`DEVELOPMENT_TEAM`, `SPLITWAY_BUNDLE_ID_PREFIX`) in `project.yml`: a network system extension needs a signing identity with the Network Extension and System Extension capabilities, and it activates only from `/Applications`.
+`bootstrap.sh` installs the git hooks, builds `TunnelCore.xcframework` and generates `Splitway.xcodeproj`; `check.sh` runs the linters, Go and Swift tests, the macOS build and, when Xcode has an iPhone simulator, the iOS build with its integration tests. To run your own signed build, set your team and bundle ID prefix (`DEVELOPMENT_TEAM`, `SPLITWAY_BUNDLE_ID_PREFIX`) in `project.yml`: a network system extension needs a signing identity with the Network Extension and System Extension capabilities, and it activates only from `/Applications`.
 
 ## Build for your iPhone
 
