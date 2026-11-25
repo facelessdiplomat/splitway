@@ -481,6 +481,16 @@
         }
       }
     },
+    "Services through the tunnel" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сервисы через туннель"
+          }
+        }
+      }
+    },
     "Settings" : {
       "localizations" : {
         "ru" : {

@@ -39,6 +39,18 @@ struct RoutingSectionModelTests {
     }
 
     @Test
+    func replacesTheSelectedServices() throws {
+        let model = RoutingSectionModel(policy: .default, platform: .iOS)
+        model.selectMode(.selectedServices)
+        let selection = ServiceSelection([try ServiceIdentifier("telegram")])
+
+        model.setServices(selection)
+
+        #expect(model.policy.mode == .selectedServices(selection))
+        #expect(model.serviceSelection == selection)
+    }
+
+    @Test
     func countsTheSelectedServices() throws {
         let selection = ServiceSelection([try ServiceIdentifier("telegram"), try ServiceIdentifier("youtube")])
 

@@ -5,7 +5,8 @@ import TunnelLibrary
 extension TunnelLibraryEntry {
     func row(
         in slot: SlotState,
-        activating pendingActivation: TunnelIdentifier?
+        activating pendingActivation: TunnelIdentifier?,
+        naming serviceNames: [ServiceIdentifier: String]
     ) -> TunnelRow {
         switch self {
         case .readable(let tunnel):
@@ -14,7 +15,8 @@ extension TunnelLibraryEntry {
                 name: tunnel.name.description,
                 status: status(of: tunnel.id, in: slot, activating: pendingActivation),
                 routingMode: tunnel.routingPolicy.mode.kind,
-                routedApplicationNames: tunnel.routingPolicy.mode.routedApplicationNames
+                routedApplicationNames: tunnel.routingPolicy.mode.routedApplicationNames,
+                routedServiceNames: tunnel.routingPolicy.mode.routedServiceNames(naming: serviceNames)
             )
         case .unreadable(let record):
             TunnelRow(
@@ -22,7 +24,8 @@ extension TunnelLibraryEntry {
                 name: record.name.description,
                 status: .unavailable,
                 routingMode: nil,
-                routedApplicationNames: []
+                routedApplicationNames: [],
+                routedServiceNames: []
             )
         }
     }
