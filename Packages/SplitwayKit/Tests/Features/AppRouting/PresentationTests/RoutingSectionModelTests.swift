@@ -6,15 +6,38 @@ import Testing
 @Suite
 struct RoutingSectionModelTests {
     @Test
-    func offersAllTrafficAndSelectedApplications() {
-        let model = RoutingSectionModel(policy: .default)
+    func offersSelectedApplicationsOnMac() {
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
 
         #expect(model.availableModes == [.allTraffic, .selectedApplications])
     }
 
     @Test
+    func offersOnlyAllTrafficOnIPhoneAndIPad() {
+        let model = RoutingSectionModel(policy: .default, platform: .iOS)
+
+        #expect(model.availableModes == [.allTraffic])
+    }
+
+    @Test
+    func ignoresAModeThePlatformDoesNotSupport() {
+        let model = RoutingSectionModel(policy: .default, platform: .iOS)
+
+        model.selectMode(.selectedApplications)
+
+        #expect(model.selectedMode == .allTraffic)
+    }
+
+    @Test(arguments: [(RoutingPlatform.macOS, true), (.iOS, false)])
+    func asksWhatToDoWithoutTheTunnelOnlyOnMac(platform: RoutingPlatform, showsChoice: Bool) {
+        let model = RoutingSectionModel(policy: .default, platform: platform)
+
+        #expect(model.offersUnavailableTunnelChoice == showsChoice)
+    }
+
+    @Test
     func warnsAboutAnEmptySelection() {
-        let model = RoutingSectionModel(policy: .default)
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
 
         model.selectMode(.selectedApplications)
 
@@ -30,7 +53,7 @@ struct RoutingSectionModelTests {
             path: "/Applications/Safari.app"
         )
         let selection = ApplicationSelection([safari])
-        let model = RoutingSectionModel(policy: RoutingPolicy(mode: .selectedApplications(selection)))
+        let model = RoutingSectionModel(policy: RoutingPolicy(mode: .selectedApplications(selection)), platform: .macOS)
 
         model.selectMode(.allTraffic)
         model.selectMode(.selectedApplications)
@@ -41,7 +64,7 @@ struct RoutingSectionModelTests {
 
     @Test
     func blocksTrafficWhenTheTunnelIsUnavailableByDefault() {
-        let model = RoutingSectionModel(policy: .default)
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
         #expect(model.blocksWhenTunnelUnavailable)
 
         model.setBlocksWhenTunnelUnavailable(false)
@@ -51,7 +74,7 @@ struct RoutingSectionModelTests {
 
     @Test
     func replacesTheSelectedApplications() throws {
-        let model = RoutingSectionModel(policy: .default)
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
         model.selectMode(.selectedApplications)
         let selection = try Self.safariSelection()
 
@@ -63,7 +86,7 @@ struct RoutingSectionModelTests {
 
     @Test
     func usesApplicationsChosenEarlierWhenTheirModeIsSelected() throws {
-        let model = RoutingSectionModel(policy: .default)
+        let model = RoutingSectionModel(policy: .default, platform: .macOS)
         let selection = try Self.safariSelection()
         model.setApplications(selection)
 
@@ -76,7 +99,7 @@ struct RoutingSectionModelTests {
     func offersTheApplicationsOfATunnelSavedWhileRoutingAllTraffic() throws {
         let selection = try Self.safariSelection()
         let saved = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)
-        let model = RoutingSectionModel(policy: saved)
+        let model = RoutingSectionModel(policy: saved, platform: .macOS)
 
         model.selectMode(.selectedApplications)
 
@@ -87,7 +110,7 @@ struct RoutingSectionModelTests {
     @Test
     func keepsTheApplicationsInThePolicyWhenAllTrafficIsChosen() throws {
         let selection = try Self.safariSelection()
-        let model = RoutingSectionModel(policy: RoutingPolicy(mode: .selectedApplications(selection)))
+        let model = RoutingSectionModel(policy: RoutingPolicy(mode: .selectedApplications(selection)), platform: .macOS)
 
         model.selectMode(.allTraffic)
 
@@ -99,7 +122,7 @@ struct RoutingSectionModelTests {
     func keepsTheApplicationsWhenWhatToDoWithoutTheTunnelChanges() throws {
         let selection = try Self.safariSelection()
         let saved = RoutingPolicy(mode: .selectedApplications(selection)).switchingMode(to: .allTraffic)
-        let model = RoutingSectionModel(policy: saved)
+        let model = RoutingSectionModel(policy: saved, platform: .macOS)
 
         model.setBlocksWhenTunnelUnavailable(false)
 

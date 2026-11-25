@@ -26,6 +26,7 @@ public final class TunnelEditorModel: Identifiable {
 
     public init(
         newTunnelNamed name: String,
+        routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         applicationPicker: ApplicationPickerActions? = nil,
         didSave: @escaping @MainActor (Tunnel) async -> Void
@@ -34,7 +35,7 @@ public final class TunnelEditorModel: Identifiable {
         draft.generatePrivateKey()
         self.draft = draft
         editedTunnel = nil
-        routing = RoutingSectionModel(policy: .default)
+        routing = RoutingSectionModel(policy: .default, platform: routingPlatform)
         self.actions = actions
         applicationPickerActions = applicationPicker
         self.didSave = didSave
@@ -43,13 +44,14 @@ public final class TunnelEditorModel: Identifiable {
 
     public init(
         editing tunnel: Tunnel,
+        routingPlatform: RoutingPlatform = .current,
         actions: TunnelEditorActions,
         applicationPicker: ApplicationPickerActions? = nil,
         didSave: @escaping @MainActor (Tunnel) async -> Void
     ) {
         draft = TunnelDraft(name: tunnel.name, configuration: tunnel.configuration)
         editedTunnel = tunnel
-        routing = RoutingSectionModel(policy: tunnel.routingPolicy)
+        routing = RoutingSectionModel(policy: tunnel.routingPolicy, platform: routingPlatform)
         self.actions = actions
         applicationPickerActions = applicationPicker
         self.didSave = didSave
