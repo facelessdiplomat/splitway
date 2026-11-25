@@ -58,10 +58,11 @@
 - **Объяснения.** `ConnectionFailure.explanation` (`TunnelConnectionPresentation`) даёт каждому отказу свой заголовок, текст с советом и действие `ConnectionFailureAction`: изменить туннель или ничего. Отказ в разрешении добавить конфигурацию VPN действия не предлагает: текст советует разрешить это в настройках и повторить. Отказ движка `configurationRejected` объясняется отдельно от остальных отказов движка.
 
 - **Удаление конфигураций** (M6-02). `ProviderSlotRemoval<Kind>` удаляет из системных настроек все сохранённые конфигурации слота с идентификатором провайдера Splitway, `TunnelConnectionAssembly.removeSystemConfigurations()` — оба слота. В тестовой ВМ после удаления Splitway `scutil --nc list` пуст (2026-11-01).
+- **Разовое чтение слота** (M6-04). `ReadSlotStateUseCase` возвращает `SlotState` одним запросом, без подписки на статусы: туннель в слоте и его подключение. Причины прошлого отключения разовое чтение не знает, поэтому отключённый слот — просто `disconnected`. Им пользуется контрол Пункта управления ([ControlWidgets](ControlWidgets.md)).
 
 ## Публичный API
 
-`ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`, `SlotSelectingTunnelController`, `SlotSelectingMessenger`, `ApplyRoutingPolicyUseCase`, `RoutingPolicyApplicationError`; адаптеры `ProviderSlotController`, `ProviderSlotKind`, `PacketTunnelSlot`, `TransparentProxySlot`, `ProviderSlotMessenger`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`; экран — `ConnectionFailureExplanation`, `ConnectionFailureAction`, `ConnectionFailure.explanation`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
+`ConnectionState`, `ConnectionFailure`, `SlotState`, `SystemConnectionStatus`, `SystemTunnelController`, `ConnectionCoordinator`, `ActivateTunnelUseCase`, `DeactivateTunnelUseCase`, `ObserveConnectionStateUseCase`, `ReadSlotStateUseCase`, `FetchRuntimeStatisticsUseCase`, `RuntimeStatisticsError`, `ConnectionActivityProbe`, `TunnelSlotDescription`, `SlotSelectingTunnelController`, `SlotSelectingMessenger`, `ApplyRoutingPolicyUseCase`, `RoutingPolicyApplicationError`; адаптеры `ProviderSlotController`, `ProviderSlotKind`, `PacketTunnelSlot`, `TransparentProxySlot`, `ProviderSlotMessenger`, `VPNStatusMapping`, `VPNErrorMapping`, сборка `TunnelConnectionAssembly`; экран — `ConnectionFailureExplanation`, `ConnectionFailureAction`, `ConnectionFailure.explanation`. Фейк `FakeSystemTunnelController` в `TunnelConnectionTestSupport` нужен и тестам экрана списка.
 
 ## Решения
 
@@ -129,3 +130,4 @@
 | 2026-11-01 | Разовое чтение слота для контрола Пункта управления | M6-04 |
 | 2026-11-01 | Установка туннеля меняет загруженный протокол: запись в слот из расширения виджетов | M6-04 |
 | 2026-11-03 | Убраны iOS и iPadOS: сборка с одним слотом пакетного туннеля, действие «Открыть Настройки» (отказ в разрешении на VPN теперь без действия), контрол Пункта управления и разовое чтение слота `ReadSlotStateUseCase`, которым пользовался только он | M8-02 |
+| 2026-11-25 | Вернулось разовое чтение слота `ReadSlotStateUseCase` для контрола Пункта управления | M9-12 |
