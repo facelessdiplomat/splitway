@@ -184,10 +184,12 @@ struct AppComposition {
     private static func tunnelImport(importer: TunnelImportAssembly, tunnelList: TunnelListModel) -> TunnelImportModel {
         TunnelImportModel(
             actions: TunnelImportActions(
-                prepareImport: importer.prepareImport(fallbackName: TunnelImportModel.fallbackName),
+                prepareImport: importer.prepareImport(fallbackNames: TunnelImportModel.fallbackNames),
                 confirmImport: importer.confirmImport,
                 fileReader: importer.fileReader,
-                clipboard: importer.clipboard
+                clipboard: importer.clipboard,
+                cameraAccess: importer.cameraAccess,
+                qrCodeDecoder: importer.qrCodeDecoder
             )
         ) {
             await tunnelList.load()
