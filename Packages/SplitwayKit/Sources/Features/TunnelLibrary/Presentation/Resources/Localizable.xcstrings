@@ -451,6 +451,16 @@
         }
       }
     },
+    "Scan QR code" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сканировать QR-код"
+          }
+        }
+      }
+    },
     "Search Tunnels" : {
       "localizations" : {
         "ru" : {

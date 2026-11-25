@@ -26,10 +26,6 @@ import UpdatesPresentation
 
 @MainActor
 struct AppComposition {
-    static var additionMethods: [TunnelAdditionMethod] {
-        [.importFromFile, .pasteFromClipboard, .createFromScratch]
-    }
-
     let tunnelList: TunnelListModel
     let statistics: TunnelStatisticsPolling
     let tunnelImport: TunnelImportModel
@@ -73,17 +69,6 @@ struct AppComposition {
             .info, "Splitway \(configuration.version) started")
         tunnelImport = Self.tunnelImport(importer: importer, tunnelList: tunnelList)
         tunnelEditor = Self.tunnelEditor(services: services, clipboard: importer.clipboard, tunnelList: tunnelList)
-    }
-
-    func add(_ method: TunnelAdditionMethod) {
-        switch method {
-        case .importFromFile:
-            tunnelImport.pickFiles()
-        case .pasteFromClipboard:
-            Task.immediate { await tunnelImport.importClipboard() }
-        case .createFromScratch:
-            tunnelEditor.createTunnel()
-        }
     }
 
     private static func logViewer(diagnostics: DiagnosticsAssembly, configuration: AppConfiguration)
