@@ -141,7 +141,7 @@ flowchart LR
 ### M9-06. iOS в `check.sh`
 `iOS` · S · зависит от: M9-04
 
-**Сделать:** шаг «iOS build and integration tests» в `Scripts/check.sh`: сборка `iOSApp` и `iOSIntegrationTests` в симуляторе iPhone. Если среды выполнения симулятора iPhone нет, шаг пропускается с заметным сообщением, чтобы Mac-версию можно было проверить без iOS. Пути iOS-таргетов в `Scripts/lint.sh` и `.swiftlint.yml`. `Scripts/release.sh` по-прежнему собирает только Mac. CI нет (D-54), поэтому `check.sh` с хуком `pre-merge-commit` — единственная проверка и для iOS-кода.
+**Сделать:** шаг «iOS build and integration tests» в `Scripts/check.sh`: сборка `iOSApp` и `iOSIntegrationTests` в симуляторе iPhone. Если среды выполнения симулятора iPhone нет, шаг пропускается с заметным сообщением, чтобы Mac-версию можно было проверить без iOS. Линтеры уже проверяют `Apps/`, `IntegrationTests/` и `IntegrationTestHost/` (M9-04). `Scripts/release.sh` по-прежнему собирает только Mac. CI нет (D-54), поэтому `check.sh` с хуком `pre-merge-commit` — единственная проверка и для iOS-кода.
 **Тесты сначала:** не требуются (скрипты); пробный запуск на Mac с симулятором iPhone и без него.
 **Готово, когда:** `check.sh` на Mac владельца собирает iOS и проходит интеграционные тесты в симуляторе, а на Mac без симулятора iOS проходит с пропуском шага.
 
