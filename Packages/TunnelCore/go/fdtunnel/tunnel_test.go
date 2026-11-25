@@ -17,13 +17,78 @@ import (
 	"golang.org/x/crypto/curve25519"
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/device"
+	"golang.zx2c4.com/wireguard/tun"
 	"golang.zx2c4.com/wireguard/tun/tuntest"
+	"splitway/tunnelcore/servicerouting"
 )
 
 const packetDeliveryTimeout = 5 * time.Second
 
+var (
+	fakeIPv4Network = netip.MustParsePrefix("198.18.0.0/15")
+	fakeAddress     = netip.MustParseAddr("198.18.1.0")
+	virtualResolver = netip.MustParseAddr("198.18.0.2")
+)
+
+type tunnelStarter func(tunnelInterface tun.Device, configuration string, logger *device.Logger) (*Tunnel, error)
+
 func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
+}
+
+func TestDeliversTrafficForFakeAddressesUnchangedWithoutAServiceRoutingPlan(t *testing.T) {
+	first := startServiceRoutingTestPeer(t, "10.0.0.1")
+	second := startTestPeer(t, "10.0.0.2")
+	first.connect(t, second, fakeIPv4Network)
+	second.connect(t, first)
+	ping := tuntest.Ping(fakeAddress, first.address)
+
+	first.channels.Outbound <- ping
+
+	expectDelivery(t, second, ping)
+}
+
+func TestDropsTrafficForUnknownFakeAddressesOnceAServiceRoutingPlanArrives(t *testing.T) {
+	first := startServiceRoutingTestPeer(t, "10.0.0.1")
+	second := startTestPeer(t, "10.0.0.2")
+	first.connect(t, second, fakeIPv4Network)
+	second.connect(t, first)
+	ping := tuntest.Ping(second.address, first.address)
+
+	err := first.tunnel.RouteServices(serviceRoutingPlan(second.address))
+	first.channels.Outbound <- tuntest.Ping(fakeAddress, first.address)
+	first.channels.Outbound <- ping
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectDelivery(t, second, ping)
+}
+
+func TestRejectsAnInvalidServiceRoutingPlan(t *testing.T) {
+	peer := startServiceRoutingTestPeer(t, "10.0.0.1")
+
+	err := peer.tunnel.RouteServices(servicerouting.Plan{UpstreamDNS: virtualResolver})
+
+	if !errors.Is(err, ErrConfigurationRejected) {
+		t.Fatalf("expected a rejected plan, got %v", err)
+	}
+}
+
+func TestStartsATunnelThatRoutesServicesOnlyInTheIOSBuild(t *testing.T) {
+	peer := startTestPeer(t, "10.0.0.1")
+
+	err := peer.tunnel.RouteServices(serviceRoutingPlan(netip.MustParseAddr("10.0.0.2")))
+
+	if peer.tunnel.RoutesServices() != routesServicesOnThisPlatform {
+		t.Fatalf("expected RoutesServices to be %v", routesServicesOnThisPlatform)
+	}
+	if routesServicesOnThisPlatform && err != nil {
+		t.Fatalf("expected the plan to apply, got %v", err)
+	}
+	if !routesServicesOnThisPlatform && !errors.Is(err, ErrServiceRoutingUnavailable) {
+		t.Fatalf("expected service routing to be unavailable, got %v", err)
+	}
 }
 
 func TestTwoTunnelsHandshakeAndDeliverAPacket(t *testing.T) {
@@ -148,13 +213,23 @@ type testPeer struct {
 
 func startTestPeer(t *testing.T, address string) *testPeer {
 	t.Helper()
+	return startTestPeerWith(t, address, Start)
+}
+
+func startServiceRoutingTestPeer(t *testing.T, address string) *testPeer {
+	t.Helper()
+	return startTestPeerWith(t, address, StartRoutingServices)
+}
+
+func startTestPeerWith(t *testing.T, address string, start tunnelStarter) *testPeer {
+	t.Helper()
 	privateKey := randomPrivateKey(t)
 	publicKey, err := curve25519.X25519(privateKey[:], curve25519.Basepoint)
 	if err != nil {
 		t.Fatal(err)
 	}
 	channels := tuntest.NewChannelTUN()
-	tunnel, err := Start(channels.TUN(), privateKeyConfiguration(privateKey)+"listen_port=0\n", silentLogger())
+	tunnel, err := start(channels.TUN(), privateKeyConfiguration(privateKey)+"listen_port=0\n", silentLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +243,7 @@ func startTestPeer(t *testing.T, address string) *testPeer {
 	}
 }
 
-func (peer *testPeer) connect(t *testing.T, other *testPeer) {
+func (peer *testPeer) connect(t *testing.T, other *testPeer, additionalAllowedIPs ...netip.Prefix) {
 	t.Helper()
 	lines := []string{
 		"replace_peers=true",
@@ -177,8 +252,19 @@ func (peer *testPeer) connect(t *testing.T, other *testPeer) {
 		"replace_allowed_ips=true",
 		"allowed_ip=" + netip.PrefixFrom(other.address, other.address.BitLen()).String(),
 	}
+	for _, allowedIP := range additionalAllowedIPs {
+		lines = append(lines, "allowed_ip="+allowedIP.String())
+	}
 	if err := peer.tunnel.Apply(strings.Join(lines, "\n") + "\n"); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func serviceRoutingPlan(upstreamResolver netip.Addr) servicerouting.Plan {
+	return servicerouting.Plan{
+		VirtualDNS:      virtualResolver,
+		UpstreamDNS:     upstreamResolver,
+		FakeIPv4Network: fakeIPv4Network,
 	}
 }
 
