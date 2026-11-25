@@ -159,11 +159,12 @@ let features: [FeatureModule] = [
         coreDependencies: ["AppRouting", "TunnelConfiguration", "TunnelLibrary"],
         presentationDependencies: [
             "TunnelConnection", "TunnelConfigurationPresentation", "AppRoutingPresentation",
-            "ApplicationCatalogPresentation", "DesignSystemPresentation",
+            "ApplicationCatalogPresentation", "ServiceCatalogPresentation", "DesignSystemPresentation",
         ],
         testDependencies: ["TunnelConfigurationTestSupport"],
         presentationTestDependencies: [
             "TunnelLibraryTestSupport", "TunnelConnectionTestSupport", "ApplicationCatalogTestSupport",
+            "ServiceCatalog", "ServiceCatalogTestSupport",
         ]
     ),
     FeatureModule(
