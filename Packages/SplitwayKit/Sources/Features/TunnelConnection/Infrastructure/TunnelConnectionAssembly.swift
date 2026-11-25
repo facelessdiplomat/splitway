@@ -36,6 +36,10 @@ public struct TunnelConnectionAssembly: Sendable {
         ObserveConnectionStateUseCase(controller: controller)
     }
 
+    public var readSlotState: ReadSlotStateUseCase {
+        ReadSlotStateUseCase(controller: controller)
+    }
+
     public var fetchStatistics: FetchRuntimeStatisticsUseCase {
         FetchRuntimeStatisticsUseCase(messenger: messenger)
     }
