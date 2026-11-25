@@ -5,13 +5,15 @@ import Observation
 @Observable
 public final class RoutingSectionModel {
     public private(set) var policy: RoutingPolicy
+    public let platform: RoutingPlatform
 
-    public init(policy: RoutingPolicy) {
+    public init(policy: RoutingPolicy, platform: RoutingPlatform) {
         self.policy = policy
+        self.platform = platform
     }
 
     public var availableModes: [RoutingModeKind] {
-        RoutingModeKind.allCases
+        RoutingModeKind.allCases.filter(platform.supportedModes.contains)
     }
 
     public var selectedMode: RoutingModeKind {
@@ -30,11 +32,16 @@ public final class RoutingSectionModel {
         policy.applicationSelection
     }
 
+    public var offersUnavailableTunnelChoice: Bool {
+        platform == .macOS
+    }
+
     public var blocksWhenTunnelUnavailable: Bool {
         policy.whenTunnelUnavailable == .block
     }
 
     public func selectMode(_ kind: RoutingModeKind) {
+        guard platform.supportedModes.contains(kind) else { return }
         policy = policy.switchingMode(to: kind)
     }
 

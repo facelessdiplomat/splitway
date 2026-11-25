@@ -37,8 +37,10 @@ public struct RoutingSection: View {
                     Text("Exclude private networks", bundle: .module)
                 }
             }
-            Toggle(isOn: blocksWhenTunnelUnavailable) {
-                Text("Block traffic when the tunnel is unavailable", bundle: .module)
+            if model.offersUnavailableTunnelChoice {
+                Toggle(isOn: blocksWhenTunnelUnavailable) {
+                    Text("Block traffic when the tunnel is unavailable", bundle: .module)
+                }
             }
         } header: {
             Text("Routing", bundle: .module)

@@ -3,9 +3,14 @@ import DiagnosticsInfrastructure
 import Foundation
 import PacketTunnel
 import PacketTunnelInfrastructure
-import SecretDeliveryInfrastructure
 import TunnelCoreAdapter
 import TunnelLibrary
+
+#if os(macOS)
+    import SecretDeliveryInfrastructure
+#else
+    import TunnelLibraryInfrastructure
+#endif
 
 struct PacketTunnelComposition: Sendable {
     private static let appGroupInfoKey = "SplitwayAppGroupIdentifier"
@@ -39,7 +44,11 @@ struct PacketTunnelComposition: Sendable {
     }
 
     private static var secretStore: any TunnelSecretStore {
-        SystemKeychainSecretStore()
+        #if os(macOS)
+            SystemKeychainSecretStore()
+        #else
+            KeychainTunnelSecretStore()
+        #endif
     }
 
     static func logDirectory(in bundle: Bundle) -> URL {

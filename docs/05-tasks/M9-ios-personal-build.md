@@ -38,7 +38,7 @@
 - [x] M9-01 Решение D-53 и план — D-53 в журнале с ответами владельца (2026-11-24), пометки у D-01, D-02, D-04, D-15, D-16, D-37 и D-45, идентификаторы iOS; документ платформы `04-platform-ios-ipados.md` и спайки SP-4 и SP-8 возвращены из `ios-final` без App Store; `CLAUDE.md`, `01-product.md`, `02-architecture.md` и формат задач обновлены
 - [x] M9-02 Go-ядро и пакеты для iOS — в xcframework срезы `ios-arm64`, `ios-arm64-simulator` и `macos-arm64_x86_64`; в срезах iOS нет `usernet` (у моста снова тег `!ios`, Swift-части адаптера — только для macOS) и есть лимит памяти Go 30 МиБ. `TunnelCoreAdapter` собирается для `generic/platform=iOS` и симулятора, все восемь функций C API, которые ему нужны, есть в срезах iOS; `check.sh` проходит (2026-11-24)
 - [x] M9-03 Общий код собирается для iOS — из `ios-final` вернулись платформенные ветки общих фич: буфер обмена на UIKit, лист настроек с кнопкой в списке и командой ⌘,, кнопка «Изменить», полноэкранный онбординг с текстами iOS, «Открыть Настройки» при запрете VPN, кнопки журнала в панели, отчёты MetricKit о запуске, `#if os(macOS)` у слота прозрачного прокси, входа при запуске и удаления. Все 23 продукта приложения и расширения собираются для симулятора iOS без ошибок и предупреждений; фичи только для Mac в iOS-сборку не входят и целиком не оборачиваются, Sparkle туда не попадает: раздел «Обновления» в настройках необязателен. `check.sh` проходит (2026-11-24)
-- [ ] M9-04 Приложение и пакетный туннель iOS: «Весь трафик»
+- [x] M9-04 Приложение и пакетный туннель iOS: «Весь трафик» — таргеты `iOSApp` (iPhone и iPad), `PacketTunnelExtension` и `iOSIntegrationTests` из `ios-final`; приложение и расширение хранят секреты в общей группе связки ключей без XPC, на iOS нет мастера системного расширения, входа при запуске, удаления и Sparkle, настройки открываются листом. `RoutingPlatform`: на iOS только «Весь трафик», выбор поведения при недоступном туннеле — только на Mac. Камера и типы документов в `Info.plist` ждут M9-11. Линтеры снова проверяют `IntegrationTests` и `IntegrationTestHost`. 11 интеграционных тестов проходят в симуляторе iOS 27.2; сборка с подписью разработки (профиль до 2027-11-24) на iPhone 13 Pro подключает «Весь трафик» к тестовому туннелю — подтверждение владельца; `check.sh` проходит (2026-11-25)
 - [ ] M9-05 Установка на iPhone
 - [ ] M9-06 iOS в `check.sh`
 - [ ] M9-07 Go: `servicerouting`
@@ -141,7 +141,7 @@ flowchart LR
 ### M9-06. iOS в `check.sh`
 `iOS` · S · зависит от: M9-04
 
-**Сделать:** шаг «iOS build and integration tests» в `Scripts/check.sh`: сборка `iOSApp` и `iOSIntegrationTests` в симуляторе iPhone. Если среды выполнения симулятора iPhone нет, шаг пропускается с заметным сообщением, чтобы Mac-версию можно было проверить без iOS. Пути iOS-таргетов в `Scripts/lint.sh` и `.swiftlint.yml`. `Scripts/release.sh` по-прежнему собирает только Mac. CI нет (D-54), поэтому `check.sh` с хуком `pre-merge-commit` — единственная проверка и для iOS-кода.
+**Сделать:** шаг «iOS build and integration tests» в `Scripts/check.sh`: сборка `iOSApp` и `iOSIntegrationTests` в симуляторе iPhone. Если среды выполнения симулятора iPhone нет, шаг пропускается с заметным сообщением, чтобы Mac-версию можно было проверить без iOS. Линтеры уже проверяют `Apps/`, `IntegrationTests/` и `IntegrationTestHost/` (M9-04). `Scripts/release.sh` по-прежнему собирает только Mac. CI нет (D-54), поэтому `check.sh` с хуком `pre-merge-commit` — единственная проверка и для iOS-кода.
 **Тесты сначала:** не требуются (скрипты); пробный запуск на Mac с симулятором iPhone и без него.
 **Готово, когда:** `check.sh` на Mac владельца собирает iOS и проходит интеграционные тесты в симуляторе, а на Mac без симулятора iOS проходит с пропуском шага.
 
@@ -185,7 +185,7 @@ flowchart LR
 ### M9-11. Импорт на iPhone: QR, AirDrop, вставка
 `iOS` · M · зависит от: M9-04
 
-**Сделать:** QR камерой (`DataScannerViewController` из VisionKit) и с картинки из Фото (Vision): порты `CameraAccess` и `QRCodeDecoder`, `VisionQRCodeDecoder`, экран сканера, `NSCameraUsageDescription`. Файлы, открытые в Splitway из «Файлов» и AirDrop, с очисткой папки входящих; системная кнопка «Вставить». Так туннели переезжают с Mac: экспорт в Mac-версии и AirDrop на iPhone.
+**Сделать:** QR камерой (`DataScannerViewController` из VisionKit) и с картинки из Фото (Vision): порты `CameraAccess` и `QRCodeDecoder`, `VisionQRCodeDecoder`, экран сканера, `NSCameraUsageDescription`. Файлы, открытые в Splitway из «Файлов» и AirDrop, с очисткой папки входящих: типы документов (`CFBundleDocumentTypes`, `LSSupportsOpeningDocumentsInPlace`) возвращаются в `Info.plist` только вместе с очисткой; системная кнопка «Вставить». Так туннели переезжают с Mac: экспорт в Mac-версии и AirDrop на iPhone.
 **Тесты сначала:** из `ios-final`: `VisionQRCodeDecoderTests` на сгенерированных QR, импорт QR в `PrepareImportUseCaseTests`, входящие файлы в `SecurityScopedFileReaderTests`, модель сканера.
 **Готово, когда:** на iPhone туннель импортируется QR-кодом камерой, картинкой из Фото и архивом экспорта Mac-версии, присланным по AirDrop.
 
