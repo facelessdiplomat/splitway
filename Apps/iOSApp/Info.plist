@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+	</array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>SplitwayAppGroupIdentifier</key>
+	<string>group.$(SPLITWAY_BUNDLE_ID_PREFIX).splitway</string>
+	<key>SplitwayTunnelProviderBundleIdentifier</key>
+	<string>$(SPLITWAY_BUNDLE_ID_PREFIX).splitway.packet-tunnel</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>WireGuard Configuration</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.wireguard.config</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>conf</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>
