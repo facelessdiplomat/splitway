@@ -53,6 +53,26 @@ Scripts/check.sh
 
 `bootstrap.sh` installs the git hooks, builds `TunnelCore.xcframework` and generates `Splitway.xcodeproj`; `check.sh` runs the linters, Go and Swift tests and the macOS build. To run your own signed build, set your team and bundle ID prefix (`DEVELOPMENT_TEAM`, `SPLITWAY_BUNDLE_ID_PREFIX`) in `project.yml`: a network system extension needs a signing identity with the Network Extension and System Extension capabilities, and it activates only from `/Applications`.
 
+## Build for your iPhone
+
+The same code builds for iPhone and iPad, but only for your own devices: there is no App Store, TestFlight or IPA release. iOS lets only device management choose apps for a VPN, so the iPhone build sends all traffic through the tunnel.
+
+You need:
+
+- a paid Apple Developer Program membership: a free Apple ID cannot sign the Network Extension;
+- Developer Mode on the iPhone (Settings › Privacy & Security › Developer Mode) and the iPhone paired with the Mac: connect it with a cable, unlock it and trust the Mac;
+- your team and bundle ID prefix in `project.yml`, as for the Mac build above.
+
+After `Scripts/bootstrap.sh`, connect the iPhone and run:
+
+```bash
+Scripts/install-ios-app.sh
+```
+
+It builds Splitway in the Release configuration, signed for development, and installs it on the connected iPhone or iPad; pass the device name or UDID when several are connected. You can also open `Splitway.xcodeproj` in Xcode, choose the `iOSApp` scheme and your device, and click Run.
+
+A development profile lasts up to a year and only while the membership is paid. When it expires, Splitway stops opening: install it again the same way, and your tunnels and settings stay.
+
 ## Contributing
 
 Bug reports and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Report security problems privately as described in [SECURITY.md](SECURITY.md).
