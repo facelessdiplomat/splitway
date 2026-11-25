@@ -55,7 +55,7 @@ Scripts/check.sh
 
 ## Build for your iPhone
 
-The same code builds for iPhone and iPad, but only for your own devices: there is no App Store, TestFlight or IPA release. iOS lets only device management choose apps for a VPN, so the iPhone build sends all traffic through the tunnel.
+The same code builds for iPhone and iPad, but only for your own devices: there is no App Store, TestFlight or IPA release. iOS lets only device management choose apps for a VPN, so instead of apps the iPhone build chooses services: all traffic goes through the tunnel, or only the selected services do — 15 built-in ones such as Telegram, YouTube and ChatGPT, plus your own domains and networks. Everything else stays on your usual connection. The iPhone build also imports tunnels from QR codes and has a Control Center switch and Shortcuts. iPad runs the same app but is not tested.
 
 You need:
 

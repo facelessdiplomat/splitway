@@ -9,7 +9,7 @@
 | M2 | [M2-engine-full-tunnel.md](M2-engine-full-tunnel.md) | Go-движок, пакетный туннель, подключение, статус, статистика — режим «Весь трафик» работает из кода | все |
 | M3 | [M3-app-ui.md](M3-app-ui.md) | Интерфейс: список, детали, импорт, QR, редактор, экспорт, журнал, онбординг | все |
 | M4 | [M4-macos-per-app.md](M4-macos-per-app.md) | Выбор приложений и DNS через туннель на macOS | macOS |
-| M5 | Выбор сервисов на iOS/iPadOS | Снята решением D-45: код и документы остались в теге `ios-final` и возвращаются в M9 | iOS, iPadOS |
+| M5 | Выбор сервисов на iOS/iPadOS | Снята решением D-45: код и документы вернулись из тега `ios-final` в M9 | iOS, iPadOS |
 | M6 | [M6-integrations.md](M6-integrations.md) | Строка меню, настройки, Команды, Controls, iPadOS-полировка, автоподключение | все |
 | M7 | [M7-release.md](M7-release.md) | Безопасность, производительность, тесты утечек, выпуск | все |
 | M8 | [M8-open-source.md](M8-open-source.md) | Только macOS, открытый код под GPL-3.0, DMG в GitHub Releases, сайт на GitHub Pages, CI на GitHub Actions (снят решением D-54) | macOS |

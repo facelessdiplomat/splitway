@@ -5,8 +5,8 @@ Splitway говорит по-русски и по-английски (решен
 ## Строки
 
 - Исходный язык — английский: ключ строки и есть английский текст. Русский перевод лежит в том же String Catalog.
-- 17 каталогов: по одному в каждом таргете `Presentation` (и `Infrastructure` строки меню), а ещё `Apps/Shared` (команды и Siri) и `InfoPlist.xcstrings` системного расширения.
-- На 2026-11-03 в каталогах 348 строк. Все переведены и проверены (состояние `translated`). Строки экранов, которые ушли вместе с iOS (решение D-45), удалены.
+- 21 каталог: по одному в каждом таргете `Presentation` (и `Infrastructure` строки меню), а ещё `Apps/Shared` (интерфейс приложения, команды и Siri), `Apps/ControlsExtension` и `InfoPlist.xcstrings` приложения iOS и системного расширения macOS.
+- На 2026-11-25 в каталогах 448 строк. Все переведены (состояние `translated`), устаревших нет. Строки экранов iOS, удалённые вместе с iOS (решение D-45), вернулись из тега `ios-final` вместе с экранами (решение D-53, веха M9).
 
 ## Словарь
 
@@ -22,7 +22,10 @@ Splitway говорит по-русски и по-английски (решен
 | Public key / Private key / Preshared key | Публичный / Приватный / Общий ключ | |
 | Latest handshake | Последнее рукопожатие | |
 | Routing | Маршрутизация | |
-| All traffic / Selected apps | Весь трафик / Выбранные приложения | |
+| All traffic / Selected apps / Selected services | Весь трафик / Выбранные приложения / Выбранные сервисы | выбранные приложения — на Mac, выбранные сервисы — на iPhone и iPad |
+| Service / Your services | Сервис / Ваши сервисы | свой сервис — домены и сети, которые пользователь добавил сам; в коде `CustomService` |
+| Domains / Networks | Домены / Сети | поля своего сервиса; поддомены входят в домен |
+| Control | Переключатель | контрол «Туннель Splitway» в Пункте управления и на экране блокировки; в документах — «контрол» |
 | Exclude private networks | Исключить локальные сети | |
 | Network extension / System extension | Сетевое / системное расширение | |
 | Log | Журнал | |
@@ -51,11 +54,11 @@ Splitway говорит по-русски и по-английски (решен
 
 Иконка — щит, разделённый изгибом S на защищённую половину и прямую (решение D-40). Изгиб — первая буква Splitway и раздел трафика, щит — тот же образ, что у значка в строке меню.
 
-- Файл — `Apps/Shared/AppIcon.icon` из Icon Composer (`ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` в `project.yml`). XcodeGen кладёт его в ресурсы приложения, а при сборке из него получаются `Assets.car` и `AppIcon.icns`.
+- Файл — `Apps/Shared/AppIcon.icon` из Icon Composer, общий для iOS, iPadOS и macOS (`ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon` в `project.yml`). XcodeGen кладёт его в ресурсы обоих приложений одним файлом, а при сборке из него получаются `Assets.car` и `AppIcon.icns`.
 - Слои — два векторных SVG в `Assets`: `Protected` (правая половина, сплошная) и `Direct` (левая, непрозрачность 0,45). Зазор между половинами постоянной ширины, 38 из 1024 точек, вдоль изгиба. Фон — автоматический градиент от синего `#0B6BDC`.
 - Светлый вариант — белые половины на синем. В тёмном половины синие (`#4DA3FF`) на тёмном фоне. Тонированный и прозрачный варианты система строит сама, Liquid Glass добавляет блики и прозрачность.
 - Изменения — в Icon Composer (Xcode › Open Developer Tool › Icon Composer). Проверка без интерфейса: `ictool Apps/Shared/AppIcon.icon --export-image --output-file icon.png --platform macOS --rendition Dark --width 1024 --height 1024 --scale 1`; варианты — `Default`, `Dark`, `TintedLight`, `TintedDark`, `ClearLight`, `ClearDark`. `ictool` лежит в `Icon Composer.app/Contents/Executables`.
-- Проверено 2026-11-02: `ictool` рисует все варианты, иконка видна в Finder тестовой ВМ и в 16 точках остаётся двухцветным щитом.
+- Проверено 2026-11-02: `ictool` рисует все варианты для iOS и macOS, иконка видна на домашнем экране симуляторов iPhone и iPad и в Finder тестовой ВМ, в 16 точках остаётся двухцветным щитом.
 
 ## Снимки экрана для сайта
 
